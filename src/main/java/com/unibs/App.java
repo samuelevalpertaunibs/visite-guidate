@@ -1,10 +1,12 @@
 package com.unibs;
 
-/**
- * Hello world!
- */
+
 public class App {
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        UserService userService = new UserService();
+        View view = new View();
+        MainController mainController = new MainController(userService, view);
+        mainController.start();
     }
+
 }
