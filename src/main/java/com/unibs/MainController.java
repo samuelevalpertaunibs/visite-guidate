@@ -1,5 +1,6 @@
 package com.unibs;
 
+import com.unibs.models.Tuple;
 import com.unibs.models.User;
 
 public class MainController {
@@ -13,7 +14,7 @@ public class MainController {
     }
 
     public void start() {
-        User currentUser  = null;
+        User currentUser = null;
 
         while (currentUser == null) {
             currentUser = authenticate();
@@ -33,22 +34,47 @@ public class MainController {
     }
 
     private User authenticate() {
+        Tuple<Boolean, User> tuple = new Tuple<Boolean, User>(null, null);
+        boolean isRegistered;
         User currentUser = null;
         int attempts = 0;
 
         while (currentUser == null) {
-            view.clearScreen();
-            if (attempts > 0) view.showMessage("Credenziali errate. Riprova.");
+            // view.clearScreen();
+            if (attempts > 0)
+                view.showMessage("Credenziali errate. Riprova.");
 
             view.showMessage("=== Login ===");
             String username = view.getInput("Inserisci username: ");
             String password = view.getInput("Inserisci password: ");
 
-            currentUser = userService.authenticate(username, password);
+            tuple = userService.authenticate(username, password);
+            isRegistered = tuple.getFirst();
+            currentUser = tuple.getSecond();
+
+            if (!isRegistered && currentUser != null) {
+                registerUser(currentUser);
+                currentUser = null;
+            }
+
             attempts++;
         }
-
         return currentUser;
+    }
+
+    protected void registerUser(User user) {
+        view.clearScreen();
+        view.showMessage("=== Cambio password ===");
+        String newPassword = view.getInput("Inserisci la nuova password: ");
+
+        try {
+            userService.changePassword(user, newPassword);
+            view.showMessage("Password cambiata con successo!");
+        } catch (IllegalArgumentException e) {
+            view.showMessage("Errore: " + e.getMessage());
+        } catch (DatabaseException e) {
+            view.showMessage("Errore: " + e.getMessage());
+        }
     }
 
 }

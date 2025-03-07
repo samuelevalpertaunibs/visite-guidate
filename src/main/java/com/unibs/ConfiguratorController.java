@@ -1,4 +1,4 @@
-package com.unibs;
+pnullackage com.unibs;
 
 import com.unibs.models.User;
 
@@ -19,9 +19,9 @@ public class ConfiguratorController implements UserController {
         showMenu();
     }
 
-    @Override
+	@Override
     public void showMenu() {
-
+        
     }
 
 }
