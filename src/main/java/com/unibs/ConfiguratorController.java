@@ -1,4 +1,4 @@
-pnullackage com.unibs;
+package com.unibs;
 
 import com.unibs.models.User;
 
