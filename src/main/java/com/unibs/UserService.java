@@ -10,7 +10,7 @@ public class UserService {
 
     protected Tuple<Boolean, User> authenticate(String username, String password) {
         // Check for unregistered users
-        // Map<String, User> users = DatabaseManager.getUnregisteredUsers();
+        // Map<String, User> users = DatabaseFactory.getDatabaseManager().getUnregisteredUsers();
         Map<String, User> users = new HashMap<>();
         users.put("ciao", new User("ciao", "ciao", "CONF"));
         User user = users.get(username);
@@ -20,7 +20,7 @@ public class UserService {
         }
 
         // Check for registered users
-        users = DatabaseManager.getUsers();
+        users = DatabaseFactory.getDatabaseManager().getUsers();
         user = users.get(username);
 
         if (user != null && user.checkPassword(password)) {
@@ -28,7 +28,7 @@ public class UserService {
         }
 
         // user not found
-        return new Tuple<Boolean, User>(null, null);
+        return new Tuple<Boolean, User>(false, null);
     }
 
     protected void changePassword(User user, String newPassword) throws DatabaseException {
@@ -40,7 +40,7 @@ public class UserService {
         user.setPassword(newPassword);
 
         try {
-            DatabaseManager.changePassword(user.getUsername(), newPassword);
+            DatabaseFactory.getDatabaseManager().changePassword(user.getUsername(), newPassword);
         } catch (DatabaseException e) {
             user.setPassword(oldPassword);
             throw new DatabaseException("Errore nell'aggiornamento della password per " + user.getUsername(), e);

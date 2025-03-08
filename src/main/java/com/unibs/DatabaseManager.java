@@ -1,22 +1,24 @@
 package com.unibs;
 
-import com.unibs.models.User;
-
-import java.util.HashMap;
 import java.util.Map;
 
-public class DatabaseManager {
+import com.unibs.models.User;
 
-    public static Map<String, User> getUnregisteredUsers() {
-        return new HashMap<String, User>();
+public abstract class DatabaseManager {
+    protected String databaseSource;
+
+    protected DatabaseManager(String databaseSource) {
+        this.databaseSource = databaseSource;
     }
 
-    public static Map<String, User> getUsers() {
-        return new HashMap<String, User>();
-    }
+    public abstract String readData();
 
-	public static void changePassword(String username, String newPassword) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'changePassword'");
-	}
+    public abstract void writeData(String data);
+
+    public abstract Map<String, User> getUnregisteredUsers();
+
+    public abstract Map<String, User> getUsers();
+
+	protected abstract void changePassword(String username, String newPassword);
+    
 }

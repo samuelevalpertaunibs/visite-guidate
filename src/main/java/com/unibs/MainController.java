@@ -16,6 +16,7 @@ public class MainController {
     public void start() {
         User currentUser = null;
 
+        view.clearScreen();
         while (currentUser == null) {
             currentUser = authenticate();
         }
@@ -29,7 +30,7 @@ public class MainController {
             configuratorController.start();
         } else {
             // TODO: ripetere il login
-            view.showMessage("Ruolo non riconosciuto: accesso negato.");
+            view.clearScreen("Ruolo non riconosciuto: accesso negato.");
         }
     }
 
@@ -37,14 +38,10 @@ public class MainController {
         Tuple<Boolean, User> tuple = new Tuple<Boolean, User>(null, null);
         boolean isRegistered;
         User currentUser = null;
-        int attempts = 0;
 
         while (currentUser == null) {
-            // view.clearScreen();
-            if (attempts > 0)
-                view.showMessage("Credenziali errate. Riprova.");
-
-            view.showMessage("=== Login ===");
+            view.clearScreen();
+            view.showTitle("Login");
             String username = view.getInput("Inserisci username: ");
             String password = view.getInput("Inserisci password: ");
 
@@ -52,28 +49,30 @@ public class MainController {
             isRegistered = tuple.getFirst();
             currentUser = tuple.getSecond();
 
+            if (currentUser == null) view.clearScreen("Credenziali errate. Riprova.");
+
             if (!isRegistered && currentUser != null) {
                 registerUser(currentUser);
                 currentUser = null;
             }
-
-            attempts++;
         }
+
         return currentUser;
     }
 
     protected void registerUser(User user) {
         view.clearScreen();
-        view.showMessage("=== Cambio password ===");
+        view.showTitle("Cambio password");
         String newPassword = view.getInput("Inserisci la nuova password: ");
 
         try {
             userService.changePassword(user, newPassword);
-            view.showMessage("Password cambiata con successo!");
+            view.clearScreen("Password cambiata con successo!");
         } catch (IllegalArgumentException e) {
-            view.showMessage("Errore: " + e.getMessage());
+            view.clearScreen("Errore: " + e.getMessage());
+            registerUser(user);
         } catch (DatabaseException e) {
-            view.showMessage("Errore: " + e.getMessage());
+            view.clearScreen("Errore: " + e.getMessage());
         }
     }
 

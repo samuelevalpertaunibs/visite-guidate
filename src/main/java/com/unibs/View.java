@@ -32,4 +32,14 @@ public class View {
         printStream.flush();
     }
 
+    public void clearScreen(String message) {
+        clearScreen();
+        showMessage(message + '\n');
+        getInput("Premi Invio per continuare...");
+    }
+
+	public void showTitle(String title) {
+	    showMessage("======== " + title + " ========");
+	}
+
 }
