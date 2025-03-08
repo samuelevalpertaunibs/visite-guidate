@@ -2,7 +2,7 @@ package com.unibs;
 
 import com.unibs.models.User;
 
-public class ConfiguratorController implements UserController {
+public class ConfiguratorController implements IUserController {
 
     private final View view;
     private final User user;
@@ -15,13 +15,13 @@ public class ConfiguratorController implements UserController {
     @Override
     public void start() {
         view.clearScreen();
-        view.showMessage("Accesso effettuato come CONFIGURATORE\nBenvenuto, " + user.getUsername() + "!" );
+        view.showMessage("Accesso effettuato come CONFIGURATORE\nBenvenuto, " + user.getUsername() + "!");
         showMenu();
     }
 
-	@Override
+    @Override
     public void showMenu() {
-        
+
     }
 
 }

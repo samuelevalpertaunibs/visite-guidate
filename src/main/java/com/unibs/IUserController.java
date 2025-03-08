@@ -1,6 +1,6 @@
 package com.unibs;
 
-public interface UserController {
+public interface IUserController {
     void start();
     void showMenu();
 }

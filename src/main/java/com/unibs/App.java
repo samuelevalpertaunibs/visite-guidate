@@ -1,12 +1,11 @@
 package com.unibs;
 
-
 public class App {
     public static void main(String[] args) {
-        UserService userService = new UserService();
+        LoginService loginService = new LoginService();
         View view = new View();
-        MainController mainController = new MainController(userService, view);
-        mainController.start();
+        LoginController loginController = new LoginController(loginService, view);
+        loginController.start();
     }
 
 }

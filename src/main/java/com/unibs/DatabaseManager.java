@@ -1,24 +1,33 @@
 package com.unibs;
 
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
-import com.unibs.models.User;
+public class DatabaseManager {
 
-public abstract class DatabaseManager {
-    protected String databaseSource;
+    private static Connection connection = null;
 
-    protected DatabaseManager(String databaseSource) {
-        this.databaseSource = databaseSource;
+    public static Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            // TODO: get by env
+            String url = "jdbc:mysql://localhost:3306/visite_guidate";
+            String user = "root";
+            String password = "root";
+
+            connection = DriverManager.getConnection(url, user, password);
+        }
+        return connection;
     }
 
-    public abstract String readData();
-
-    public abstract void writeData(String data);
-
-    public abstract Map<String, User> getUnregisteredUsers();
-
-    public abstract Map<String, User> getUsers();
-
-	protected abstract void changePassword(String username, String newPassword);
-    
+    public static void closeConnection() {
+        try {
+            if (connection != null) {
+                connection.close();
+                connection = null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

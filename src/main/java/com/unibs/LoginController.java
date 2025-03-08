@@ -1,15 +1,17 @@
 package com.unibs;
 
+import java.sql.SQLException;
+
 import com.unibs.models.Tuple;
 import com.unibs.models.User;
 
-public class MainController {
+public class LoginController {
 
-    private final UserService userService;
+    private final LoginService loginService;
     private final View view;
 
-    public MainController(UserService userService, View view) {
-        this.userService = userService;
+    public LoginController(LoginService loginService, View view) {
+        this.loginService = loginService;
         this.view = view;
     }
 
@@ -35,8 +37,6 @@ public class MainController {
     }
 
     private User authenticate() {
-        Tuple<Boolean, User> tuple = new Tuple<Boolean, User>(null, null);
-        boolean isRegistered;
         User currentUser = null;
 
         while (currentUser == null) {
@@ -45,19 +45,24 @@ public class MainController {
             String username = view.getInput("Inserisci username: ");
             String password = view.getInput("Inserisci password: ");
 
-            tuple = userService.authenticate(username, password);
-            isRegistered = tuple.getFirst();
-            currentUser = tuple.getSecond();
+            try {
+                currentUser = loginService.authenticate(username, password);
+            } catch (DatabaseException | IllegalArgumentException e) {
+                view.clearScreen("Errore: " + e.getMessage());
+                continue;
+            }
 
-            if (currentUser == null) view.clearScreen("Credenziali errate. Riprova.");
+            if (currentUser == null)
+                view.clearScreen("Credenziali errate. Riprova.");
 
-            if (!isRegistered && currentUser != null) {
+            if (currentUser != null && currentUser.getLastLogin() == null) {
                 registerUser(currentUser);
                 currentUser = null;
             }
         }
 
         return currentUser;
+
     }
 
     protected void registerUser(User user) {
@@ -66,13 +71,11 @@ public class MainController {
         String newPassword = view.getInput("Inserisci la nuova password: ");
 
         try {
-            userService.changePassword(user, newPassword);
+            loginService.registerUser(user, newPassword);
             view.clearScreen("Password cambiata con successo!");
-        } catch (IllegalArgumentException e) {
+        } catch (DatabaseException | IllegalArgumentException e) {
             view.clearScreen("Errore: " + e.getMessage());
             registerUser(user);
-        } catch (DatabaseException e) {
-            view.clearScreen("Errore: " + e.getMessage());
         }
     }
 
