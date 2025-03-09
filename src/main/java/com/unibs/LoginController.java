@@ -52,12 +52,25 @@ public class LoginController {
                 continue;
             }
 
-            if (currentUser == null)
+            if (currentUser == null) {
                 view.clearScreen("Credenziali errate. Riprova.");
+                continue;
+            }
+
+            if (currentUser != null && currentUser.getLastLogin() != null) {
+                try {
+                    currentUser = loginService.updateLastLogin(currentUser.getUsername());
+                } catch (DatabaseException e) {
+                    view.clearScreen("Errore: " + e.getMessage());
+                    currentUser = null;
+                    continue;
+                }
+            }
 
             if (currentUser != null && currentUser.getLastLogin() == null) {
                 registerUser(currentUser);
                 currentUser = null;
+                continue;
             }
         }
 
