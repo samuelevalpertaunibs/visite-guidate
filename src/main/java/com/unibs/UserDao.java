@@ -44,8 +44,8 @@ public class UserDao {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            // throw new DatabaseException("Impossibile modificare la password.");
-            throw new DatabaseException(e.getMessage());
+            throw new DatabaseException("Impossibile modificare la password.");
+
         }
     }
 
