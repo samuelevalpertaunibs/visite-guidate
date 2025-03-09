@@ -41,4 +41,15 @@ public class LoginService {
         }
     }
 
+    public User updateLastLogin(String username) throws DatabaseException {
+        try {
+            int updated = UserDao.updateLastLogin(username);
+            if (updated > 0) {
+                return UserDao.findByUsername(username);
+            }
+        } catch (DatabaseException e) {
+            throw e;
+        }
+        return null;
+    }
 }

@@ -49,4 +49,18 @@ public class UserDao {
         }
     }
 
+    public static int updateLastLogin(String username) throws DatabaseException {
+            String sql = "UPDATE user SET last_login = ? WHERE username = ?";
+            try (
+                    Connection conn = DatabaseManager.getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
+                stmt.setString(2, username);
+                return stmt.executeUpdate();
+
+            } catch (SQLException e) {
+                throw new DatabaseException("Impossibile recuperare i dati relativi all'utente.");
+            }
+    }
 }

@@ -1,8 +1,5 @@
 package com.unibs;
 
-import java.sql.SQLException;
-
-import com.unibs.models.Tuple;
 import com.unibs.models.User;
 
 public class LoginController {
@@ -31,8 +28,8 @@ public class LoginController {
             ConfiguratorController configuratorController = new ConfiguratorController(view, currentUser);
             configuratorController.start();
         } else {
-            // TODO: ripetere il login
             view.clearScreen("Ruolo non riconosciuto: accesso negato.");
+            start();
         }
     }
 
@@ -57,7 +54,7 @@ public class LoginController {
                 continue;
             }
 
-            if (currentUser != null && currentUser.getLastLogin() != null) {
+            if (currentUser.getLastLogin() != null) {
                 try {
                     currentUser = loginService.updateLastLogin(currentUser.getUsername());
                 } catch (DatabaseException e) {
@@ -70,7 +67,6 @@ public class LoginController {
             if (currentUser != null && currentUser.getLastLogin() == null) {
                 registerUser(currentUser);
                 currentUser = null;
-                continue;
             }
         }
 
