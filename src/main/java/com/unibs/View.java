@@ -42,4 +42,19 @@ public class View {
 	    showMessage("======== " + title + " ========");
 	}
 
+    public int getIntInput(String prompt, int min, int max) {
+        while (true) {
+            String input = getInput(prompt);
+            try {
+                int value = Integer.parseInt(input);
+                if (value >= min && value <= max) {
+                    return value;
+                } else {
+                    showMessage("Inserisci un numero tra " + min + " e " + max);
+                }
+            } catch (NumberFormatException e) {
+                showMessage("Input non valido. Inserisci un numero.");
+            }
+        }
+    }
 }
