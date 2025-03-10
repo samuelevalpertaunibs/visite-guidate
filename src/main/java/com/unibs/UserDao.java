@@ -22,8 +22,8 @@ public class UserDao {
                 return new User(rs.getString("username"), rs.getString("password"), rs.getString("role"),
                         rs.getObject("last_login", LocalDate.class));
             }
-        } catch (SQLException e) {
-            throw new DatabaseException("Impossibile recuperare i dati relativi all'utente.");
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
         }
 
         return null;
@@ -43,24 +43,24 @@ public class UserDao {
             stmt.setString(3, username);
             stmt.executeUpdate();
 
-        } catch (SQLException e) {
-            throw new DatabaseException("Impossibile modificare la password.");
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
 
         }
     }
 
     public static int updateLastLogin(String username) throws DatabaseException {
-            String sql = "UPDATE user SET last_login = ? WHERE username = ?";
-            try (
-                    Connection conn = DatabaseManager.getConnection();
-                    PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "UPDATE user SET last_login = ? WHERE username = ?";
+        try (
+                Connection conn = DatabaseManager.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-                stmt.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
-                stmt.setString(2, username);
-                return stmt.executeUpdate();
+            stmt.setDate(1, java.sql.Date.valueOf(LocalDate.now()));
+            stmt.setString(2, username);
+            return stmt.executeUpdate();
 
-            } catch (SQLException e) {
-                throw new DatabaseException("Impossibile recuperare i dati relativi all'utente.");
-            }
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 }

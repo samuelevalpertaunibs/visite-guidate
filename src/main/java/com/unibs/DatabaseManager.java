@@ -7,15 +7,34 @@ import java.sql.SQLException;
 public class DatabaseManager {
 
     private static Connection connection = null;
+    private static String url;
+    private static String port;
+    private static String name;
+    private static String user;
+    private static String pass;
 
     public static Connection getConnection() throws SQLException {
-        if (connection == null || connection.isClosed()) {
-            // TODO: get by env
-            String url = "jdbc:mysql://localhost:3306/visite_guidate";
-            String user = "root";
-            String password = "root";
+        if (url == null && port == null && name == null && user == null && pass == null) {
+            url = System.getenv("DB_URL");
+            port = System.getenv("DB_PORT");
+            name = System.getenv("DB_NAME");
+            user = System.getenv("DB_USER");
+            pass = System.getenv("DB_PASS");
 
-            connection = DriverManager.getConnection(url, user, password);
+            if (url == null || port == null || name == null || user == null || pass == null) {
+                throw new IllegalStateException("Variabili d'ambiente per il database mancanti!\n" +
+                        "Assicurati di aver impostato DB_URL, DB_PORT, DB_NAME, DB_USER e DB_PASS.");
+            }
+        }
+
+        if (connection == null || connection.isClosed()) {
+            String url = "jdbc:mysql://localhost:3306/visite_guidate";
+
+            try {
+                connection = DriverManager.getConnection(url, user, pass);
+            } catch (SQLException e) {
+                throw new SQLException("Impossibile comunicare con il database");
+            }
         }
         return connection;
     }

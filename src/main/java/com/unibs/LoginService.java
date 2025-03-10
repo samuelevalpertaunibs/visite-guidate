@@ -26,7 +26,7 @@ public class LoginService {
 
     protected void registerUser(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
         if (newPassword.isEmpty())
-            throw new IllegalArgumentException("La nuova password non può essere vuota");
+            throw new IllegalArgumentException("La nuova password non può essere vuota.");
         String oldPassword = user.getPassword();
         if (oldPassword.equals(newPassword)) {
             throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente.");
