@@ -11,16 +11,12 @@ public class LoginService {
         if (username.isEmpty() || password.isEmpty())
             throw new IllegalArgumentException("Username e password non possono essere vuoti.");
 
-        try {
-            User user = UserDao.findByUsername(username);
+        User user = UserDao.findByUsername(username);
 
-            if (user != null && user.checkPassword(password)) {
-                return user;
-            }
-
-        } catch (DatabaseException e) {
-            throw e;
+        if (user != null && user.checkPassword(password)) {
+            return user;
         }
+
         return null;
     }
 
@@ -41,15 +37,13 @@ public class LoginService {
         }
     }
 
-    public User updateLastLogin(String username) throws DatabaseException {
-        try {
-            int updated = UserDao.updateLastLogin(username);
-            if (updated > 0) {
-                return UserDao.findByUsername(username);
-            }
-        } catch (DatabaseException e) {
-            throw e;
+    protected User updateLastLogin(String username) throws DatabaseException {
+
+        int updated = UserDao.updateLastLogin(username);
+        if (updated > 0) {
+            return UserDao.findByUsername(username);
         }
+
         return null;
     }
 }
