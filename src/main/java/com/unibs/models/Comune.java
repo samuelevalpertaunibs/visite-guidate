@@ -30,4 +30,10 @@ public final class Comune {
     public String getProvincia() {
         return provincia;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s, %s, %s", nome, regione, provincia);
+    }
+
 }
