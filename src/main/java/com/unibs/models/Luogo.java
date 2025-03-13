@@ -1,8 +1,8 @@
 package com.unibs.models;
 
 public class Luogo {
-    private  String nome;
-    private  String descrizione;
+    private String nome;
+    private String descrizione;
     private Comune comune;
 
     public Luogo(String nome, String descrizione, Comune comune) {
