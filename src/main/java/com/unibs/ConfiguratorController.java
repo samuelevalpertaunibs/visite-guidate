@@ -72,7 +72,7 @@ public class ConfiguratorController implements IUserController {
             }
 
             String provincia = view.getLimitedInput("Inserisci la provincia: ", 32);
-            String regione = view.getLimitedInput("Inserisci la provincia: ", 32);
+            String regione = view.getLimitedInput("Inserisci la regione: ", 32);
 
             Comune comuneDaAggiungere = new Comune(nome, provincia, regione);
             // Se il comune non è gia presente lo aggiungo all'ambito territoriale

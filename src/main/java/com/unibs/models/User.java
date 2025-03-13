@@ -41,8 +41,8 @@ public class User {
         this.lastLogin = lastLogin;
     }
 
-    public boolean checkPassword(String password) {
-        return this.passwordHash.equals(password);
+    public boolean checkPassword(String passwordHash) {
+        return this.passwordHash.equals(passwordHash);
     }
 
     public byte[] getSalt() {
