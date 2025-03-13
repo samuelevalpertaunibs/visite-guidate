@@ -27,6 +27,13 @@ public class View {
         return scanner.nextLine();
     }
 
+
+    public String getLimitedInput(String message, int maxLength) {
+        printStream.print(message);
+        String input = scanner.nextLine();
+        return input.length() > maxLength ? input.substring(0, maxLength) : input;
+    }
+
     public void clearScreen() {
         printStream.print("\033[H\033[2J");
         printStream.flush();
@@ -38,22 +45,40 @@ public class View {
         getInput("Premi Invio per continuare...");
     }
 
-	public void showTitle(String title) {
-	    showMessage("======== " + title + " ========");
-	}
+    public void showTitle(String title) {
+        showMessage("======== " + title + " ========");
+    }
 
-    public int getIntInput(String prompt, int min, int max) {
+    public boolean getConfirm() {
+        do {
+            String input = getInput("Confermi la tua scelta? [Y/n] ");
+            if (input.isEmpty() || input.equalsIgnoreCase("Y")) {
+                return true;
+            }
+
+            if (input.equalsIgnoreCase("N")) {
+                return false;
+            }
+
+        } while (true);
+    }
+
+    public int getInt(String title, String message, int min) {
         while (true) {
-            String input = getInput(prompt);
+            clearScreen();
+            showTitle(title);
+            showMessage(message);
+            String input = scanner.nextLine().trim();
+
             try {
                 int value = Integer.parseInt(input);
-                if (value >= min && value <= max) {
-                    return value;
+                if (value >= min) {
+                    return value; // Ritorna il numero se valido
                 } else {
-                    showMessage("Inserisci un numero tra " + min + " e " + max);
+                    clearScreen("Errore: il numero deve essere almeno " + min + ".");
                 }
             } catch (NumberFormatException e) {
-                showMessage("Input non valido. Inserisci un numero.");
+                clearScreen("Errore: inserisci un numero intero valido.");
             }
         }
     }

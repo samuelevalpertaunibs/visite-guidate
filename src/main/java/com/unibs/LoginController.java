@@ -7,8 +7,8 @@ public class LoginController {
     private final LoginService loginService;
     private final View view;
 
-    public LoginController(LoginService loginService, View view) {
-        this.loginService = loginService;
+    public LoginController(View view) {
+        this.loginService = new LoginService();
         this.view = view;
     }
 
@@ -44,7 +44,10 @@ public class LoginController {
 
             try {
                 currentUser = loginService.authenticate(username, password);
-            } catch (DatabaseException | IllegalArgumentException e) {
+            } catch (DatabaseException  e) {
+                view.clearScreen("Errore: " + e.getMessage());
+                System.exit(1);
+            } catch (IllegalArgumentException e) {
                 view.clearScreen("Errore: " + e.getMessage());
                 continue;
             }
@@ -59,8 +62,7 @@ public class LoginController {
                     currentUser = loginService.updateLastLogin(currentUser.getUsername());
                 } catch (DatabaseException e) {
                     view.clearScreen("Errore: " + e.getMessage());
-                    currentUser = null;
-                    continue;
+                    System.exit(1);
                 }
             }
 
@@ -82,10 +84,14 @@ public class LoginController {
         try {
             loginService.registerUser(user, newPassword);
             view.clearScreen("Password cambiata con successo!");
-        } catch (DatabaseException | IllegalArgumentException e) {
+        } catch (DatabaseException e) {
             view.clearScreen("Errore: " + e.getMessage());
+            System.exit(1);
+        } catch (IllegalArgumentException e) {
             registerUser(user);
         }
+
     }
+
 
 }
