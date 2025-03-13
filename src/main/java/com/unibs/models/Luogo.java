@@ -16,4 +16,5 @@ public class Luogo {
     public String getDescription() { return descrizione; }
 
     public Comune getComune() { return comune; }
+
 }
