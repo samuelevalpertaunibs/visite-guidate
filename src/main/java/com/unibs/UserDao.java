@@ -11,7 +11,7 @@ import com.unibs.models.User;
 public class UserDao {
 
     public static User findByUsername(String username) throws DatabaseException {
-        String sql = "SELECT username, password, role, last_login FROM user WHERE username = ?";
+        String sql = "SELECT username, password_hash, salt, role, last_login FROM user WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -19,7 +19,7 @@ public class UserDao {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new User(rs.getString("username"), rs.getString("password"), rs.getString("role"),
+                return new User(rs.getString("username"), rs.getString("password_hash"), rs.getBytes("salt"), rs.getString("role"),
                         rs.getObject("last_login", LocalDate.class));
             }
         } catch (Exception e) {
@@ -33,7 +33,7 @@ public class UserDao {
             throws DatabaseException {
         // If we change the password we are at first login, so we also have to edit the
         // unregistered bool
-        String sql = "UPDATE user SET password = ?, last_login = ? WHERE username = ?";
+        String sql = "UPDATE user SET password_hash = ?, last_login = ? WHERE username = ?";
         try (
                 Connection conn = DatabaseManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
