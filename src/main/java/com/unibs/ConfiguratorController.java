@@ -47,46 +47,52 @@ public class ConfiguratorController implements IUserController {
         do {
             view.clearScreen();
             view.showTitle("Inizializzazione corpo dati");
-            String nome = view.getLimitedInput("Inserisci un comune da aggiungere all'ambito territoriale (stop per proseguire): ", 32);
+            boolean inputValido = true;
 
-            // Se inserisce 'stop' senza aver inserito alcun comune
-            if (nome.equals("stop") && ambitoTerritoriale.isEmpty()) {
-                view.clearScreen("Almeno un comune deve appartenere all'ambito territoriale");
-                continue;
-            }
+            do {
+                String nome = view.getLimitedInput("Inserisci un comune da aggiungere all'ambito territoriale: ", 32);
+                String provincia = view.getLimitedInput("Inserisci la provincia: ", 32);
+                String regione = view.getLimitedInput("Inserisci la regione: ", 32);
+
+                inputValido = !nome.isBlank() && !provincia.isBlank() && !regione.isBlank();
+                if (!inputValido){
+                    view.clearScreen("Tutti i campi sono obbligatori. Riprova\n");
+                    continue;
+                }
+                Comune comuneDaAggiungere = new Comune(nome, provincia, regione);
+                // Se il comune non è gia presente lo aggiungo all'ambito territoriale
+                if (!ambitoTerritoriale.contains(comuneDaAggiungere)) {
+                    ambitoTerritoriale.add(comuneDaAggiungere);
+                    view.clearScreen("Comune aggiunto: " + comuneDaAggiungere);
+                }
+            }while (!inputValido);
+            boolean avanti = view.confirmDefaultN("Vuoi aggiungere un altro comune?");
 
             // Se inserisce 'stop' e almeno un comune è presente
-            if (nome.equals("stop")) {
+            if (!avanti) {
                 view.clearScreen();
                 view.showTitle("Inizializzazione corpo dati");
                 mostraAmbitoTerritoriale(ambitoTerritoriale.toArray(new Comune[0]));
 
-                if (view.getConfirm()) {
+                if (view.confirmDefaultY("Confermi la tua scelta?")) {
                     // Se conferma finisco il ciclo
                     continua = false;
-                    continue;
+                    break;
                 }
                 // Se non conferma resetto l'ambito territoriale
                 ambitoTerritoriale = new ArrayList<>();
                 continue;
             }
 
-            String provincia = view.getLimitedInput("Inserisci la provincia: ", 32);
-            String regione = view.getLimitedInput("Inserisci la regione: ", 32);
-
-            Comune comuneDaAggiungere = new Comune(nome, provincia, regione);
-            // Se il comune non è gia presente lo aggiungo all'ambito territoriale
-            if (!ambitoTerritoriale.contains(comuneDaAggiungere))
-                view.clearScreen("Comune aggiunto: " + comuneDaAggiungere);
-            ambitoTerritoriale.add(comuneDaAggiungere);
-        }
-        while (continua);
+        }while (continua);
 
         // Init numero massimo di persone
         continua = true;
         do {
-            numero_max_iscrizioni = view.getInt("Inizializzazione corpo dati", "Inserisci il numero massimo di persone che un fruitore può iscrivere a una iniziativa mediante singola iscrizione: ", 1);
-            if (view.getConfirm()) {
+            numero_max_iscrizioni = view.getInt("Inizializzazione corpo dati",
+                    "Inserisci il numero massimo di persone che un fruitore " +
+                            "può iscrivere a una iniziativa mediante singola iscrizione: ", 1);
+            if (view.confirmDefaultY("Confermi la tua scelta?")) {
                 // Se conferma finisco il ciclo
                 continua = false;
             }

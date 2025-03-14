@@ -49,9 +49,9 @@ public class View {
         showMessage("======== " + title + " ========");
     }
 
-    public boolean getConfirm() {
+    public boolean confirmDefaultY(String message) {
         do {
-            String input = getInput("Confermi la tua scelta? [Y/n] ");
+            String input = getInput(message + " [Y/n] ");
             if (input.isEmpty() || input.equalsIgnoreCase("Y")) {
                 return true;
             }
@@ -59,7 +59,20 @@ public class View {
             if (input.equalsIgnoreCase("N")) {
                 return false;
             }
+            showMessage("Input non valido. Rispondi con 'Y' per confermare o 'N' per annullare.");
+        } while (true);
+    }
+    public boolean confirmDefaultN(String message) {
+        do {
+            String input = getInput(message + " [y/N] ");
+            if (input.isEmpty() || input.equalsIgnoreCase("N")) {
+                return false;
+            }
 
+            if (input.equalsIgnoreCase("Y")) {
+                return true;
+            }
+            showMessage("Input non valido. Rispondi con 'Y' per confermare o 'N' per annullare.");
         } while (true);
     }
 
