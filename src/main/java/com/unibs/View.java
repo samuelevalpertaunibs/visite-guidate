@@ -1,5 +1,6 @@
 package com.unibs;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Scanner;
 
@@ -35,8 +36,18 @@ public class View {
     }
 
     public void clearScreen() {
-        printStream.print("\033[H\033[2J");
-        printStream.flush();
+        try {
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("windows")) {
+                new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+            }
+            else {
+                printStream.print("\033[H\033[2J");
+                printStream.flush();
+            }
+        } catch(IOException | InterruptedException e){
+            showMessage("Errore: " + e.getMessage());
+        }
     }
 
     public void clearScreen(String message) {
