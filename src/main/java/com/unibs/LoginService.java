@@ -11,11 +11,10 @@ public class LoginService {
 
     protected User authenticate(String username, String password)
             throws DatabaseException, IllegalArgumentException {
-        if (username.isEmpty() || password.isEmpty())
+        if (username.isBlank() || password.isBlank())
             throw new IllegalArgumentException("Username e password non possono essere vuoti.");
 
         User user = UserDao.findByUsername(username);
-
 
         if (user != null) {
             String passwordHash = hashPassword(password, user.getSalt());
@@ -28,12 +27,12 @@ public class LoginService {
     }
 
     protected void registerUser(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
-        if (newPassword.isEmpty())
+        if (newPassword.isBlank())
             throw new IllegalArgumentException("La nuova password non può essere vuota.");
         String oldPassword = user.getPasswordHash();
 
-        byte [] salt = user.getSalt();
-        String hashedNewPassword = hashPassword(newPassword,salt);
+        byte[] salt = user.getSalt();
+        String hashedNewPassword = hashPassword(newPassword, salt);
 
         if (oldPassword.equals(hashedNewPassword)) {
             throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente.");
@@ -49,21 +48,21 @@ public class LoginService {
     }
 
     protected User updateLastLogin(String username) throws DatabaseException {
-
         int updated = UserDao.updateLastLogin(username);
         if (updated > 0) {
             return UserDao.findByUsername(username);
         }
-
         return null;
     }
+
     public String hashPassword(String password, byte[] salt) {
-        MessageDigest md = null;
+        MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+
         md.update(salt);
         byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
         return bytesToHex(hashedPassword);

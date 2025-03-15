@@ -15,8 +15,8 @@ public final class Comune {
     }
 
     public boolean equals(Comune comune) {
-        return (this.nome.equals(comune.getNome()) && this.regione.equals(comune.getRegione())
-                && this.provincia.equals(comune.getProvincia()));
+        return (this.nome.equalsIgnoreCase(comune.getNome()) && this.regione.equalsIgnoreCase(comune.getRegione())
+                && this.provincia.equalsIgnoreCase(comune.getProvincia()));
     }
 
     public String getNome() {

@@ -13,24 +13,18 @@ public class View {
         this.printStream = new PrintStream(System.out);
     }
 
-    public View(Scanner scanner, PrintStream printStream) {
-        this.scanner = scanner;
-        this.printStream = printStream;
-    }
-
     public void showMessage(String message) {
         printStream.println(message);
     }
 
     public String getInput(String prompt) {
         printStream.print(prompt);
-        return scanner.nextLine();
+        return scanner.nextLine().trim();
     }
-
 
     public String getLimitedInput(String message, int maxLength) {
         printStream.print(message);
-        String input = scanner.nextLine();
+        String input = scanner.nextLine().trim();
         return input.length() > maxLength ? input.substring(0, maxLength) : input;
     }
 
@@ -49,9 +43,22 @@ public class View {
         showMessage("======== " + title + " ========");
     }
 
+    public void clearScreenAndShowTitle(String title) {
+        clearScreen();
+        showTitle(title);
+    }
+
     public boolean getConfirm() {
+        return getYesOrNo("Confermi la tua scelta?");
+    }
+
+    public boolean getConfirmWithDefaultNo() {
+        return getYesOrNoWithDefaultNo("Confermi la tua scelta?");
+    }
+
+    public boolean getYesOrNo(String message) {
         do {
-            String input = getInput("Confermi la tua scelta? [Y/n] ");
+            String input = getInput(message + " [Y/n] ");
             if (input.isEmpty() || input.equalsIgnoreCase("Y")) {
                 return true;
             }
@@ -63,10 +70,23 @@ public class View {
         } while (true);
     }
 
+    public boolean getYesOrNoWithDefaultNo(String message) {
+        do {
+            String input = getInput(message + " [y/N] ");
+            if (input.isEmpty() || input.equalsIgnoreCase("N")) {
+                return false;
+            }
+
+            if (input.equalsIgnoreCase("Y")) {
+                return true;
+            }
+
+        } while (true);
+    }
+
     public int getInt(String title, String message, int min) {
         while (true) {
-            clearScreen();
-            showTitle(title);
+            clearScreenAndShowTitle(title);
             showMessage(message);
             String input = scanner.nextLine().trim();
 
