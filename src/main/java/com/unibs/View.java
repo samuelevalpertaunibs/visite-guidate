@@ -36,18 +36,17 @@ public class View {
     }
 
     public void clearScreen() {
-        try{
+        try {
             String os = System.getProperty("os.name").toLowerCase();
             if (os.contains("windows")) {
-                //il comando viene lanciato solo se eseguiamo l'app da cmd.exe
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
             }
             else {
                 printStream.print("\033[H\033[2J");
                 printStream.flush();
             }
-        }catch(IOException | InterruptedException e){
-            showMessage(e.getMessage());
+        } catch(IOException | InterruptedException e){
+            showMessage("Errore: " + e.getMessage());
         }
     }
 
