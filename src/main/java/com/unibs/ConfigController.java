@@ -2,9 +2,6 @@ package com.unibs;
 
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
-import com.unibs.models.Luogo;
-import com.unibs.models.TipoVisita;
-import com.unibs.models.User;
 
 import java.util.ArrayList;
 
@@ -24,7 +21,7 @@ public class ConfigController {
             config = configService.initDefault();
 
             do {
-                view.clearScreenAndShowTitle("Inizializzazione del corpo dati - Ambito territoriale");
+                view.clearScreenAndShowTitle("Inizializzazione dell'ambito territoriale");
                 String nome = view.getLimitedInput(
                         "Inserisci un comune da aggiungere all'ambito territoriale: ", 32);
                 String provincia = view.getLimitedInput("Inserisci la provincia: ", 32);
@@ -40,19 +37,16 @@ public class ConfigController {
             } while (config == null || config.isAmbitoTerritorialeVuoto() || view.getYesOrNoWithDefaultNo("Vuoi inserire un'altro comune?"));
 
             // Ripeto il ciclo se il configuratore non conferma
+            view.clearScreen();
             mostraAmbitoTerritoriale(config.getAmbitoTerritoriale());
         } while (!view.getConfirm());
 
         // Inizializzazione numero max persone
         do {
-            int numero_max = view.getInt("Inizializzazione del corpo dati - Configurazioni aggiuntive", "Inserisci il numero massimo di persone che un fruitore può iscrivere a una iniziativa\n" +
-                    "mediante una singola iscrizione: ", 1);
+            int numero_max = view.getInt("Inizializzazione di configurazioni aggiuntive", "Inserisci il numero massimo di persone che un fruitore può iscrivere a una iniziativa mediante una singola iscrizione: ", 1);
             config = ConfigDao.setNumeroMax(numero_max);
         } while (!view.getConfirm());
 
-
-
-        config = ConfigDao.setIsInitialized(true);
         return config;
     }
 
@@ -61,5 +55,9 @@ public class ConfigController {
         for (Comune comune : ambitoTerritoriale) {
             view.showMessage(" - " + comune.toString());
         }
+    }
+
+    public Config setIsInitialized(boolean isInitialized) {
+        return ConfigDao.setIsInitialized(isInitialized);
     }
 }

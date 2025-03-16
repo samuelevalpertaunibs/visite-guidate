@@ -1,27 +1,21 @@
 package com.unibs.models;
 
 public class Luogo {
-    private final int id;
     private final String nome;
     private final String descrizione;
     private final Comune comune;
 
-    public Luogo(int id, String nome, String descrizione, Comune comune) {
-        this.id = id;
+    public Luogo(String nome, String descrizione, Comune comune) {
         this.nome = nome;
         this.descrizione = descrizione;
         this.comune = comune;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
+    public String getNome() {
         return nome;
     }
 
-    public String getDescription() {
+    public String getDescrizione() {
         return descrizione;
     }
 
@@ -29,4 +23,15 @@ public class Luogo {
         return comune;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "%s, %s\n\tSituato a %s.",
+                nome, descrizione, comune.toString()
+        );
+    }
+
+    public String getNomeComune() {
+        return comune.getNome();
+    }
 }

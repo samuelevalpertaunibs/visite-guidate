@@ -15,8 +15,7 @@ public final class Comune {
     }
 
     public boolean equals(Comune comune) {
-        return (this.nome.equalsIgnoreCase(comune.getNome()) && this.regione.equalsIgnoreCase(comune.getRegione())
-                && this.provincia.equalsIgnoreCase(comune.getProvincia()));
+        return this.nome.equalsIgnoreCase(comune.getNome());
     }
 
     public String getNome() {
@@ -33,7 +32,7 @@ public final class Comune {
 
     @Override
     public String toString() {
-        return String.format("%s, %s, %s", nome, regione, provincia);
+        return String.format("%s (%s), %s", nome, regione, provincia);
     }
 
 }

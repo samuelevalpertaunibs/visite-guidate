@@ -33,7 +33,6 @@ public class ConfigDao {
         }
     }
 
-
     public static ArrayList<Comune> getAmbitoTerritoriale(int config_id) throws DatabaseException {
         String sql = "SELECT * FROM comune WHERE config_id = ?";
         ArrayList<Comune> ambitoTerritoriale = new ArrayList<>();

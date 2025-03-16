@@ -43,12 +43,16 @@ public class ConfiguratorController implements IUserController {
         Config config = configController.initConfig();
 
         // Init tipo visita
-        initData(config);
+        initData();
 
+
+        // Se l'inizializzazione è andata a buon fine lo scrivo nel database
+        config = configController.setIsInitialized(true);
     }
 
-    private void initData(Config config) {
-        //TODO
+    private void initData() {
+        TipoVisitaController tipoVisitaController = new TipoVisitaController(view);
+        tipoVisitaController.aggiungiTipoVisita();
     }
 
 

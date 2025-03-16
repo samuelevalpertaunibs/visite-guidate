@@ -101,4 +101,28 @@ public class View {
             }
         }
     }
+
+    public int showMenu(String title, String[] options) {
+        clearScreenAndShowTitle(title);
+
+        for (int i = 0; i < options.length; i++) {
+            printStream.println((i + 1) + ". " + options[i]);
+        }
+
+        int scelta = -1;
+        while (scelta < 1 || scelta > options.length) {
+            System.out.print("Scegli un'opzione (1-" + options.length + "): ");
+            try {
+                scelta = Integer.parseInt(scanner.nextLine());
+                if (scelta < 1 || scelta > options.length) {
+                    System.out.println("Selezione non valida. Per favore, inserisci un numero tra 1 e " + options.length);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Input non valido. Per favore, inserisci un numero.");
+            }
+        }
+
+        return scelta - 1;
+    }
 }
+
