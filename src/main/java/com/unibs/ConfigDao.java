@@ -20,9 +20,10 @@ public class ConfigDao {
             if (rs.next()) {
                 int configId = rs.getInt("id");
                 int numeroMaxIscrizioni = rs.getInt("numero_max_iscrizioni");
+                boolean isInitialized = rs.getBoolean("is_initialized");
                 ArrayList<Comune> ambitoTerritoriale = getAmbitoTerritoriale(configId);
 
-                return new Config(ambitoTerritoriale, numeroMaxIscrizioni);
+                return new Config(ambitoTerritoriale, numeroMaxIscrizioni, isInitialized);
             }
 
             return null;
@@ -60,51 +61,20 @@ public class ConfigDao {
 
     public static Config aggiungiComune(Comune comune) {
         String insertSql = "INSERT INTO comune (nome, provincia, regione, config_id) VALUES (?, ?, ?, 1)";
-        String selectSql = "SELECT nome, provincia, regione FROM comune WHERE config_id = 1";
 
-        ArrayList<Comune> ambitoTerritoriale = new ArrayList<>();
-
-        try (Connection conn = DatabaseManager.getConnection()) {
-            try {
-                conn.setAutoCommit(false); // Inizio transazione
-
-                // Inserisco il comune in batch
-                try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-                    insertStmt.setString(1, comune.getNome());
-                    insertStmt.setString(2, comune.getProvincia());
-                    insertStmt.setString(3, comune.getRegione());
-                    insertStmt.addBatch();
-                    insertStmt.executeBatch();
-                }
-
-                // Recupero i comuni aggiornati
-                try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
-                     ResultSet rs = selectStmt.executeQuery()) {
-
-                    while (rs.next()) {
-                        String nome = rs.getString("nome");
-                        String provincia = rs.getString("provincia");
-                        String regione = rs.getString("regione");
-                        ambitoTerritoriale.add(new Comune(nome, provincia, regione));
-                    }
-                }
-
-                conn.commit(); // Conferma transazione
-
-            } catch (SQLException e) {
-                conn.rollback(); // Annulla tutto in caso di errore
-                throw new DatabaseException("Errore nell'aggiornamento delle configurazioni: " + e.getMessage(), e);
-            } finally {
-                conn.setAutoCommit(true); // Ripristina modalità predefinita
-            }
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+            insertStmt.setString(1, comune.getNome());
+            insertStmt.setString(2, comune.getProvincia());
+            insertStmt.setString(3, comune.getRegione());
+            insertStmt.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DatabaseException("Errore di connessione al database: " + e.getMessage(), e);
+            throw new DatabaseException("Errore nell'aggiornamento delle configurazioni: " + e.getMessage(), e);
         }
 
-        return new Config(ambitoTerritoriale, 1);
+        // Restituisci la Config aggiornata
+        return getConfig();
     }
-
 
     public static boolean doesInclude(String nome, String provincia, String regione) {
         String sql = "SELECT COUNT(*) FROM comune WHERE LOWER(nome) = LOWER(?) AND LOWER(provincia) = LOWER(?) AND LOWER(regione) = LOWER(?)";
@@ -137,7 +107,7 @@ public class ConfigDao {
                 deleteStmt.executeUpdate();
             }
             // Inserisci i dati di default nel database
-            String insertConfigSql = "INSERT INTO `config` (`id`, `numero_max_iscrizioni`) VALUES (DEFAULT, NULL);";
+            String insertConfigSql = "INSERT INTO `config` (`id`, `numero_max_iscrizioni`, `is_initialized`) VALUES (DEFAULT, NULL, DEFAULT)";
             try (PreparedStatement stmt = conn.prepareStatement(insertConfigSql)) {
                 stmt.executeUpdate();
             }
@@ -150,4 +120,35 @@ public class ConfigDao {
         return getConfig();
     }
 
+    public static Config setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String sql = "UPDATE config SET numero_max_iscrizioni = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
+                updateStmt.setInt(1, numeroMassimoIscrizioniPrenotazione);
+                updateStmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
+        }
+
+        // Restituisci la Config aggiornata
+        return getConfig();
+    }
+
+    public static Config setIsInitialized(boolean isInitialized) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String sql = "UPDATE config SET is_initialized = ?";
+            try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
+                updateStmt.setBoolean(1, isInitialized);
+                updateStmt.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
+        }
+
+        // Restituisci la Config aggiorata
+        return getConfig();
+    }
 }

@@ -87,8 +87,7 @@ public class View {
     public int getInt(String title, String message, int min) {
         while (true) {
             clearScreenAndShowTitle(title);
-            showMessage(message);
-            String input = scanner.nextLine().trim();
+            String input = getInput(message);
 
             try {
                 int value = Integer.parseInt(input);

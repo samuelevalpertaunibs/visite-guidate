@@ -8,9 +8,11 @@ public class ConfiguratorController implements IUserController {
     private final ConfiguratorService configuratorService;
     private final View view;
     private final User user;
+    private final ConfigService configService;
 
     public ConfiguratorController(View currentView, User currentUser) {
         this.configuratorService = new ConfiguratorService();
+        this.configService = new ConfigService();
         this.view = currentView;
         this.user = currentUser;
     }
@@ -23,13 +25,12 @@ public class ConfiguratorController implements IUserController {
         Config config = null;
 
         try {
-            config = ConfigDao.getConfig();
+            config = configService.getConfig();
         } catch (DatabaseException e) {
             view.showMessage(e.getMessage());
         }
 
-        // TODO: if (config.getInitializedCorrectly() == false) {
-        if (config == null) {
+        if (config == null || !config.getIsInitialized()) {
             initApp();
         }
 
@@ -38,6 +39,7 @@ public class ConfiguratorController implements IUserController {
 
     private void initApp() {
         ConfigController configController = new ConfigController(view);
+
         Config config = configController.initConfig();
 
         // Init tipo visita

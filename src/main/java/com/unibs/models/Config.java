@@ -6,10 +6,12 @@ public class Config {
 
     private final ArrayList<Comune> ambitoTerritoriale;
     private int numeroMassimoIscrizioniPrenotazione;
+    private final boolean isInitialized;
 
-    public Config(ArrayList<Comune> ambitoTerritoriale, int numeroMassimoIscrizioniPrenotazione) {
+    public Config(ArrayList<Comune> ambitoTerritoriale, int numeroMassimoIscrizioniPrenotazione, boolean isInitialized) {
         this.ambitoTerritoriale = ambitoTerritoriale;
         this.numeroMassimoIscrizioniPrenotazione = numeroMassimoIscrizioniPrenotazione;
+        this.isInitialized = isInitialized;
     }
 
     public ArrayList<Comune> getAmbitoTerritoriale() {
@@ -34,5 +36,9 @@ public class Config {
 
     public boolean isAmbitoTerritorialeVuoto() {
         return ambitoTerritoriale.isEmpty();
+    }
+
+    public boolean getIsInitialized() {
+        return isInitialized;
     }
 }
