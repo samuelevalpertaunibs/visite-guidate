@@ -1,10 +1,25 @@
 package com.unibs;
 
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+
+import java.io.IOException;
+
 public class App {
     public static void main(String[] args) {
-        View view = new View();
-        LoginController loginController = new LoginController(view);
-        loginController.start();
+        try {
+            Screen screen = new DefaultTerminalFactory().createScreen();
+            screen.startScreen();
+
+            MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
+            LoginController controller = new LoginController(gui);
+
+            gui.addWindowAndWait(controller.getView());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

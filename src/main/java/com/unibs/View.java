@@ -1,5 +1,8 @@
 package com.unibs;
 
+import com.googlecode.lanterna.gui2.BasicWindow;
+import com.googlecode.lanterna.gui2.Window;
+
 import java.io.PrintStream;
 import java.util.Scanner;
 

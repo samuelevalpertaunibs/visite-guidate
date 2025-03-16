@@ -13,7 +13,7 @@ public class UserDao {
     public static User findByUsername(String username) throws DatabaseException {
         String sql = "SELECT username, password_hash, salt, role, last_login FROM user WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
@@ -29,23 +29,22 @@ public class UserDao {
         return null;
     }
 
-    public static void registerUser(String username, String newPassword, LocalDate last_login)
-            throws DatabaseException {
-        // If we change the password we are at first login, so we also have to edit the
-        // unregistered bool
+    public static void updatePassword(User user) throws DatabaseException {
         String sql = "UPDATE user SET password_hash = ?, last_login = ? WHERE username = ?";
-        try (
-                Connection conn = DatabaseManager.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, newPassword);
-            stmt.setDate(2, java.sql.Date.valueOf(last_login));
-            stmt.setString(3, username);
-            stmt.executeUpdate();
+            stmt.setString(1, user.getPasswordHash());
+            stmt.setDate(2, java.sql.Date.valueOf(user.getLastLogin()));
+            stmt.setString(3, user.getUsername());
 
-        } catch (Exception e) {
-            throw new DatabaseException(e.getMessage());
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new DatabaseException("Errore durante l'aggiornamento della password, utente non trovato.");
+            }
 
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante l'aggiornamento della password: " + e.getMessage(), e);
         }
     }
 

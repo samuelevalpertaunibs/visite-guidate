@@ -1,26 +1,23 @@
 package com.unibs;
 
 import com.unibs.models.User;
+import com.googlecode.lanterna.gui2.*;
+
 
 public class LoginController {
 
     private final LoginService loginService;
-    private final View view;
+    private final LoginView view;
+    private final MultiWindowTextGUI gui;
 
-    public LoginController(View view) {
+    public LoginController(MultiWindowTextGUI gui) {
         this.loginService = new LoginService();
-        this.view = view;
+        this.view = new LoginView(this);
+        this.gui = gui;
     }
 
-    public void start() {
-        User currentUser = null;
-
-        view.clearScreen();
-        while (currentUser == null) {
-            currentUser = authenticate();
-        }
-
-        handleSpecificUser(currentUser);
+    public Window getView() {
+        return this.view.creaFinestra();
     }
 
     private void handleSpecificUser(User currentUser) {
@@ -29,69 +26,41 @@ public class LoginController {
             configuratorController.start();
         } else {
             view.clearScreen("Ruolo non riconosciuto: accesso negato.");
-            start();
         }
     }
 
-    private User authenticate() {
-        User currentUser = null;
-
-        while (currentUser == null) {
-            view.clearScreen();
-            view.showTitle("Login");
-            String username = view.getInput("Inserisci username: ");
-            String password = view.getInput("Inserisci password: ");
-
-            try {
-                currentUser = loginService.authenticate(username, password);
-            } catch (DatabaseException  e) {
-                view.clearScreen("Errore: " + e.getMessage());
-                System.exit(1);
-            } catch (IllegalArgumentException e) {
-                view.clearScreen("Errore: " + e.getMessage());
-                continue;
-            }
-
-            if (currentUser == null) {
-                view.clearScreen("Credenziali errate. Riprova.");
-                continue;
-            }
-
-            if (currentUser.getLastLogin() != null) {
-                try {
-                    currentUser = loginService.updateLastLogin(currentUser.getUsername());
-                } catch (DatabaseException e) {
-                    view.clearScreen("Errore: " + e.getMessage());
-                    System.exit(1);
-                }
-            }
-
-            if (currentUser != null && currentUser.getLastLogin() == null) {
-                registerUser(currentUser);
-                currentUser = null;
-            }
-        }
-
-        return currentUser;
-
-    }
-
-    protected void registerUser(User user) {
-        view.clearScreen();
-        view.showTitle("Cambio password");
-        String newPassword = view.getInput("Inserisci la nuova password: ");
-
+    public void verificaCredenziali(String username, String password) {
         try {
-            loginService.registerUser(user, newPassword);
-            view.clearScreen("Password cambiata con successo!");
-        } catch (DatabaseException e) {
-            view.clearScreen("Errore: " + e.getMessage());
-            System.exit(1);
-        } catch (IllegalArgumentException e) {
-            registerUser(user);
-        }
+            User user = loginService.authenticate(username, password);
 
+            if (user == null) {
+                view.showPopupMessage("Credenziali errate. Riprova");
+                return;
+            }
+
+            if (user.isFirstLogin()) {
+                CambioPasswordView cambioPasswordView = new CambioPasswordView(this, user);
+                gui.addWindowAndWait(cambioPasswordView.creaFinestra());
+                view.resetLogin();
+                return;
+            } else {
+                loginService.updateLastLogin(user);
+                handleSpecificUser(user);
+            }
+
+            return;
+
+        } catch (DatabaseException e) {
+            return;
+        }
+    }
+
+    protected void updatePassword(User user, String newPassword) {
+        loginService.updatePassword(user, newPassword);
     }
 
 
+    public WindowBasedTextGUI getGui() {
+        return this.gui;
+    }
 }

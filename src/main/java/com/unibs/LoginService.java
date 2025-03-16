@@ -26,11 +26,8 @@ public class LoginService {
         return null;
     }
 
-    protected void registerUser(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
-        if (newPassword.isBlank())
-            throw new IllegalArgumentException("La nuova password non può essere vuota.");
+    protected void updatePassword(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
         String oldPassword = user.getPasswordHash();
-
         byte[] salt = user.getSalt();
         String hashedNewPassword = hashPassword(newPassword, salt);
 
@@ -38,16 +35,20 @@ public class LoginService {
             throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente.");
         }
         user.setPasswordHash(hashedNewPassword);
+        user.setLastLogin(LocalDate.now());
 
         try {
-            UserDao.registerUser(user.getUsername(), hashedNewPassword, LocalDate.now());
+            UserDao.updatePassword(user);
         } catch (DatabaseException e) {
+            // Ripristina il vecchio stato in caso di errore
             user.setPasswordHash(oldPassword);
-            throw e;
+            user.setLastLogin(null);
+            throw e;  // Rilancia l'eccezione
         }
     }
 
-    protected User updateLastLogin(String username) throws DatabaseException {
+    protected User updateLastLogin(User user) throws DatabaseException {
+        String username = user.getUsername();
         int updated = UserDao.updateLastLogin(username);
         if (updated > 0) {
             return UserDao.findByUsername(username);
