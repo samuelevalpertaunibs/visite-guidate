@@ -21,11 +21,12 @@ public class TipoVisitaController {
 
     public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio,
             String dataFine, String oraInizio, String durata, String entrataLibera,
-            String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato) {
+            String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
+            String[] volontari) {
         try {
             tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio,
                     dataFine, oraInizio, durata, entrataLibera,
-                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato);
+                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari);
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }

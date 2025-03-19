@@ -1,16 +1,24 @@
 package com.unibs.views;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.unibs.controllers.LuogoController;
 import com.unibs.controllers.TipoVisitaController;
+import com.unibs.controllers.VolontariController;
 
 public class AggiungiTipoVisitaView {
     private final TipoVisitaController tipoVisitaController;
+    private final VolontariController volontariController;
     private final SelezionaLuogoView selezionaLuogoView;
+
     private Button selezionaLuogoButton;
+    private Button associaVolontariButton;
+
     private final TextBox titoloField;
     private final TextBox descrizioneField;
     private final TextBox dataInizioField;
@@ -23,9 +31,13 @@ public class AggiungiTipoVisitaView {
     private final TextBox numeroMaxPartecipantiField;
     private final Label puntoIncontroComuneLabel;
     private final Label errorLabel;
+    private final Label volontariSelezionatiLabel;
+
+    private List<String> volontariSelezionati = new ArrayList<>();
 
     public AggiungiTipoVisitaView(TipoVisitaController tipoVisitaController, LuogoController luogoController) {
         this.tipoVisitaController = tipoVisitaController;
+        this.volontariController = new VolontariController();
         this.selezionaLuogoView = new SelezionaLuogoView(luogoController);
 
         titoloField = new TextBox("");
@@ -40,24 +52,55 @@ public class AggiungiTipoVisitaView {
         entrataLibera.addItem("Sì");
         entrataLibera.addItem("No");
         entrataLibera.setSelectedIndex(0);
-        entrataLibera.setCheckedItemIndex(0);
         numeroMinPartecipantiField = new TextBox("");
         numeroMaxPartecipantiField = new TextBox("");
+        volontariSelezionatiLabel = new Label("Nessun volontario selezionato");
         errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
 
-        // TODO: fix il simbolo di selezione di entrataLibera
         this.selezionaLuogoButton = new Button("Nessun luogo selezionato", () -> {
-            // Definisci il callback per gestire la selezione del luogo
             selezionaLuogoView.setOnLuogoSelected((luogoSelezionato) -> {
-                // Aggiorna il testo del pulsante con il nome del luogo selezionato
                 this.selezionaLuogoButton.setLabel(luogoSelezionato.getNome());
                 this.selezionaLuogoButton.setEnabled(false);
-                // Quando il luogo viene selezionato fisso il punto di incontro nel comune di
-                // appartenenza del luogo
                 this.puntoIncontroComuneLabel.setText(" - " + luogoSelezionato.getNomeComune());
             });
             tipoVisitaController.getGui().addWindowAndWait(selezionaLuogoView.creaFinestra());
         });
+
+        this.associaVolontariButton = new Button("Associa Volontari", () -> apriPopupSelezioneVolontari());
+    }
+
+    private void apriPopupSelezioneVolontari() {
+        BasicWindow popupWindow = new BasicWindow("Seleziona Volontari");
+        Panel panel = new Panel();
+        panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+
+        List<CheckBox> checkBoxList = new ArrayList<>();
+        List<String> volontariDisponibili = volontariController.getListaVolontari(); // Ottiene la lista dal controller
+
+        for (String volontario : volontariDisponibili) {
+            CheckBox checkBox = new CheckBox(volontario);
+            if (volontariSelezionati.contains(volontario))
+                checkBox.setChecked(true);
+            checkBoxList.add(checkBox);
+            panel.addComponent(checkBox);
+        }
+
+        Button confermaButton = new Button("Conferma", () -> {
+            volontariSelezionati.clear();
+            for (CheckBox checkBox : checkBoxList) {
+                if (checkBox.isChecked()) {
+                    volontariSelezionati.add(checkBox.getLabel());
+                }
+            }
+            volontariSelezionatiLabel.setText("Selezionati: " + String.join(", ", volontariSelezionati));
+            popupWindow.close();
+        });
+
+        panel.addComponent(new EmptySpace());
+        panel.addComponent(confermaButton);
+
+        popupWindow.setComponent(panel);
+        tipoVisitaController.getGui().addWindowAndWait(popupWindow);
     }
 
     public Window creaFinestra() {
@@ -74,8 +117,8 @@ public class AggiungiTipoVisitaView {
         Panel puntoIncontroPanel = new Panel();
         puntoIncontroPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
         puntoIncontroPanel.addComponent(puntoIncontroField);
-        puntoIncontroPanel.addComponent(puntoIncontroComuneLabel);
 
+        puntoIncontroPanel.addComponent(puntoIncontroComuneLabel);
         panel.addComponent(new Label("Punto d'incontro"));
         panel.addComponent(puntoIncontroPanel);
 
@@ -100,6 +143,10 @@ public class AggiungiTipoVisitaView {
         panel.addComponent(new Label("Numero massimo partecipanti"));
         panel.addComponent(numeroMaxPartecipantiField);
 
+        panel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
+        panel.addComponent(associaVolontariButton);
+        panel.addComponent(volontariSelezionatiLabel);
+
         panel.addComponent(errorLabel);
 
         panel.addComponent(new EmptySpace());
@@ -114,26 +161,10 @@ public class AggiungiTipoVisitaView {
                     entrataLibera.getCheckedItem(),
                     numeroMinPartecipantiField.getText(),
                     numeroMaxPartecipantiField.getText(),
-                    selezionaLuogoButton.getLabel());
+                    selezionaLuogoButton.getLabel(),
+                    volontariSelezionati.toArray(new String[0]) // Passa i volontari selezionati
+            );
         }));
-
-        Button confirmButton = new Button("Mostra Conferma", () -> {
-            MessageDialogButton result = MessageDialog.showMessageDialog(
-                    tipoVisitaController.getGui(),
-                    "Conferma",
-                    "Sei sicuro di procedere?",
-                    MessageDialogButton.Yes,
-                    MessageDialogButton.No);
-
-            // Azione in base alla risposta
-            if (result == MessageDialogButton.Yes) {
-                MessageDialog.showMessageDialog(tipoVisitaController.getGui(), "Risultato", "Hai scelto Sì!");
-            } else {
-                MessageDialog.showMessageDialog(tipoVisitaController.getGui(), "Risultato", "Hai scelto No!");
-            }
-        });
-
-        panel.addComponent(confirmButton);
 
         window.setComponent(panel);
         return window;

@@ -4,13 +4,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.unibs.daos.TipoVisitaDao;
+
 public class TipoVisitaService {
 
 	private static final int MINUTES_PER_DAY = 24 * 60;
 
 	public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
 			String oraInizioString, String durataMinutiString, String entrataLibera, String numeroMinPartecipanti,
-			String numeroMaxPartecipanti, String nomeLuogoSelezionato) {
+			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari) {
 		if (titolo == null || titolo.isEmpty())
 			throw new IllegalStateException("Il campo Titolo non può essere vuoto");
 		if (dataInizioString == null || dataInizioString.isEmpty())
@@ -28,7 +30,9 @@ public class TipoVisitaService {
 		if (numeroMaxPartecipanti == null || numeroMaxPartecipanti.isEmpty())
 			throw new IllegalStateException("Il campo Numero massimo partecipanti non può essere vuoto");
 		if (nomeLuogoSelezionato == null || nomeLuogoSelezionato.isEmpty())
-			throw new IllegalStateException("Il campo nomeLuogoSelezionato non può essere vuoto");
+			throw new IllegalStateException("Seleziona un luogo prima di preseguire");
+		if (volontari == null || volontari.length < 1)
+			throw new IllegalStateException("Seleziona almeno un volontario da associare al tipo di visita.");
 
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM");
 		LocalDate dataInizio;
@@ -85,6 +89,12 @@ public class TipoVisitaService {
 			throw new IllegalArgumentException("Il numero minimo di partecipanti non è valido.");
 		}
 
+		boolean entrataLiberaBool = entrataLibera.equals("Sì") ? true : false;
+
 		// Controlli fatti, aggiungere al DB
+		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
+				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,
+				numeroMax, nomeLuogoSelezionato, volontari);
+
 	}
 }
