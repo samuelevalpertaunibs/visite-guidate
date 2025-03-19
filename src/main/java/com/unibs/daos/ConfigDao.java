@@ -1,4 +1,4 @@
-package com.unibs;
+package com.unibs.daos;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.unibs.DatabaseException;
+import com.unibs.DatabaseManager;
 import com.unibs.models.Config;
 import com.unibs.models.Comune;
 
@@ -21,7 +23,7 @@ public class ConfigDao {
                 int configId = rs.getInt("id");
                 int numeroMaxIscrizioni = rs.getInt("numero_max_iscrizioni");
                 boolean isInitialized = rs.getBoolean("is_initialized");
-                ArrayList<Comune> ambitoTerritoriale = getAmbitoTerritoriale(configId);
+                ArrayList<Comune> ambitoTerritoriale = getAmbitoTerritoriale();
 
                 return new Config(ambitoTerritoriale, numeroMaxIscrizioni, isInitialized);
             }
@@ -33,13 +35,12 @@ public class ConfigDao {
         }
     }
 
-    public static ArrayList<Comune> getAmbitoTerritoriale(int config_id) throws DatabaseException {
-        String sql = "SELECT * FROM comune WHERE config_id = ?";
+    public static ArrayList<Comune> getAmbitoTerritoriale() throws DatabaseException {
+        String sql = "SELECT * FROM comune WHERE config_id = 1";
         ArrayList<Comune> ambitoTerritoriale = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, config_id);
             ResultSet rs = stmt.executeQuery();
 
             Comune comune;
@@ -58,7 +59,7 @@ public class ConfigDao {
         return ambitoTerritoriale;
     }
 
-    public static Config aggiungiComune(Comune comune) {
+    public static void aggiungiComune(Comune comune) {
         String insertSql = "INSERT INTO comune (nome, provincia, regione, config_id) VALUES (?, ?, ?, 1)";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
@@ -70,9 +71,6 @@ public class ConfigDao {
         } catch (SQLException e) {
             throw new DatabaseException("Errore nell'aggiornamento delle configurazioni: " + e.getMessage(), e);
         }
-
-        // Restituisci la Config aggiornata
-        return getConfig();
     }
 
     public static boolean doesInclude(String nome, String provincia, String regione) {
@@ -97,7 +95,7 @@ public class ConfigDao {
         return false;
     }
 
-    public static Config initDefault() throws DatabaseException {
+    public static void initDefault() throws DatabaseException {
         // Salva i dati di default nel database
         try (Connection conn = DatabaseManager.getConnection()) {
             String deleteExistingSql = "DELETE FROM config";
@@ -115,8 +113,6 @@ public class ConfigDao {
             throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
         }
 
-        // Restituisci la Config creata
-        return getConfig();
     }
 
     public static Config setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
@@ -149,5 +145,19 @@ public class ConfigDao {
 
         // Restituisci la Config aggiorata
         return getConfig();
+    }
+
+    public static int getNumeroComuni() {
+        String sql = "SELECT COUNT(*) FROM comune WHERE config_id = 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            return (rs.next()) ? rs.getInt(1) : 0;
+
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
+
     }
 }

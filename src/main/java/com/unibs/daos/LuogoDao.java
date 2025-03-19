@@ -1,5 +1,7 @@
-package com.unibs;
+package com.unibs.daos;
 
+import com.unibs.DatabaseException;
+import com.unibs.DatabaseManager;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
 

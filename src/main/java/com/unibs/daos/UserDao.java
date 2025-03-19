@@ -1,4 +1,4 @@
-package com.unibs;
+package com.unibs.daos;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
+import com.unibs.DatabaseException;
+import com.unibs.DatabaseManager;
 import com.unibs.models.User;
 
 public class UserDao {

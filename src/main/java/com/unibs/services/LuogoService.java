@@ -1,5 +1,6 @@
-package com.unibs;
+package com.unibs.services;
 
+import com.unibs.daos.LuogoDao;
 import com.unibs.models.Luogo;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public class LuogoService {
     }
 
     public Luogo aggiungiLuogo(Luogo luogoDaAggiungere) {
-        if (luogoDaAggiungere.getNome().isBlank() || luogoDaAggiungere.getDescrizione().isBlank())
+        if (luogoDaAggiungere.getNome().isBlank() || luogoDaAggiungere.getDescrizione().isBlank() || luogoDaAggiungere.getComune() == null)
             throw new IllegalArgumentException("I campi non possono essere vuoti.");
 
         if (LuogoDao.esisteLuogo(luogoDaAggiungere.getNome())) {

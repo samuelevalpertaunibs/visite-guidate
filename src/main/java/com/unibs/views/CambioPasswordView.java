@@ -1,7 +1,8 @@
-package com.unibs;
+package com.unibs.views;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
+import com.unibs.controllers.LoginController;
 import com.unibs.models.User;
 
 public class CambioPasswordView {

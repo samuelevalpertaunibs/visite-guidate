@@ -1,7 +1,10 @@
-package com.unibs;
+package com.unibs.controllers;
 
+import com.unibs.services.LoginService;
 import com.unibs.models.User;
 import com.googlecode.lanterna.gui2.*;
+import com.unibs.views.CambioPasswordView;
+import com.unibs.views.LoginView;
 
 
 public class LoginController {
@@ -22,10 +25,10 @@ public class LoginController {
 
     private void handleSpecificUser(User currentUser) {
         if (currentUser.getRole().equals("CONF")) {
-            ConfiguratorController configuratorController = new ConfiguratorController(view, currentUser);
+            ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUser);
             configuratorController.start();
         } else {
-            view.clearScreen("Ruolo non riconosciuto: accesso negato.");
+            //view.clearScreen("Ruolo non riconosciuto: accesso negato.");
         }
     }
 
@@ -50,12 +53,12 @@ public class LoginController {
 
             return;
 
-        } catch (DatabaseException e) {
-            return;
+        } catch (Exception e) {
+            view.showErrorMessage(e.getMessage());
         }
     }
 
-    protected void updatePassword(User user, String newPassword) {
+    public void updatePassword(User user, String newPassword) {
         loginService.updatePassword(user, newPassword);
     }
 

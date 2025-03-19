@@ -1,13 +1,12 @@
-package com.unibs;
+package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.DialogWindow;
+import com.unibs.controllers.LoginController;
 
-import java.util.Arrays;
-
-public class LoginView extends View {
+public class LoginView {
     private final TextBox usernameField;
     private final TextBox passwordField;
+    private final Label errorLabel;
     private final Button loginButton;
     private final LoginController controller;;
 
@@ -16,6 +15,7 @@ public class LoginView extends View {
 
         usernameField = new TextBox();
         passwordField = new TextBox().setMask('*'); // Maschera la password
+        errorLabel = new Label("");
 
         loginButton = new Button("Accedi", () -> {
             controller.verificaCredenziali(usernameField.getText(), passwordField.getText());
@@ -31,6 +31,8 @@ public class LoginView extends View {
 
         panel.addComponent(new Label("Password:"));
         panel.addComponent(passwordField);
+
+        panel.addComponent(errorLabel);
 
         panel.addComponent(loginButton);
 
@@ -65,6 +67,11 @@ public class LoginView extends View {
     public void resetLogin() {
         usernameField.setText("");
         passwordField.setText("");
+        errorLabel.setText("");
         usernameField.takeFocus();
+    }
+
+    public void showErrorMessage(String message) {
+        errorLabel.setText(message);
     }
 }

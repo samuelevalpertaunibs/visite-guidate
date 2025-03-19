@@ -32,7 +32,7 @@ public final class Comune {
 
     @Override
     public String toString() {
-        return String.format("%s (%s), %s", nome, regione, provincia);
+        return String.format("%s (%s), %s", nome, provincia, regione);
     }
 
 }

@@ -1,8 +1,12 @@
 package com.unibs;
 
+import com.googlecode.lanterna.graphics.SimpleTheme;
+import com.googlecode.lanterna.graphics.Theme;
+import com.googlecode.lanterna.graphics.ThemeDefinition;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.unibs.controllers.LoginController;
 
 import java.io.IOException;
 
@@ -13,9 +17,9 @@ public class App {
             screen.startScreen();
 
             MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
-            LoginController controller = new LoginController(gui);
+            LoginController loginController = new LoginController(gui);
 
-            gui.addWindowAndWait(controller.getView());
+            gui.addWindowAndWait(loginController.getView());
 
         } catch (IOException e) {
             e.printStackTrace();

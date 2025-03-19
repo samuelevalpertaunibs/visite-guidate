@@ -1,15 +1,17 @@
-package com.unibs;
+package com.unibs.services;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.unibs.DatabaseException;
+import com.unibs.daos.UserDao;
 import com.unibs.models.User;
 
 public class LoginService {
 
-    protected User authenticate(String username, String password)
+    public User authenticate(String username, String password)
             throws DatabaseException, IllegalArgumentException {
         if (username.isBlank() || password.isBlank())
             throw new IllegalArgumentException("Username e password non possono essere vuoti.");
@@ -26,7 +28,7 @@ public class LoginService {
         return null;
     }
 
-    protected void updatePassword(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
+    public void updatePassword(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
         String oldPassword = user.getPasswordHash();
         byte[] salt = user.getSalt();
         String hashedNewPassword = hashPassword(newPassword, salt);
@@ -47,7 +49,7 @@ public class LoginService {
         }
     }
 
-    protected User updateLastLogin(User user) throws DatabaseException {
+    public User updateLastLogin(User user) throws DatabaseException {
         String username = user.getUsername();
         int updated = UserDao.updateLastLogin(username);
         if (updated > 0) {
