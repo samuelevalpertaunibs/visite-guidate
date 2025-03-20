@@ -20,7 +20,6 @@ public class ConfigDao {
              ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
-                int configId = rs.getInt("id");
                 int numeroMaxIscrizioni = rs.getInt("numero_max_iscrizioni");
                 boolean isInitialized = rs.getBoolean("is_initialized");
                 ArrayList<Comune> ambitoTerritoriale = getAmbitoTerritoriale();
@@ -83,11 +82,9 @@ public class ConfigDao {
             stmt.setString(2, provincia.toLowerCase());
             stmt.setString(3, regione.toLowerCase());
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
+            ResultSet rs = stmt.executeQuery();
+                if (rs.next())
                     return rs.getInt(1) > 0;
-                }
-            }
         } catch (SQLException e) {
             throw new DatabaseException("Errore nel controllo dell'esistenza del comune.");
         }
@@ -115,7 +112,7 @@ public class ConfigDao {
 
     }
 
-    public static Config setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
+    public static void setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
         try (Connection conn = DatabaseManager.getConnection()) {
             String sql = "UPDATE config SET numero_max_iscrizioni = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
@@ -127,11 +124,9 @@ public class ConfigDao {
             throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
         }
 
-        // Restituisci la Config aggiornata
-        return getConfig();
     }
 
-    public static Config setIsInitialized(boolean isInitialized) {
+    public static void setIsInitialized(boolean isInitialized) {
         try (Connection conn = DatabaseManager.getConnection()) {
             String sql = "UPDATE config SET is_initialized = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
@@ -143,8 +138,6 @@ public class ConfigDao {
             throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
         }
 
-        // Restituisci la Config aggiorata
-        return getConfig();
     }
 
     public static int getNumeroComuni() {

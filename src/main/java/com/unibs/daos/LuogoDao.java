@@ -14,18 +14,25 @@ public class LuogoDao {
         ArrayList<Luogo> luoghi = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                String nome = rs.getString("nome");
-                String descrizione = rs.getString("descrizione");
-                String comuneFk = rs.getString("comune_fk");
+            // Chiamata al database per ottenere i dati
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String nome = rs.getString("nome");
+                    String descrizione = rs.getString("descrizione");
+                    String comuneFk = rs.getString("comune_fk");
 
-                Comune comune = ComuneDao.getComuneByNome(comuneFk);
+                    Comune comune = new Comune(comuneFk, null, null);
+                    Luogo luogo = new Luogo(nome, descrizione, comune);
+                    luoghi.add(luogo);
+                }
+            }
 
-                Luogo luogo = new Luogo(nome, descrizione, comune);
-                luoghi.add(luogo);
+            // Per evitare problemi con il ResultSet associo i comuni dopo aver concluso la prima query
+            for (Luogo luogo : luoghi) {
+                Comune comune = ComuneDao.getComuneByNome(luogo.getNomeComune());
+                luogo.setComune(comune);
             }
 
         } catch (SQLException e) {
@@ -67,18 +74,18 @@ public class LuogoDao {
 
             stmt.setString(1, nome);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    String descrizione = rs.getString("descrizione");
-                    String comuneFk = rs.getString("comune_fk");
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String descrizione = rs.getString("descrizione");
+                String comuneFk = rs.getString("comune_fk");
 
-                    Comune comune = ComuneDao.getComuneByNome(comuneFk);
+                Comune comune = ComuneDao.getComuneByNome(comuneFk);
 
-                    return new Luogo(nome, descrizione, comune);
-                } else {
-                    return null;
-                }
+                return new Luogo(nome, descrizione, comune);
+            } else {
+                return null;
             }
+
 
         } catch (SQLException e) {
             throw new DatabaseException("Errore durante la ricerca del luogo per nome: " + e.getMessage(), e);

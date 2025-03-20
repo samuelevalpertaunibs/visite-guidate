@@ -2,7 +2,7 @@ package com.unibs.controllers;
 
 import java.util.ArrayList;
 
-import com.unibs.models.VolontariService;
+import com.unibs.services.VolontariService;
 
 /**
  * VolontariController

@@ -8,7 +8,7 @@ public final class Comune {
     private final String regione;
     private final String provincia;
 
-    public Comune(String nome, String regione, String provincia) {
+    public Comune(String nome, String provincia, String regione) {
         this.nome = nome;
         this.regione = regione;
         this.provincia = provincia;

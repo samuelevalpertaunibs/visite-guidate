@@ -8,24 +8,26 @@ import java.util.ArrayList;
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
 
-public class VolontariDao {
 
-    public static ArrayList<String> getListaVolontari() {
-        ArrayList<String> volontari = new ArrayList<>();
-        String query = "SELECT username FROM user WHERE role = 'VOL'";
+public class GiorniSettimanaDao {
+
+    public static ArrayList<String> getGiorniSettimana() {
+        ArrayList<String> giorni = new ArrayList<>();
+        String query = "select nome from giorno_settimana ORDER BY FIELD(nome, 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica')";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)
         ) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                volontari.add(rs.getString("username"));
+                giorni.add(rs.getString("nome"));
             }
 
         } catch (Exception e) {
-            throw new DatabaseException("Errore nel recupero dei volontari: " + e.getMessage());
+            throw new DatabaseException("Errore nel recupero dei giorni della settimana: " + e.getMessage());
         }
 
-        return volontari;
+        return giorni;
     }
 }
+

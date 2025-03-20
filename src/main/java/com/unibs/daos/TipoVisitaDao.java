@@ -1,9 +1,6 @@
 package com.unibs.daos;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -13,8 +10,8 @@ import com.unibs.DatabaseManager;
 public class TipoVisitaDao {
 
     public static void aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
-            LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
-            String nomeLuogoSelezionato, String[] volontari) {
+                                      LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
+                                      String nomeLuogoSelezionato, String[] volontari, String[] giorni) {
 
         String insertSql = "INSERT INTO tipo_visita (titolo, descrizione, data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
@@ -22,10 +19,14 @@ public class TipoVisitaDao {
 
         String insertVolontarioNN = "INSERT INTO tipovisita_volontario_nn (tipo_visita_fk, volontario_fk) VALUES (?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(false); // Inizio della transazione
+        String insertGiorniNN = "INSERT INTO giornosettimana_tipovisita_nn (tipo_visita_fk, giorno_settimana_fk) VALUES (?, ?)";
 
-            int tipoVisitaId = -1; // Per salvare l'ID della visita appena inserita
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false); // Disabilita auto-commit all'inizio
+
+            int tipoVisitaId; // Per salvare l'ID della visita appena inserita
 
             try (PreparedStatement stmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -46,57 +47,97 @@ public class TipoVisitaDao {
                 }
 
                 // Ottiene l'ID generato
-                try (ResultSet rs = stmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        tipoVisitaId = rs.getInt(1);
-                    } else {
-                        throw new DatabaseException("Errore nel recupero dell'ID generato");
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    tipoVisitaId = rs.getInt(1);
+                } else {
+                    throw new DatabaseException("Errore nel recupero dell'ID generato");
+
+                }
+
+                // Inserisce l'associazione tra visita e luogo
+                try (PreparedStatement stmt2 = conn.prepareStatement(insertLuogoVisitaNN)) {
+                    stmt2.setInt(1, tipoVisitaId);
+                    stmt2.setString(2, nomeLuogoSelezionato);
+
+                    affectedRows = stmt2.executeUpdate();
+                    if (affectedRows == 0) {
+                        throw new DatabaseException("Associazione tra luogo e tipo visita fallita");
                     }
                 }
-            }
 
-            // Inserisce l'associazione tra visita e luogo
-            try (PreparedStatement stmt2 = conn.prepareStatement(insertLuogoVisitaNN)) {
-                stmt2.setInt(1, tipoVisitaId);
-                stmt2.setString(2, nomeLuogoSelezionato);
+                // Inserisce ogni volontario nella tabella tipovisita_volontario_nn
+                try (PreparedStatement stmt3 = conn.prepareStatement(insertVolontarioNN)) {
+                    for (String volontario : volontari) {
+                        stmt3.setInt(1, tipoVisitaId);
+                        stmt3.setString(2, volontario);
+                        stmt3.addBatch(); // Aggiunge alla batch per eseguire più query in un solo colpo
+                    }
+                    int[] batchResults = stmt3.executeBatch(); // Esegue tutte le insert insieme
 
-                int affectedRows = stmt2.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new DatabaseException("Associazione tra luogo e tipo visita fallita");
-                }
-            }
-
-            // Inserisce ogni volontario nella tabella tipovisita_volontario_nn
-            try (PreparedStatement stmt3 = conn.prepareStatement(insertVolontarioNN)) {
-                for (String volontario : volontari) {
-                    stmt3.setInt(1, tipoVisitaId);
-                    stmt3.setString(2, volontario);
-                    stmt3.addBatch(); // Aggiunge alla batch per eseguire più query in un solo colpo
-                }
-                int[] batchResults = stmt3.executeBatch(); // Esegue tutte le insert insieme
-
-                // Controlla se almeno un'operazione è fallita
-                for (int result : batchResults) {
-                    if (result == Statement.EXECUTE_FAILED) {
-                        throw new DatabaseException("Inserimento volontario fallito");
+                    // Controlla se almeno un'operazione è fallita
+                    for (int result : batchResults) {
+                        if (result == Statement.EXECUTE_FAILED) {
+                            throw new DatabaseException("Inserimento volontario fallito");
+                        }
                     }
                 }
-            }
 
-            conn.commit(); // Se tutto va bene conferma la transazione
+                // Inserisce ogni giorno della settimana nella tabella giornosettimana_tipovisita_nn
+                try (PreparedStatement stmt4 = conn.prepareStatement(insertGiorniNN)) {
+                    for (String giorno : giorni) {
+                        stmt4.setInt(1, tipoVisitaId);
+                        stmt4.setString(2, giorno);
+                        stmt4.addBatch(); // Aggiunge alla batch per eseguire più query in un solo colpo
+                    }
+                    int[] batchResults = stmt4.executeBatch(); // Esegue tutte le insert insieme
+
+                    // Controlla se almeno un'operazione è fallita
+                    for (int result : batchResults) {
+                        if (result == Statement.EXECUTE_FAILED) {
+                            throw new DatabaseException("Inserimento giorni fallito");
+                        }
+                    }
+                }
+
+                conn.commit(); // Se tutto va bene conferma la transazione
+
+            }
         } catch (Exception e) {
             try {
-                DatabaseManager.getConnection().rollback(); // Se qualcosa va storto rimuovi tutto
+                if (conn != null) {
+                    conn.rollback(); // Esegui il rollback se qualcosa va storto
+                }
             } catch (Exception rollbackEx) {
                 throw new DatabaseException("Errore nel rollback: " + rollbackEx.getMessage());
             }
             throw new DatabaseException("Errore nella transazione: " + e.getMessage());
         } finally {
             try {
-                DatabaseManager.getConnection().setAutoCommit(true); // Ripristina auto-commit
+                if (conn != null) {
+                    conn.setAutoCommit(true); // Ripristina auto-commit
+                }
             } catch (Exception autoCommitEx) {
                 throw new DatabaseException("Errore nel ripristino dell'auto-commit: " + autoCommitEx.getMessage());
             }
         }
+    }
+
+    public static boolean isEmpty() {
+        String sql = "SELECT COUNT(*) FROM tipo_visita";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1) == 0;
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante il controllo della tabella tipo_visita: " + e.getMessage());
+        }
+
+        return true;
     }
 }

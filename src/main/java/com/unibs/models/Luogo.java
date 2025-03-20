@@ -3,7 +3,7 @@ package com.unibs.models;
 public class Luogo {
     private final String nome;
     private final String descrizione;
-    private final Comune comune;
+    private Comune comune;
 
     public Luogo(String nome, String descrizione, Comune comune) {
         this.nome = nome;
@@ -33,5 +33,9 @@ public class Luogo {
 
     public String getNomeComune() {
         return comune.getNome();
+    }
+
+    public void setComune(Comune comune) {
+        this.comune = comune;
     }
 }

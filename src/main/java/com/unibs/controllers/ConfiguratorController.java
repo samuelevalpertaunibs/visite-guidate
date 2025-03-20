@@ -36,21 +36,10 @@ public class ConfiguratorController implements IUserController {
             gui.addWindowAndWait(configController.getView());
             // Config inizializzate, configurazione dati
             TipoVisitaController tipoVisitaController = new TipoVisitaController(this.gui);
+            // Chiamo il metodo apri invece che aggiungerla alla gui perchè la View è gestita da un altro controller
             tipoVisitaController.apriAggiungiTipoVisita();
+            configController.setIsInitialized(true);
         }
-
-        // Qua le Config sono inizializzate, procedo con l'inizializzazione del corpo
-        // dati
-
-        // try {
-        // config = configService.getConfig();
-        // } catch (DatabaseException e) {
-        // view.showMessage(e.getMessage());
-        // }
-        //
-        // if (config == null || !config.getIsInitialized()) {
-        // initApp();
-        // }
 
         showMenu();
     }
