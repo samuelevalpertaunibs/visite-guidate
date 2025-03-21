@@ -8,15 +8,14 @@ public final class Comune {
     private final String regione;
     private final String provincia;
 
-    public Comune(String nome, String regione, String provincia) {
+    public Comune(String nome, String provincia, String regione) {
         this.nome = nome;
         this.regione = regione;
         this.provincia = provincia;
     }
 
     public boolean equals(Comune comune) {
-        return (this.nome.equals(comune.getNome()) && this.regione.equals(comune.getRegione())
-                && this.provincia.equals(comune.getProvincia()));
+        return this.nome.equalsIgnoreCase(comune.getNome());
     }
 
     public String getNome() {
@@ -33,7 +32,7 @@ public final class Comune {
 
     @Override
     public String toString() {
-        return String.format("%s, %s, %s", nome, regione, provincia);
+        return String.format("%s (%s), %s", nome, provincia, regione);
     }
 
 }

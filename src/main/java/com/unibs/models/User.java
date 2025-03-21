@@ -48,4 +48,8 @@ public class User {
     public byte[] getSalt() {
         return this.salt;
     }
+
+    public boolean isFirstLogin() {
+        return this.lastLogin == null;
+    }
 }

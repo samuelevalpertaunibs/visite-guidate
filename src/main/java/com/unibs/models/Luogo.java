@@ -1,8 +1,8 @@
 package com.unibs.models;
 
 public class Luogo {
-    private String nome;
-    private String descrizione;
+    private final String nome;
+    private final String descrizione;
     private Comune comune;
 
     public Luogo(String nome, String descrizione, Comune comune) {
@@ -11,10 +11,31 @@ public class Luogo {
         this.comune = comune;
     }
 
-    public String getName() { return nome; }
+    public String getNome() {
+        return nome;
+    }
 
-    public String getDescription() { return descrizione; }
+    public String getDescrizione() {
+        return descrizione;
+    }
 
-    public Comune getComune() { return comune; }
+    public Comune getComune() {
+        return comune;
+    }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "%s, %s\n\tSituato a %s.",
+                nome, descrizione, comune.toString()
+        );
+    }
+
+    public String getNomeComune() {
+        return comune.getNome();
+    }
+
+    public void setComune(Comune comune) {
+        this.comune = comune;
+    }
 }
