@@ -13,13 +13,13 @@ public class TipoVisitaDao {
                                       LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
                                       String nomeLuogoSelezionato, String[] volontari, String[] giorni) {
 
-        String insertSql = "INSERT INTO tipo_visita (titolo, descrizione, data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_fk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String insertSql = "INSERT INTO tipi_visita (titolo, descrizione, data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-        String insertLuogoVisitaNN = "INSERT INTO tipovisita_luogo_nn (tipo_visita_fk, luogo_fk) VALUES (?, ?)";
+        String insertLuogoVisitaNN = "INSERT INTO tipi_visita_luoghi (tipo_visita_id, luogo_id) VALUES (?, ?)";
 
-        String insertVolontarioNN = "INSERT INTO tipovisita_volontario_nn (tipo_visita_fk, volontario_fk) VALUES (?, ?)";
+        String insertVolontarioNN = "INSERT INTO tipi_visita_volontari (tipo_visita_id, volontario_id) VALUES (?, ?)";
 
-        String insertGiorniNN = "INSERT INTO giornosettimana_tipovisita_nn (tipo_visita_fk, giorno_settimana_fk) VALUES (?, ?)";
+        String insertGiorniNN = "INSERT INTO giorni_settimana_tipi_visita (tipo_visita_id, giorno_settimana_id) VALUES (?, ?)";
 
         Connection conn = null;
         try {
@@ -124,7 +124,7 @@ public class TipoVisitaDao {
     }
 
     public static boolean isEmpty() {
-        String sql = "SELECT COUNT(*) FROM tipo_visita";
+        String sql = "SELECT COUNT(*) FROM tipi_visita";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);

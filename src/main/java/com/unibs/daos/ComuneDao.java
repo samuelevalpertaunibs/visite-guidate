@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class ComuneDao {
     public static Comune getComuneByNome(String nomeDaCercare) throws DatabaseException {
-        String sql = "SELECT * FROM comune WHERE nome = ?";
+        String sql = "SELECT * FROM comuni WHERE nome = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -32,7 +32,7 @@ public class ComuneDao {
     }
 
     public static ArrayList<Comune> getAllComuni() throws DatabaseException {
-        String sql = "SELECT * FROM comune";
+        String sql = "SELECT * FROM comuni";
         ArrayList<Comune> comuni = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();

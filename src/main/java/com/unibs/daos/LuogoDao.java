@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class LuogoDao {
     public static ArrayList<Luogo> getAllLuoghi() throws DatabaseException {
-        String sql = "SELECT * FROM luogo";
+        String sql = "SELECT * FROM luoghi";
         ArrayList<Luogo> luoghi = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -44,7 +44,7 @@ public class LuogoDao {
 
 
     public static Luogo aggiungiLuogo(Luogo luogo) throws DatabaseException {
-        String sql = "INSERT INTO luogo (nome, descrizione, comune_fk) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO luoghi (nome, descrizione, comune_id) VALUES (?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -67,7 +67,7 @@ public class LuogoDao {
     }
 
     public static Luogo cercaLuogoPerNome(String nome) throws DatabaseException {
-        String sql = "SELECT * FROM luogo WHERE nome = ? LIMIT 1";
+        String sql = "SELECT * FROM luoghi WHERE nome = ? LIMIT 1";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -93,7 +93,7 @@ public class LuogoDao {
     }
 
     public static boolean esisteLuogo(String nome) throws DatabaseException {
-        String sql = "SELECT 1 FROM luogo WHERE nome = ? LIMIT 1";
+        String sql = "SELECT 1 FROM luoghi WHERE nome = ? LIMIT 1";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

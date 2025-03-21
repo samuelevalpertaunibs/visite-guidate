@@ -13,7 +13,7 @@ public class GiorniSettimanaDao {
 
     public static ArrayList<String> getGiorniSettimana() {
         ArrayList<String> giorni = new ArrayList<>();
-        String query = "select nome from giorno_settimana ORDER BY FIELD(nome, 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica')";
+        String query = "select nome from giorni_settimana ORDER BY FIELD(nome, 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica')";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)

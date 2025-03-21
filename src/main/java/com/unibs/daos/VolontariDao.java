@@ -12,7 +12,7 @@ public class VolontariDao {
 
     public static ArrayList<String> getListaVolontari() {
         ArrayList<String> volontari = new ArrayList<>();
-        String query = "SELECT username FROM user WHERE role = 'VOL'";
+        String query = "SELECT username FROM utenti WHERE ruolo_id = 2";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)
