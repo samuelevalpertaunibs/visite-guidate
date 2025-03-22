@@ -30,27 +30,16 @@ public class ConfiguratorController implements IUserController {
     public void start() {
 
         // Se le configurazioni non sono ancora state inizializzate
-        if (!configService.isInitialized()) {
+     /*   if (!configService.isInitialized()) {
             configService.initDefault();
             ConfigController configController = new ConfigController(this.gui);
             gui.addWindowAndWait(configController.getView());
             // Config inizializzate, configurazione dati
             TipoVisitaController tipoVisitaController = new TipoVisitaController(this.gui);
             tipoVisitaController.apriAggiungiTipoVisita();
-        }
-
-        // Qua le Config sono inizializzate, procedo con l'inizializzazione del corpo
-        // dati
-
-        // try {
-        // config = configService.getConfig();
-        // } catch (DatabaseException e) {
-        // view.showMessage(e.getMessage());
-        // }
-        //
-        // if (config == null || !config.getIsInitialized()) {
-        // initApp();
-        // }
+        }*/
+        DatePrecluseController controller = new DatePrecluseController(gui);
+        controller.apriAggiungiDatePrecluse();
 
         showMenu();
     }
