@@ -3,6 +3,7 @@ package com.unibs.daos;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import com.unibs.DatabaseException;
@@ -27,5 +28,25 @@ public class VolontariDao {
         }
 
         return volontari;
+    }
+
+    public static int getIdByUsername(String username) {
+        String sql = "SELECT id FROM utenti WHERE username = ? AND ruolo_id = 2";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+
+            return -1;
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante la ricerca del volontario per nome: " + e.getMessage());
+        }
     }
 }

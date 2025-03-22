@@ -44,10 +44,11 @@ public class ConfigDao {
 
             Comune comune;
             while (rs.next()) {
+                int id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 String provincia = rs.getString("provincia");
                 String regione = rs.getString("regione");
-                comune = new Comune(nome, provincia, regione);
+                comune = new Comune(id, nome, provincia, regione);
                 ambitoTerritoriale.add(comune);
             }
 

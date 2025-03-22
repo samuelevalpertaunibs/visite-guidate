@@ -41,6 +41,6 @@ public class LuogoController {
     }
 
     public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) {
-        return luogoService.aggiungiLuogo(new Luogo(nome, descrizione, comune));
+        return luogoService.aggiungiLuogo(new Luogo(-1, nome, descrizione, comune));
     }
 }

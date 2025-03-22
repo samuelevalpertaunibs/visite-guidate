@@ -11,18 +11,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ComuneDao {
-    public static Comune getComuneByNome(String nomeDaCercare) throws DatabaseException {
-        String sql = "SELECT * FROM comuni WHERE nome = ?";
+    public static Comune getComuneById(int id) throws DatabaseException {
+        String sql = "SELECT * FROM comuni WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, nomeDaCercare);
+            stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String nome = rs.getString("nome");
-                    String regione = rs.getString("regione");
                     String provincia = rs.getString("provincia");
-                    return new Comune(nome, provincia, regione);
+                    String regione = rs.getString("regione");
+                    return new Comune(id, nome, provincia, regione);
                 }
             }
         } catch (SQLException e) {
@@ -41,11 +41,12 @@ public class ComuneDao {
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
+                int id =  rs.getInt("id");
                 String nome = rs.getString("nome");
                 String provincia = rs.getString("provincia");
                 String regione = rs.getString("regione");
 
-                Comune comune = new Comune(nome, provincia, regione);
+                Comune comune = new Comune(id, nome, provincia, regione);
                 comuni.add(comune);
             }
 
