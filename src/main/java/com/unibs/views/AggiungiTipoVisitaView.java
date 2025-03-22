@@ -5,8 +5,6 @@ import java.util.ArrayList;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.unibs.controllers.LuogoController;
 import com.unibs.controllers.TipoVisitaController;
 import com.unibs.controllers.VolontariController;
@@ -15,9 +13,12 @@ public class AggiungiTipoVisitaView {
     private final TipoVisitaController tipoVisitaController;
     private final VolontariController volontariController;
     private final SelezionaLuogoView selezionaLuogoView;
+    private final LuogoController luogoController;
 
-    private Button selezionaLuogoButton;
-    private Button associaVolontariButton;
+    private final Button selezionaLuogoButton;
+    private final Button associaGiorniButton;
+    private final Button associaVolontariButton;
+    private final Button fineButton;
 
     private final TextBox titoloField;
     private final TextBox descrizioneField;
@@ -32,11 +33,15 @@ public class AggiungiTipoVisitaView {
     private final Label puntoIncontroComuneLabel;
     private final Label errorLabel;
     private final Label volontariSelezionatiLabel;
+    private final Label giorniSelezionatiLabel;
 
-    private List<String> volontariSelezionati = new ArrayList<>();
+
+    private final List<String> volontariSelezionati = new ArrayList<>();
+    private final List<String> giorniSelezionati = new ArrayList<>();
 
     public AggiungiTipoVisitaView(TipoVisitaController tipoVisitaController, LuogoController luogoController) {
         this.tipoVisitaController = tipoVisitaController;
+        this.luogoController = luogoController;
         this.volontariController = new VolontariController();
         this.selezionaLuogoView = new SelezionaLuogoView(luogoController);
 
@@ -51,22 +56,62 @@ public class AggiungiTipoVisitaView {
         entrataLibera = new RadioBoxList<>();
         entrataLibera.addItem("Sì");
         entrataLibera.addItem("No");
-        entrataLibera.setSelectedIndex(0);
         numeroMinPartecipantiField = new TextBox("");
         numeroMaxPartecipantiField = new TextBox("");
         volontariSelezionatiLabel = new Label("Nessun volontario selezionato");
+        giorniSelezionatiLabel = new Label("Nessun giorno selezionato");
         errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
+        fineButton = new Button("Fine", tipoVisitaController::chiudiFinestraAggiungiTipoVisita);
 
-        this.selezionaLuogoButton = new Button("Nessun luogo selezionato", () -> {
-            selezionaLuogoView.setOnLuogoSelected((luogoSelezionato) -> {
-                this.selezionaLuogoButton.setLabel(luogoSelezionato.getNome());
-                this.selezionaLuogoButton.setEnabled(false);
-                this.puntoIncontroComuneLabel.setText(" - " + luogoSelezionato.getNomeComune());
-            });
-            tipoVisitaController.getGui().addWindowAndWait(selezionaLuogoView.creaFinestra());
+        this.selezionaLuogoButton = new Button("Nessun luogo selezionato", this::apriPopupSelezioneLuogo);
+        this.associaGiorniButton = new Button("Seleziona giorni", this::apriPopupSelezioneGiorni);
+        this.associaVolontariButton = new Button("Associa Volontari", this::apriPopupSelezioneVolontari);
+    }
+
+    private void apriPopupSelezioneLuogo() {
+
+        selezionaLuogoView.setOnLuogoSelected((luogoSelezionato) -> {
+            this.selezionaLuogoButton.setLabel(luogoSelezionato.getNome());
+            this.selezionaLuogoButton.setEnabled(false);
+            this.puntoIncontroComuneLabel.setText(" - " + luogoSelezionato.getNomeComune());
         });
 
-        this.associaVolontariButton = new Button("Associa Volontari", () -> apriPopupSelezioneVolontari());
+        tipoVisitaController.getGui().addWindowAndWait(selezionaLuogoView.creaFinestra());
+        titoloField.takeFocus();
+    }
+
+    private void apriPopupSelezioneGiorni() {
+        BasicWindow popupWindow = new BasicWindow("Seleziona giorni della settimana");
+        Panel panel = new Panel();
+        panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+
+        List<CheckBox> checkBoxList = new ArrayList<>();
+        List<String> giorni = tipoVisitaController.getGiorniSettimana();
+
+        for (String giorno : giorni) {
+            CheckBox checkBox = new CheckBox(giorno);
+            if (volontariSelezionati.contains(giorno))
+                checkBox.setChecked(true);
+            checkBoxList.add(checkBox);
+            panel.addComponent(checkBox);
+        }
+
+        Button confermaButton = new Button("Conferma", () -> {
+            giorni.clear();
+            for (CheckBox checkBox : checkBoxList) {
+                if (checkBox.isChecked()) {
+                    giorniSelezionati.add(checkBox.getLabel());
+                }
+            }
+            giorniSelezionatiLabel.setText("Selezionati: " + String.join(", ", giorniSelezionati));
+            popupWindow.close();
+        });
+
+        panel.addComponent(new EmptySpace());
+        panel.addComponent(confermaButton);
+
+        popupWindow.setComponent(panel);
+        tipoVisitaController.getGui().addWindowAndWait(popupWindow);
     }
 
     private void apriPopupSelezioneVolontari() {
@@ -128,6 +173,11 @@ public class AggiungiTipoVisitaView {
         panel.addComponent(new Label("Data fine (dd/MM)"));
         panel.addComponent(dataFineField);
 
+        panel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
+        panel.addComponent(associaGiorniButton);
+        panel.addComponent(giorniSelezionatiLabel);
+        panel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
+
         panel.addComponent(new Label("Ora inizio (HH:mm)"));
         panel.addComponent(oraInizioField);
 
@@ -136,6 +186,8 @@ public class AggiungiTipoVisitaView {
 
         panel.addComponent(new Label("Entrata libera?"));
         panel.addComponent(entrataLibera);
+
+        entrataLibera.setSelectedIndex(0); // TODO: NON FUNZIONA
 
         panel.addComponent(new Label("Numero minimo partecipanti"));
         panel.addComponent(numeroMinPartecipantiField);
@@ -150,21 +202,22 @@ public class AggiungiTipoVisitaView {
         panel.addComponent(errorLabel);
 
         panel.addComponent(new EmptySpace());
-        panel.addComponent(new Button("Aggiungi", () -> {
-            tipoVisitaController.aggiungiTipoVisita(
-                    titoloField.getText(),
-                    descrizioneField.getText(),
-                    dataInizioField.getText(),
-                    dataFineField.getText(),
-                    oraInizioField.getText(),
-                    durataField.getText(),
-                    entrataLibera.getCheckedItem(),
-                    numeroMinPartecipantiField.getText(),
-                    numeroMaxPartecipantiField.getText(),
-                    selezionaLuogoButton.getLabel(),
-                    volontariSelezionati.toArray(new String[0]) // Passa i volontari selezionati
-            );
-        }));
+        panel.addComponent(new Button("Aggiungi", () -> tipoVisitaController.aggiungiTipoVisita(
+                titoloField.getText(),
+                descrizioneField.getText(),
+                dataInizioField.getText(),
+                dataFineField.getText(),
+                oraInizioField.getText(),
+                durataField.getText(),
+                entrataLibera.getCheckedItem(),
+                numeroMinPartecipantiField.getText(),
+                numeroMaxPartecipantiField.getText(),
+                selezionaLuogoButton.getLabel(),
+                volontariSelezionati.toArray(new String[0]), // Passa i volontari selezionati
+                giorniSelezionati.toArray(new String[0])
+        )));
+
+        panel.addComponent(fineButton);
 
         window.setComponent(panel);
         return window;
@@ -173,4 +226,31 @@ public class AggiungiTipoVisitaView {
     public void mostraErrore(String message) {
         errorLabel.setText(message);
     }
+
+    public void clearAll() {
+        titoloField.setText("");
+        descrizioneField.setText("");
+        puntoIncontroField.setText("");
+        dataInizioField.setText("");
+        dataFineField.setText("");
+        oraInizioField.setText("");
+        durataField.setText("");
+        numeroMinPartecipantiField.setText("");
+        numeroMaxPartecipantiField.setText("");
+
+        entrataLibera.setSelectedIndex(0); // Resetta alla prima opzione
+        volontariSelezionati.clear();
+        volontariSelezionatiLabel.setText("Nessun volontario selezionato");
+        giorniSelezionati.clear();
+        giorniSelezionatiLabel.setText("Nessun giorno selezionati");
+
+        selezionaLuogoButton.setLabel("Nessun luogo selezionato");
+        selezionaLuogoButton.setEnabled(true);
+
+        puntoIncontroComuneLabel.setText("");
+
+
+        errorLabel.setText("");
+    }
+
 }

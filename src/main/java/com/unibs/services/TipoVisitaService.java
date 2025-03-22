@@ -4,7 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.unibs.daos.GiorniSettimanaDao;
 import com.unibs.daos.TipoVisitaDao;
+import com.unibs.daos.LuogoDao;
+import com.unibs.daos.VolontariDao;
+
+import java.util.ArrayList;
 
 public class TipoVisitaService {
 
@@ -12,7 +17,7 @@ public class TipoVisitaService {
 
 	public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
 			String oraInizioString, String durataMinutiString, String entrataLibera, String numeroMinPartecipanti,
-			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari) {
+			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni) {
 		if (titolo == null || titolo.isEmpty())
 			throw new IllegalStateException("Il campo Titolo non può essere vuoto");
 		if (dataInizioString == null || dataInizioString.isEmpty())
@@ -33,17 +38,20 @@ public class TipoVisitaService {
 			throw new IllegalStateException("Seleziona un luogo prima di preseguire");
 		if (volontari == null || volontari.length < 1)
 			throw new IllegalStateException("Seleziona almeno un volontario da associare al tipo di visita.");
+		if (giorni == null || giorni.length < 1)
+			throw new IllegalStateException("Seleziona almeno un giorno della settimana.");
 
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM");
+
+		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		LocalDate dataInizio;
 		LocalDate dataFine;
 		try {
-			dataInizio = LocalDate.parse(dataInizioString, dateFormatter);
+			dataInizio = LocalDate.parse(dataInizioString + "/" + LocalDate.now().getYear(), dateFormatter);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Il formato della data di inizio non è corretto");
 		}
 		try {
-			dataFine = LocalDate.parse(dataFineString, dateFormatter);
+			dataFine = LocalDate.parse(dataFineString + "/" + LocalDate.now().getYear(), dateFormatter);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Il formato della data di fine non è corretto");
 		}
@@ -84,17 +92,39 @@ public class TipoVisitaService {
 			if (numeroMin < 1 || numeroMin > 100)
 				throw new IllegalArgumentException("Il numero minimo deve essere positivo e minore di 100.");
 			if (numeroMin > numeroMax)
-				throw new IllegalArgumentException("Il numero minimo deve essere minore del numero massimo");
+				throw new IllegalArgumentException("Il numero minimo deve essere minore del numero massimo.");
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Il numero minimo di partecipanti non è valido.");
 		}
 
-		boolean entrataLiberaBool = entrataLibera.equals("Sì") ? true : false;
+		boolean entrataLiberaBool = entrataLibera.equals("Sì");
+
+		int luogoId = LuogoDao.getIdByNome(nomeLuogoSelezionato);
+
+		int[] volontariIds = new int[volontari.length];
+		for  (int i = 0; i < volontari.length; i++) {
+			volontariIds[i] = VolontariDao.getIdByUsername(volontari[i]);
+		}
+
+		int[] giorniIds = new int[giorni.length];
+		for  (int i = 0; i < giorni.length; i++) {
+			giorniIds[i] = GiorniSettimanaDao.getIdByNome(giorni[i]);
+		}
+
+
 
 		// Controlli fatti, aggiungere al DB
 		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
 				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,
-				numeroMax, nomeLuogoSelezionato, volontari);
+				numeroMax, luogoId, volontariIds, giorniIds);
 
+	}
+
+	public ArrayList<String> getGiorniSettimana() {
+		return GiorniSettimanaDao.getGiorniSettimana();
+	}
+
+	public boolean isEmpty() {
+		return TipoVisitaDao.isEmpty();
 	}
 }

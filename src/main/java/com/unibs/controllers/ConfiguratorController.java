@@ -30,14 +30,18 @@ public class ConfiguratorController implements IUserController {
     public void start() {
 
         // Se le configurazioni non sono ancora state inizializzate
-     /*   if (!configService.isInitialized()) {
+        if (!configService.isInitialized()) {
             configService.initDefault();
-            ConfigController configController = new ConfigController(this.gui);
+            ConfigController configController = new ConfigController(gui);
             gui.addWindowAndWait(configController.getView());
             // Config inizializzate, configurazione dati
-            TipoVisitaController tipoVisitaController = new TipoVisitaController(this.gui);
+            TipoVisitaController tipoVisitaController = new TipoVisitaController(gui, configController);
+            // Chiamo il metodo apri invece che aggiungerla alla gui perchè la View è
+            // gestita da un altro controller
             tipoVisitaController.apriAggiungiTipoVisita();
-        }*/
+        }
+
+        // TODO: before merge
         DatePrecluseController controller = new DatePrecluseController(gui);
         controller.apriAggiungiDatePrecluse();
 

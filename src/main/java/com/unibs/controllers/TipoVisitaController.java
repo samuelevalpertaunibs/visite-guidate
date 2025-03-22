@@ -22,11 +22,19 @@ public class TipoVisitaController {
     public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio,
             String dataFine, String oraInizio, String durata, String entrataLibera,
             String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
-            String[] volontari) {
+            String[] volontari, String[] giorni) {
+
+        // Controllo che il luogo sia stato selezionato, non è compito del service
+        // perchè lui si aspetta un nomeLuogo
+        if (nomeLuogoSelezionato.equalsIgnoreCase("Nessun luogo selezionato")) {
+            aggiungiTipoVisitaView.mostraErrore("Seleziona un luogo prima di preseguire");
+            return;
+        }
         try {
             tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio,
                     dataFine, oraInizio, durata, entrataLibera,
-                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari);
+                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari, giorni);
+            aggiungiTipoVisitaView.clearAll();
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
@@ -34,5 +42,23 @@ public class TipoVisitaController {
 
     public WindowBasedTextGUI getGui() {
         return this.gui;
+    }
+
+    public ArrayList<String> getGiorniSettimana() {
+        return tipoVisitaService.getGiorniSettimana();
+    }
+
+    public void chiudiFinestraAggiungiTipoVisita() {
+        try {
+            if (tipoVisitaService.isEmpty()) {
+                aggiungiTipoVisitaView.mostraErrore("Inserisci almeno un tipo di visita.");
+                return;
+            }
+        } catch (Exception e) {
+            aggiungiTipoVisitaView.mostraErrore(e.getMessage());
+        }
+        // Chiudo AggiungiTipoVisitaView
+        configController.setIsInitialized(true);
+        gui.removeWindow(gui.getActiveWindow());
     }
 }

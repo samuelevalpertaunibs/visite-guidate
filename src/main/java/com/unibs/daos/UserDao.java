@@ -13,7 +13,7 @@ import com.unibs.models.User;
 public class UserDao {
 
     public static User findByUsername(String username) throws DatabaseException {
-        String sql = "SELECT username, password_hash, salt, role, last_login FROM user WHERE username = ?";
+        String sql = "SELECT username, password_hash, salt, ruolo_id, last_login FROM utenti WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -21,7 +21,7 @@ public class UserDao {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new User(rs.getString("username"), rs.getString("password_hash"), rs.getBytes("salt"), rs.getString("role"),
+                return new User(rs.getString("username"), rs.getString("password_hash"), rs.getBytes("salt"), rs.getInt("ruolo_id"),
                         rs.getObject("last_login", LocalDate.class));
             }
         } catch (Exception e) {
@@ -32,7 +32,7 @@ public class UserDao {
     }
 
     public static void updatePassword(User user) throws DatabaseException {
-        String sql = "UPDATE user SET password_hash = ?, last_login = ? WHERE username = ?";
+        String sql = "UPDATE utenti SET password_hash = ?, last_login = ? WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -51,7 +51,7 @@ public class UserDao {
     }
 
     public static int updateLastLogin(String username) throws DatabaseException {
-        String sql = "UPDATE user SET last_login = ? WHERE username = ?";
+        String sql = "UPDATE utenti SET last_login = ? WHERE username = ?";
         try (
                 Connection conn = DatabaseManager.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {

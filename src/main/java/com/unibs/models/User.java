@@ -5,11 +5,11 @@ import java.time.LocalDate;
 public class User {
     private final String username;
     private String passwordHash;
-    private final String role;
+    private final int role;
     private LocalDate lastLogin;
     private final byte[] salt;
 
-    public User(String username, String passwordHash, byte[] salt, String role, LocalDate lastLogin) {
+    public User(String username, String passwordHash, byte[] salt, int role, LocalDate lastLogin) {
         this.username = username;
         this.passwordHash = passwordHash;
         this.salt = salt;
@@ -25,7 +25,7 @@ public class User {
         return passwordHash;
     }
 
-    public String getRole() {
+    public int getRole() {
         return role;
     }
 

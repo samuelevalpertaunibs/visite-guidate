@@ -20,7 +20,6 @@ public class ConfigDao {
              ResultSet rs = stmt.executeQuery()) {
 
             if (rs.next()) {
-                int configId = rs.getInt("id");
                 int numeroMaxIscrizioni = rs.getInt("numero_max_iscrizioni");
                 boolean isInitialized = rs.getBoolean("is_initialized");
                 ArrayList<Comune> ambitoTerritoriale = getAmbitoTerritoriale();
@@ -36,7 +35,7 @@ public class ConfigDao {
     }
 
     public static ArrayList<Comune> getAmbitoTerritoriale() throws DatabaseException {
-        String sql = "SELECT * FROM comune WHERE config_id = 1";
+        String sql = "SELECT * FROM comuni WHERE config_id = 1";
         ArrayList<Comune> ambitoTerritoriale = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -45,10 +44,11 @@ public class ConfigDao {
 
             Comune comune;
             while (rs.next()) {
+                int id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 String provincia = rs.getString("provincia");
                 String regione = rs.getString("regione");
-                comune = new Comune(nome, provincia, regione);
+                comune = new Comune(id, nome, provincia, regione);
                 ambitoTerritoriale.add(comune);
             }
 
@@ -60,7 +60,7 @@ public class ConfigDao {
     }
 
     public static void aggiungiComune(Comune comune) {
-        String insertSql = "INSERT INTO comune (nome, provincia, regione, config_id) VALUES (?, ?, ?, 1)";
+        String insertSql = "INSERT INTO comuni (nome, provincia, regione, config_id) VALUES (?, ?, ?, 1)";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
             insertStmt.setString(1, comune.getNome());
@@ -74,7 +74,7 @@ public class ConfigDao {
     }
 
     public static boolean doesInclude(String nome, String provincia, String regione) {
-        String sql = "SELECT COUNT(*) FROM comune WHERE LOWER(nome) = LOWER(?) AND LOWER(provincia) = LOWER(?) AND LOWER(regione) = LOWER(?)";
+        String sql = "SELECT COUNT(*) FROM comuni WHERE LOWER(nome) = LOWER(?) AND LOWER(provincia) = LOWER(?) AND LOWER(regione) = LOWER(?)";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -83,11 +83,9 @@ public class ConfigDao {
             stmt.setString(2, provincia.toLowerCase());
             stmt.setString(3, regione.toLowerCase());
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
+            ResultSet rs = stmt.executeQuery();
+                if (rs.next())
                     return rs.getInt(1) > 0;
-                }
-            }
         } catch (SQLException e) {
             throw new DatabaseException("Errore nel controllo dell'esistenza del comune.");
         }
@@ -115,7 +113,7 @@ public class ConfigDao {
 
     }
 
-    public static Config setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
+    public static void setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
         try (Connection conn = DatabaseManager.getConnection()) {
             String sql = "UPDATE config SET numero_max_iscrizioni = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
@@ -127,11 +125,9 @@ public class ConfigDao {
             throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
         }
 
-        // Restituisci la Config aggiornata
-        return getConfig();
     }
 
-    public static Config setIsInitialized(boolean isInitialized) {
+    public static void setIsInitialized(boolean isInitialized) {
         try (Connection conn = DatabaseManager.getConnection()) {
             String sql = "UPDATE config SET is_initialized = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
@@ -143,12 +139,10 @@ public class ConfigDao {
             throw new DatabaseException("Errore durante l'inizializzazione della configurazione: " + e.getMessage());
         }
 
-        // Restituisci la Config aggiorata
-        return getConfig();
     }
 
     public static int getNumeroComuni() {
-        String sql = "SELECT COUNT(*) FROM comune WHERE config_id = 1";
+        String sql = "SELECT COUNT(*) FROM comuni WHERE config_id = 1";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
