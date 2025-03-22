@@ -10,6 +10,7 @@ import com.unibs.daos.LuogoDao;
 import com.unibs.daos.VolontariDao;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TipoVisitaService {
 
@@ -127,4 +128,8 @@ public class TipoVisitaService {
 	public boolean isEmpty() {
 		return TipoVisitaDao.isEmpty();
 	}
+
+	public ArrayList<String> getTipoVisita() { return TipoVisitaDao.getTipiVisita(); }
+
+	public List<String> getTipoVisitaNomeByVolontarioId(int volontarioId) { return TipoVisitaDao.getTipiVisitaNomeByVolontarioId(volontarioId); }
 }

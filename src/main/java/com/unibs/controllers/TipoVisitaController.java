@@ -6,6 +6,7 @@ import com.unibs.services.TipoVisitaService;
 import com.unibs.views.AggiungiTipoVisitaView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
@@ -65,4 +66,8 @@ public class TipoVisitaController {
         configController.setIsInitialized(true);
         gui.removeWindow(gui.getActiveWindow());
     }
+
+    public ArrayList<String> getNomeTipiVisita() { return tipoVisitaService.getTipoVisita(); }
+
+    public List<String> getTipiVisitaNomeByVolontarioId(int volontarioId) { return tipoVisitaService.getTipoVisitaNomeByVolontarioId(volontarioId);}
 }

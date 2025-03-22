@@ -3,6 +3,8 @@ package com.unibs.daos;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
@@ -138,5 +140,41 @@ public class TipoVisitaDao {
         }
 
         return true;
+    }
+
+    public static ArrayList<String> getTipiVisita() {
+        ArrayList<String> tipiVisita = new ArrayList<>();
+        String query = "SELECT nome FROM tipi_visita";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                tipiVisita.add(rs.getString("nome"));
+            }
+        } catch (Exception e) {
+            throw new DatabaseException("Errore nel recupero dei tipi di visita: " + e.getMessage());
+        }
+        return tipiVisita;
+    }
+
+    public static List<String> getTipiVisitaNomeByVolontarioId(int volontarioId) {
+        ArrayList<String> nomiTipiVisita = new ArrayList<>();
+        String sql = "SELECT tv.nome FROM tipi_visita tv JOIN volontari_tipi_visita vtv ON tv.id = vtv.tipo_visita_id WHERE vtv.volontario_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, volontarioId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                nomiTipiVisita.add(rs.getString("nome"));
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore nel recupero dei volontari: " + e.getMessage());
+        }
+        return nomiTipiVisita;
     }
 }
