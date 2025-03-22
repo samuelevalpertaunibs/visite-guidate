@@ -35,7 +35,7 @@ public class ConfigDao {
     }
 
     public static ArrayList<Comune> getAmbitoTerritoriale() throws DatabaseException {
-        String sql = "SELECT * FROM comune WHERE config_id = 1";
+        String sql = "SELECT * FROM comuni WHERE config_id = 1";
         ArrayList<Comune> ambitoTerritoriale = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -44,10 +44,11 @@ public class ConfigDao {
 
             Comune comune;
             while (rs.next()) {
+                int id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 String provincia = rs.getString("provincia");
                 String regione = rs.getString("regione");
-                comune = new Comune(nome, provincia, regione);
+                comune = new Comune(id, nome, provincia, regione);
                 ambitoTerritoriale.add(comune);
             }
 
@@ -59,7 +60,7 @@ public class ConfigDao {
     }
 
     public static void aggiungiComune(Comune comune) {
-        String insertSql = "INSERT INTO comune (nome, provincia, regione, config_id) VALUES (?, ?, ?, 1)";
+        String insertSql = "INSERT INTO comuni (nome, provincia, regione, config_id) VALUES (?, ?, ?, 1)";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
             insertStmt.setString(1, comune.getNome());
@@ -73,7 +74,7 @@ public class ConfigDao {
     }
 
     public static boolean doesInclude(String nome, String provincia, String regione) {
-        String sql = "SELECT COUNT(*) FROM comune WHERE LOWER(nome) = LOWER(?) AND LOWER(provincia) = LOWER(?) AND LOWER(regione) = LOWER(?)";
+        String sql = "SELECT COUNT(*) FROM comuni WHERE LOWER(nome) = LOWER(?) AND LOWER(provincia) = LOWER(?) AND LOWER(regione) = LOWER(?)";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -141,7 +142,7 @@ public class ConfigDao {
     }
 
     public static int getNumeroComuni() {
-        String sql = "SELECT COUNT(*) FROM comune WHERE config_id = 1";
+        String sql = "SELECT COUNT(*) FROM comuni WHERE config_id = 1";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 

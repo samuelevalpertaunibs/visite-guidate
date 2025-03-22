@@ -46,50 +46,23 @@ public class CambioPasswordView {
     }
 
     private void onConferma() {
+        mostraErrore("");
         String newPassword = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
-
-        if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            resetCambioPassword();
-            errorLabel.setText("I campi non possono essere vuoti.");
-            return;
-        }
-
-        if (!newPassword.equals(confirmPassword)) {
-            errorLabel.setText("Le password non coincidono.");
-            resetCambioPassword();
-            return;
-        }
-
-        controller.updatePassword(user, newPassword);
-        window.close(); // Torna alla pagina principale
+        controller.updatePassword(user, newPassword,  confirmPassword);
     }
 
-    private void resetCambioPassword() {
+    public void resetCampi() {
         passwordField.setText("");
         confirmPasswordField.setText("");
         passwordField.takeFocus();
     }
 
-    public void showPopupMessage(String message) {
-        Window window = new BasicWindow("Errore");
+    public void mostraErrore(String message) {
+        this.errorLabel.setText(message);
+    }
 
-        // Create a label to display the message
-        Panel panel = new Panel();
-        panel.addComponent(new Label(message));
-
-        // Add a button to close the window
-        Button closeButton = new Button("Chiudi", new Runnable() {
-            @Override
-            public void run() {
-                window.close();  // Close the window when clicked
-            }
-        });
-        panel.addComponent(closeButton);
-
-        window.setComponent(panel);
-
-        // Add the window to the GUI
-        controller.getGui().addWindowAndWait(window);
+    public void close() {
+        window.close();
     }
 }

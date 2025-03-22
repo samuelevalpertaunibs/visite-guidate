@@ -30,7 +30,7 @@ public class ConfigController {
     }
 
     public void aggiungiComune(String nome, String provincia, String regione) {
-        Comune comune = new Comune(nome, provincia, regione);
+        Comune comune = new Comune(0, nome, provincia, regione);
         try {
             configService.aggiungiComune(comune);
             view.showPopupMessage("Il comune è stato aggiunto correttamente.");

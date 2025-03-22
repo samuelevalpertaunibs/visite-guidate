@@ -6,6 +6,9 @@ import java.time.format.DateTimeFormatter;
 
 import com.unibs.daos.GiorniSettimanaDao;
 import com.unibs.daos.TipoVisitaDao;
+import com.unibs.daos.LuogoDao;
+import com.unibs.daos.VolontariDao;
+
 import java.util.ArrayList;
 
 public class TipoVisitaService {
@@ -96,10 +99,24 @@ public class TipoVisitaService {
 
 		boolean entrataLiberaBool = entrataLibera.equals("Sì");
 
+		int luogoId = LuogoDao.getIdByNome(nomeLuogoSelezionato);
+
+		int[] volontariIds = new int[volontari.length];
+		for  (int i = 0; i < volontari.length; i++) {
+			volontariIds[i] = VolontariDao.getIdByUsername(volontari[i]);
+		}
+
+		int[] giorniIds = new int[giorni.length];
+		for  (int i = 0; i < giorni.length; i++) {
+			giorniIds[i] = GiorniSettimanaDao.getIdByNome(giorni[i]);
+		}
+
+
+
 		// Controlli fatti, aggiungere al DB
 		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
 				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,
-				numeroMax, nomeLuogoSelezionato, volontari, giorni);
+				numeroMax, luogoId, volontariIds, giorniIds);
 
 	}
 
