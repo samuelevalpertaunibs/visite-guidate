@@ -14,7 +14,7 @@ public class ComuneDao {
     public static Comune getComuneById(int id) throws DatabaseException {
         String sql = "SELECT * FROM comuni WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -36,12 +36,11 @@ public class ComuneDao {
         ArrayList<Comune> comuni = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                int id =  rs.getInt("id");
+                int id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 String provincia = rs.getString("provincia");
                 String regione = rs.getString("regione");

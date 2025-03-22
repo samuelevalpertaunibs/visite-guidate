@@ -8,8 +8,7 @@ import com.unibs.daos.GiorniSettimanaDao;
 import com.unibs.daos.TipoVisitaDao;
 import com.unibs.daos.LuogoDao;
 import com.unibs.daos.VolontariDao;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public class TipoVisitaService {
 
@@ -120,7 +119,7 @@ public class TipoVisitaService {
 
 	}
 
-	public ArrayList<String> getGiorniSettimana() {
+	public List<String> getGiorniSettimana() {
 		return GiorniSettimanaDao.getGiorniSettimana();
 	}
 

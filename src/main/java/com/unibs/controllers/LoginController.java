@@ -6,7 +6,6 @@ import com.googlecode.lanterna.gui2.*;
 import com.unibs.views.CambioPasswordView;
 import com.unibs.views.LoginView;
 
-
 public class LoginController {
 
     private final LoginService loginService;
@@ -25,12 +24,12 @@ public class LoginController {
     }
 
     private void handleSpecificUser(User currentUser) {
-        //TODO fix check with role name instead of == 1
+        // TODO fix check with role name instead of == 1
         if (currentUser.getRole() == 1) {
             ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUser);
             configuratorController.start();
         } else {
-            //view.clearScreen("Ruolo non riconosciuto: accesso negato.");
+            // view.clearScreen("Ruolo non riconosciuto: accesso negato.");
         }
     }
 
@@ -58,7 +57,8 @@ public class LoginController {
 
     public void updatePassword(User user, String newPassword, String newPasswordConfirm) {
 
-        // Faccio i controlli nel controller in questo caso perchè è una cosa slegata dal serviceCambioPassword
+        // Faccio i controlli nel controller in questo caso perchè è una cosa slegata
+        // dal serviceCambioPassword
         if (newPassword.isEmpty() || newPasswordConfirm.isEmpty()) {
             cambioPasswordView.mostraErrore("I campi non possono essere vuoti.");
             cambioPasswordView.resetCampi();
@@ -77,7 +77,6 @@ public class LoginController {
             cambioPasswordView.resetCampi();
         }
     }
-
 
     public WindowBasedTextGUI getGui() {
         return this.gui;

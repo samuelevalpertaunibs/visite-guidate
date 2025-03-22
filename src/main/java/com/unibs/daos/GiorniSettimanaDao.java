@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
@@ -12,7 +13,7 @@ import com.unibs.DatabaseManager;
 
 public class GiorniSettimanaDao {
 
-    public static ArrayList<String> getGiorniSettimana() {
+    public static List<String> getGiorniSettimana() {
         ArrayList<String> giorni = new ArrayList<>();
         String query = "select nome from giorni_settimana ORDER BY id";
 

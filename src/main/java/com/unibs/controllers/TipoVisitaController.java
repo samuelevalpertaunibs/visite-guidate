@@ -1,17 +1,15 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.models.Config;
 import com.unibs.services.TipoVisitaService;
 import com.unibs.views.AggiungiTipoVisitaView;
-
-import java.util.ArrayList;
+import java.util.List;
 
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
     private final AggiungiTipoVisitaView aggiungiTipoVisitaView;
-    private final ConfigController configController;
     private final WindowBasedTextGUI gui;
+    private final ConfigController configController;
 
     protected TipoVisitaController(WindowBasedTextGUI gui, ConfigController configController) {
         this.tipoVisitaService = new TipoVisitaService();
@@ -25,11 +23,12 @@ public class TipoVisitaController {
     }
 
     public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio,
-                                   String dataFine, String oraInizio, String durata, String entrataLibera,
-                                   String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
-                                   String[] volontari, String[] giorni) {
+            String dataFine, String oraInizio, String durata, String entrataLibera,
+            String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
+            String[] volontari, String[] giorni) {
 
-        // Controllo che il luogo sia stato selezionato, non è compito del service perchè lui si aspetta un nomeLuogo
+        // Controllo che il luogo sia stato selezionato, non è compito del service
+        // perchè lui si aspetta un nomeLuogo
         if (nomeLuogoSelezionato.equalsIgnoreCase("Nessun luogo selezionato")) {
             aggiungiTipoVisitaView.mostraErrore("Seleziona un luogo prima di preseguire");
             return;
@@ -48,7 +47,7 @@ public class TipoVisitaController {
         return this.gui;
     }
 
-    public ArrayList<String> getGiorniSettimana() {
+    public List<String> getGiorniSettimana() {
         return tipoVisitaService.getGiorniSettimana();
     }
 

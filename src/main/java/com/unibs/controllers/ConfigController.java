@@ -70,7 +70,6 @@ public class ConfigController {
     }
 
     public void nonConferma() {
-        //configService.initDefault();
         view.resetNumeroMax();
         view.resetComune();
         view.resetError();

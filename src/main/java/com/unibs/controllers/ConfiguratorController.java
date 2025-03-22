@@ -36,9 +36,14 @@ public class ConfiguratorController implements IUserController {
             gui.addWindowAndWait(configController.getView());
             // Config inizializzate, configurazione dati
             TipoVisitaController tipoVisitaController = new TipoVisitaController(gui, configController);
-            // Chiamo il metodo apri invece che aggiungerla alla gui perchè la View è gestita da un altro controller
+            // Chiamo il metodo apri invece che aggiungerla alla gui perchè la View è
+            // gestita da un altro controller
             tipoVisitaController.apriAggiungiTipoVisita();
         }
+
+        // TODO: before merge
+        DatePrecluseController controller = new DatePrecluseController(gui);
+        controller.apriAggiungiDatePrecluse();
 
         showMenu();
     }

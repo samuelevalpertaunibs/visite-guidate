@@ -27,14 +27,13 @@ public class LuogoController {
         AggiungiLuogoView view = new AggiungiLuogoView(this, new ConfigController(this.gui), nuovoLuogo -> {
             // Quando un luogo viene creato, chiama il Consumer passato
             if (onLuogoCreated != null) {
-                onLuogoCreated.accept(nuovoLuogo);  // Passa il luogo alla callback
+                onLuogoCreated.accept(nuovoLuogo); // Passa il luogo alla callback
             }
         });
 
         // Aggiungi la finestra alla GUI e aspetta che venga chiusa
         this.gui.addWindowAndWait(view.creaFinestra());
     }
-
 
     public WindowBasedTextGUI getGui() {
         return gui;
