@@ -3,15 +3,18 @@ package com.unibs.controllers;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.TipoVisitaService;
 import com.unibs.views.AggiungiTipoVisitaView;
+import java.util.List;
 
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
     private final AggiungiTipoVisitaView aggiungiTipoVisitaView;
     private final WindowBasedTextGUI gui;
+    private final ConfigController configController;
 
-    protected TipoVisitaController(WindowBasedTextGUI gui) {
+    protected TipoVisitaController(WindowBasedTextGUI gui, ConfigController configController) {
         this.tipoVisitaService = new TipoVisitaService();
         this.gui = gui;
+        this.configController = configController;
         this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView(this, new LuogoController(gui));
     }
 
@@ -44,7 +47,7 @@ public class TipoVisitaController {
         return this.gui;
     }
 
-    public ArrayList<String> getGiorniSettimana() {
+    public List<String> getGiorniSettimana() {
         return tipoVisitaService.getGiorniSettimana();
     }
 
