@@ -4,29 +4,35 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
+import com.unibs.models.Volontario;
 
-public class VolontariDao {
+public class VolontarioDao {
 
-    public static ArrayList<String> getListaVolontari() {
-        ArrayList<String> volontari = new ArrayList<>();
-        String query = "SELECT username FROM utenti WHERE ruolo_id = 2";
+    public static List<Volontario> getAllVolontari() {
+        ArrayList<Volontario> volontari = new ArrayList<>();
+        String query = "SELECT * FROM utenti WHERE ruolo_id = 2";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)
         ) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                volontari.add(rs.getString("username"));
+                int id = rs.getInt("id");
+                String username = rs.getString("username");
+                String passwordHash = rs.getString("password_hash");
+                byte[] salt = rs.getBytes("salt");
+                LocalDate lastLogin = rs.getObject("last_login", LocalDate.class);
+                volontari.add(new Volontario(id, username, passwordHash, salt, lastLogin));
             }
-
         } catch (Exception e) {
-            throw new DatabaseException("Errore nel recupero dei volontari: " + e.getMessage());
+            throw new DatabaseException("Errore nel recupero degi volontari: " + e.getMessage());
         }
-
         return volontari;
     }
 

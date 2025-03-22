@@ -1,14 +1,13 @@
 package com.unibs.controllers;
 
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 
 public class InitController {
     private final ConfigController configController;
     private final TipoVisitaController tipoVisitaController;
 
-    public InitController(WindowBasedTextGUI gui, ConfigController configController) {
+    public InitController(ConfigController configController, TipoVisitaController tipoVisitaController) {
         this.configController = configController;
-        this.tipoVisitaController = new TipoVisitaController(gui);
+        this.tipoVisitaController = tipoVisitaController;
     }
 
     public void assertInizializzazione() {

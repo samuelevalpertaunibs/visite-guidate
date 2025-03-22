@@ -8,12 +8,12 @@ import java.time.LocalDate;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
-import com.unibs.models.User;
+import com.unibs.models.Utente;
 
-public class UserDao {
+public class UtenteDao {
 
-    public static User findByUsername(String username) throws DatabaseException {
-        String sql = "SELECT username, password_hash, salt, ruolo_id, last_login FROM utenti WHERE username = ?";
+    public static Utente findByUsername(String username) throws DatabaseException {
+        String sql = "SELECT * FROM utenti WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -21,7 +21,7 @@ public class UserDao {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new User(rs.getString("username"), rs.getString("password_hash"), rs.getBytes("salt"), rs.getInt("ruolo_id"),
+                return new Utente(rs.getInt("id"), rs.getString("username"), rs.getString("password_hash"), rs.getBytes("salt"), rs.getInt("ruolo_id"),
                         rs.getObject("last_login", LocalDate.class));
             }
         } catch (Exception e) {
@@ -31,14 +31,14 @@ public class UserDao {
         return null;
     }
 
-    public static void updatePassword(User user) throws DatabaseException {
+    public static void updatePassword(Utente utente) throws DatabaseException {
         String sql = "UPDATE utenti SET password_hash = ?, last_login = ? WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, user.getPasswordHash());
-            stmt.setDate(2, java.sql.Date.valueOf(user.getLastLogin()));
-            stmt.setString(3, user.getUsername());
+            stmt.setString(1, utente.getPasswordHash());
+            stmt.setDate(2, java.sql.Date.valueOf(utente.getLastLogin()));
+            stmt.setString(3, utente.getUsername());
 
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
@@ -64,4 +64,5 @@ public class UserDao {
             throw new DatabaseException(e.getMessage());
         }
     }
+
 }

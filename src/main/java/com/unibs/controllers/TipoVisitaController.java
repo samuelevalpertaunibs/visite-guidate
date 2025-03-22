@@ -3,17 +3,25 @@ package com.unibs.controllers;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.TipoVisitaService;
 import com.unibs.views.AggiungiTipoVisitaView;
+import com.unibs.views.ElencoVolontariView;
+
 import java.util.List;
 
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
     private final AggiungiTipoVisitaView aggiungiTipoVisitaView;
+    private final ElencoVolontariView elencoVolontariView;
     private final WindowBasedTextGUI gui;
+    private final LuogoController luogoController;
+    private final VolontariController volontariController;
 
-    protected TipoVisitaController(WindowBasedTextGUI gui) {
+    protected TipoVisitaController(WindowBasedTextGUI gui, LuogoController luogoController, VolontariController volontariController) {
         this.gui = gui;
         this.tipoVisitaService = new TipoVisitaService();
-        this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView(this, new LuogoController(gui));
+        this.luogoController = luogoController;
+        this.volontariController = volontariController;
+        this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView(this);
+        this.elencoVolontariView = new ElencoVolontariView(this);
     }
 
     public void apriAggiungiTipoVisita() {
@@ -59,5 +67,21 @@ public class TipoVisitaController {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
         gui.removeWindow(gui.getActiveWindow());
+    }
+
+    public List<String> getTitoliByVolontarioId(int volontarioId) {
+        return tipoVisitaService.getTitoliByVolontarioId(volontarioId);
+    }
+
+    public void apriVisualizzaVisitePerVolontari() {
+        gui.addWindowAndWait(elencoVolontariView.creaFinestra());
+    }
+
+    public LuogoController getLuogoController() {
+        return luogoController;
+    }
+
+    public VolontariController getVolontariController() {
+        return volontariController;
     }
 }

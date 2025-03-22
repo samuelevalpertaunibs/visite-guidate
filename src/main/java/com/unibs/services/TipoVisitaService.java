@@ -7,7 +7,8 @@ import java.time.format.DateTimeFormatter;
 import com.unibs.daos.GiorniSettimanaDao;
 import com.unibs.daos.TipoVisitaDao;
 import com.unibs.daos.LuogoDao;
-import com.unibs.daos.VolontariDao;
+import com.unibs.daos.VolontarioDao;
+
 import java.util.List;
 
 public class TipoVisitaService {
@@ -39,7 +40,6 @@ public class TipoVisitaService {
 			throw new IllegalStateException("Seleziona almeno un volontario da associare al tipo di visita.");
 		if (giorni == null || giorni.length < 1)
 			throw new IllegalStateException("Seleziona almeno un giorno della settimana.");
-
 
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		LocalDate dataInizio;
@@ -101,16 +101,14 @@ public class TipoVisitaService {
 		int luogoId = LuogoDao.getIdByNome(nomeLuogoSelezionato);
 
 		int[] volontariIds = new int[volontari.length];
-		for  (int i = 0; i < volontari.length; i++) {
-			volontariIds[i] = VolontariDao.getIdByUsername(volontari[i]);
+		for (int i = 0; i < volontari.length; i++) {
+			volontariIds[i] = VolontarioDao.getIdByUsername(volontari[i]);
 		}
 
 		int[] giorniIds = new int[giorni.length];
-		for  (int i = 0; i < giorni.length; i++) {
+		for (int i = 0; i < giorni.length; i++) {
 			giorniIds[i] = GiorniSettimanaDao.getIdByNome(giorni[i]);
 		}
-
-
 
 		// Controlli fatti, aggiungere al DB
 		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
@@ -125,5 +123,9 @@ public class TipoVisitaService {
 
 	public boolean isEmpty() {
 		return TipoVisitaDao.isEmpty();
+	}
+
+	public List<String> getTitoliByVolontarioId(int volontarioId) {
+		return TipoVisitaDao.getTitoliByVolontarioId(volontarioId);
 	}
 }

@@ -3,7 +3,7 @@ package com.unibs.views;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.LoginController;
-import com.unibs.models.User;
+import com.unibs.models.Utente;
 
 public class CambioPasswordView {
 
@@ -12,11 +12,11 @@ public class CambioPasswordView {
     private final TextBox confirmPasswordField;
     private final Label errorLabel;
     private final LoginController controller;
-    private final User user;
+    private final Utente utente;
 
-    public CambioPasswordView(LoginController controller, User user) {
+    public CambioPasswordView(LoginController controller, Utente utente) {
         this.controller = controller;
-        this.user = user;
+        this.utente = utente;
         passwordField = new TextBox().setMask('*');
         confirmPasswordField = new TextBox().setMask('*');
         errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
@@ -49,7 +49,7 @@ public class CambioPasswordView {
         mostraErrore("");
         String newPassword = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
-        controller.updatePassword(user, newPassword,  confirmPassword);
+        controller.updatePassword(utente, newPassword,  confirmPassword);
     }
 
     public void resetCampi() {

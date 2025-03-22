@@ -2,19 +2,29 @@ package com.unibs.models;
 
 import java.time.LocalDate;
 
-public class User {
+public class Utente {
+    private int id;
     private final String username;
     private String passwordHash;
     private final int role;
     private LocalDate lastLogin;
     private final byte[] salt;
 
-    public User(String username, String passwordHash, byte[] salt, int role, LocalDate lastLogin) {
+    public Utente(int id, String username, String passwordHash, byte[] salt, int role, LocalDate lastLogin) {
+        this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
         this.salt = salt;
         this.role = role;
         this.lastLogin = lastLogin;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getUsername() {

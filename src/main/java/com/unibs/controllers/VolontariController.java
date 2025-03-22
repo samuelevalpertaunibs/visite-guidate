@@ -1,22 +1,25 @@
 package com.unibs.controllers;
 
-import java.util.ArrayList;
+import java.util.List;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.models.Volontario;
+import com.unibs.services.VolontarioService;
 
-import com.unibs.services.VolontariService;
-
-/**
- * VolontariController
- */
 public class VolontariController {
+    private final VolontarioService volontarioService;
+    private final WindowBasedTextGUI tui;
 
-    private final VolontariService volontariService;
-
-    public VolontariController() {
-        this.volontariService = new VolontariService();
+    public VolontariController(WindowBasedTextGUI tui) {
+        this.volontarioService = new VolontarioService();
+        this.tui = tui;
     }
 
-    public ArrayList<String> getListaVolontari() {
-        return volontariService.getListaVolontari();
+    public List<Volontario> getAllVolontari() {
+        return volontarioService.getAllVolontari();
+    }
+
+    public int getIdByUsername(String nomeVolontario) {
+        return volontarioService.getIdByUsername(nomeVolontario);
     }
 
 }

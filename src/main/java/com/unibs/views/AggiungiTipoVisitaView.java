@@ -8,6 +8,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.LuogoController;
 import com.unibs.controllers.TipoVisitaController;
 import com.unibs.controllers.VolontariController;
+import com.unibs.models.Volontario;
 
 public class AggiungiTipoVisitaView {
     private final TipoVisitaController tipoVisitaController;
@@ -39,10 +40,10 @@ public class AggiungiTipoVisitaView {
     private final List<String> volontariSelezionati = new ArrayList<>();
     private final List<String> giorniSelezionati = new ArrayList<>();
 
-    public AggiungiTipoVisitaView(TipoVisitaController tipoVisitaController, LuogoController luogoController) {
+    public AggiungiTipoVisitaView(TipoVisitaController tipoVisitaController) {
         this.tipoVisitaController = tipoVisitaController;
-        this.luogoController = luogoController;
-        this.volontariController = new VolontariController();
+        this.luogoController = tipoVisitaController.getLuogoController();
+        this.volontariController = tipoVisitaController.getVolontariController();
         this.selezionaLuogoView = new SelezionaLuogoView(luogoController);
 
         titoloField = new TextBox("");
@@ -120,11 +121,11 @@ public class AggiungiTipoVisitaView {
         panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 
         List<CheckBox> checkBoxList = new ArrayList<>();
-        List<String> volontariDisponibili = volontariController.getListaVolontari(); // Ottiene la lista dal controller
+        List<Volontario> volontariDisponibili = volontariController.getAllVolontari(); // Ottiene la lista dal controller
 
-        for (String volontario : volontariDisponibili) {
-            CheckBox checkBox = new CheckBox(volontario);
-            if (volontariSelezionati.contains(volontario))
+        for (Volontario volontario : volontariDisponibili) {
+            CheckBox checkBox = new CheckBox(volontario.getUsername());
+            if (volontariSelezionati.contains(volontario.getUsername()))
                 checkBox.setChecked(true);
             checkBoxList.add(checkBox);
             panel.addComponent(checkBox);

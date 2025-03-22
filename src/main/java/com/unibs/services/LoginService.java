@@ -6,54 +6,54 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import com.unibs.DatabaseException;
-import com.unibs.daos.UserDao;
-import com.unibs.models.User;
+import com.unibs.daos.UtenteDao;
+import com.unibs.models.Utente;
 
 public class LoginService {
 
-    public User authenticate(String username, String password)
+    public Utente authenticate(String username, String password)
             throws DatabaseException, IllegalArgumentException {
         if (username.isBlank() || password.isBlank())
             throw new IllegalArgumentException("Username e password non possono essere vuoti.");
 
-        User user = UserDao.findByUsername(username);
+        Utente utente = UtenteDao.findByUsername(username);
 
-        if (user != null) {
-            String passwordHash = hashPassword(password, user.getSalt());
-            if (user.checkPassword(passwordHash)) {
-                return user;
+        if (utente != null) {
+            String passwordHash = hashPassword(password, utente.getSalt());
+            if (utente.checkPassword(passwordHash)) {
+                return utente;
             }
         }
 
         return null;
     }
 
-    public void updatePassword(User user, String newPassword) throws DatabaseException, IllegalArgumentException {
-        String oldPassword = user.getPasswordHash();
-        byte[] salt = user.getSalt();
+    public void updatePassword(Utente utente, String newPassword) throws DatabaseException, IllegalArgumentException {
+        String oldPassword = utente.getPasswordHash();
+        byte[] salt = utente.getSalt();
         String hashedNewPassword = hashPassword(newPassword, salt);
 
         if (oldPassword.equals(hashedNewPassword)) {
             throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente.");
         }
-        user.setPasswordHash(hashedNewPassword);
-        user.setLastLogin(LocalDate.now());
+        utente.setPasswordHash(hashedNewPassword);
+        utente.setLastLogin(LocalDate.now());
 
         try {
-            UserDao.updatePassword(user);
+            UtenteDao.updatePassword(utente);
         } catch (DatabaseException e) {
             // Ripristina il vecchio stato in caso di errore
-            user.setPasswordHash(oldPassword);
-            user.setLastLogin(null);
+            utente.setPasswordHash(oldPassword);
+            utente.setLastLogin(null);
             throw e;  // Rilancia l'eccezione
         }
     }
 
-    public User updateLastLogin(User user) throws DatabaseException {
-        String username = user.getUsername();
-        int updated = UserDao.updateLastLogin(username);
+    public Utente updateLastLogin(Utente utente) throws DatabaseException {
+        String username = utente.getUsername();
+        int updated = UtenteDao.updateLastLogin(username);
         if (updated > 0) {
-            return UserDao.findByUsername(username);
+            return UtenteDao.findByUsername(username);
         }
         return null;
     }

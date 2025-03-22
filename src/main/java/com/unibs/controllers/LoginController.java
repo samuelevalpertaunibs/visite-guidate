@@ -1,7 +1,7 @@
 package com.unibs.controllers;
 
 import com.unibs.services.LoginService;
-import com.unibs.models.User;
+import com.unibs.models.Utente;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.views.CambioPasswordView;
 import com.unibs.views.LoginView;
@@ -23,11 +23,11 @@ public class LoginController {
         return this.view.creaFinestra();
     }
 
-    private void handleSpecificUser(User currentUser) {
+    private void handleSpecificUser(Utente currentUtente) {
         view.resetLogin();
         // TODO fix check with role name instead of == 1
-        if (currentUser.getRole() == 1) {
-            ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUser);
+        if (currentUtente.getRole() == 1) {
+            ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUtente);
             configuratorController.start();
         } else {
             view.showErrorMessage("Ruolo non riconosciuto");
@@ -36,27 +36,27 @@ public class LoginController {
 
     public void verificaCredenziali(String username, String password) {
         try {
-            User user = loginService.authenticate(username, password);
+            Utente utente = loginService.authenticate(username, password);
 
-            if (user == null) {
+            if (utente == null) {
                 view.showPopupMessage("Credenziali errate. Riprova");
                 return;
             }
 
-            if (user.isFirstLogin()) {
-                cambioPasswordView = new CambioPasswordView(this, user);
+            if (utente.isFirstLogin()) {
+                cambioPasswordView = new CambioPasswordView(this, utente);
                 gui.addWindowAndWait(cambioPasswordView.creaFinestra());
                 view.resetLogin();
             } else {
-                loginService.updateLastLogin(user);
-                handleSpecificUser(user);
+                utente = loginService.updateLastLogin(utente);
+                handleSpecificUser(utente);
             }
         } catch (Exception e) {
             view.showErrorMessage(e.getMessage());
         }
     }
 
-    public void updatePassword(User user, String newPassword, String newPasswordConfirm) {
+    public void updatePassword(Utente utente, String newPassword, String newPasswordConfirm) {
 
         // Faccio i controlli nel controller in questo caso perchè è una cosa slegata
         // dal serviceCambioPassword
@@ -71,7 +71,7 @@ public class LoginController {
             return;
         }
         try {
-            loginService.updatePassword(user, newPassword);
+            loginService.updatePassword(utente, newPassword);
             cambioPasswordView.close();
         } catch (Exception e) {
             cambioPasswordView.mostraErrore(e.getMessage());
