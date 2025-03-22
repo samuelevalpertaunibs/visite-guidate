@@ -4,40 +4,34 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.DatePrecluseController;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.TextStyle;
-import java.util.Locale;
-
 public class AggiungiDatePrecluseView {
     private final DatePrecluseController precluseController;
-    private Button precluseButton;
+    private final Button precludeButton;
     private final TextBox dataTextBox;
     private final Label errorLabel;
+    private final Button fineButton;
 
 
     public AggiungiDatePrecluseView(DatePrecluseController precluseController) {
         this.precluseController = precluseController;
-
         this.dataTextBox = new TextBox("");
-        errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
+        this.errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
+        this.precludeButton = new Button("Precludi", () -> precluseController.aggiungiDataPreclusa(dataTextBox.getText()));
+        this.fineButton = new Button("Fine", precluseController::chiudiAggiungiDatePrecluse);
     }
 
-    public Window creaFinestra() {
-        LocalDateTime now = LocalDateTime.now().plusMonths(3);
-        String mese = now.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN);
-        int anno = now.getYear();
+    public Window creaFinestra(String mese, int anno) {
+
         Window window = new BasicWindow("Aggiungi Data Preclusa");
         Panel panel = new Panel();
 
-        panel.addComponent(new Label("Inserisci il giorno da precludere per " + mese + " " + anno));
+        panel.addComponent(new Label("Inserisci un giorno da precludere per " + mese + " " + anno));
         panel.addComponent(dataTextBox);
 
         panel.addComponent(errorLabel);
 
-        panel.addComponent(new Button("Aggiungi", () -> {
-            precluseController.aggiungiDataPrecluse(dataTextBox.getText());
-        }));
+        panel.addComponent(precludeButton);
+        panel.addComponent(fineButton);
 
         window.setComponent(panel);
         return window;

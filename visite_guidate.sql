@@ -93,6 +93,10 @@ CREATE TABLE giorni_settimana_tipi_visita (
   FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita(id) ON DELETE CASCADE
 );
 
+CREATE TABLE date_precluse (
+  data_preclusa DATE PRIMARY KEY
+);
+
 INSERT INTO giorni_settimana (`id`, `nome`) VALUES
 (1, 'Lunedì'),
 (2, 'Martedì'),
