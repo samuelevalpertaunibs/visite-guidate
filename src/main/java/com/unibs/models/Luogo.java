@@ -1,14 +1,20 @@
 package com.unibs.models;
 
 public class Luogo {
+    private int id;
     private final String nome;
     private final String descrizione;
     private Comune comune;
 
-    public Luogo(String nome, String descrizione, Comune comune) {
+    public Luogo(int id, String nome, String descrizione, Comune comune) {
+        this.id = id;
         this.nome = nome;
         this.descrizione = descrizione;
         this.comune = comune;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getNome() {
@@ -37,5 +43,13 @@ public class Luogo {
 
     public void setComune(Comune comune) {
         this.comune = comune;
+    }
+
+    public int getIdComune() {
+        return comune.getId();
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
