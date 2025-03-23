@@ -4,7 +4,7 @@ import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.DatePrecluseService;
 import com.unibs.views.AggiungiDatePrecluseView;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
@@ -21,10 +21,10 @@ public class DatePrecluseController {
     }
 
     public void apriAggiungiDatePrecluse() {
-        LocalDateTime now = LocalDateTime.now().plusMonths(3);
-        String mese = now.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN);
+        LocalDate primaDataPrecludibile = precluseService.getPrimaDataPrecludibile();
+        String mese = primaDataPrecludibile.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN);
         mese = mese.substring(0, 1).toUpperCase() + mese.substring(1);
-        int anno = now.getYear();
+        int anno = primaDataPrecludibile.getYear();
         gui.addWindowAndWait(aggiungiDatePrecluseView.creaFinestra(mese, anno));
     }
 
@@ -36,9 +36,5 @@ public class DatePrecluseController {
         } catch (Exception e) {
             aggiungiDatePrecluseView.mostraErrore(e.getMessage());
         }
-    }
-
-    public void chiudiAggiungiDatePrecluse() {
-        gui.removeWindow(gui.getActiveWindow());
     }
 }

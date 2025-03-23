@@ -110,6 +110,11 @@ public class TipoVisitaService {
 			giorniIds[i] = GiorniSettimanaDao.getIdByNome(giorni[i]);
 		}
 
+		// Controllo overlap
+		if (TipoVisitaDao.siSovrappone(luogoId, giorniIds, oraInizio, durataMinuti, dataInizio, dataFine)) {
+			throw new  IllegalArgumentException("La visita si sovrappone ad un'altra.");
+		}
+
 		// Controlli fatti, aggiungere al DB
 		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
 				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,

@@ -3,26 +3,34 @@ package com.unibs.services;
 import com.unibs.daos.DatePrecluseDao;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class DatePrecluseService {
     public void aggiungiDataPrecluse(String giorno) {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
         if (giorno == null || giorno.isEmpty()) {
             throw new IllegalArgumentException("Inserisci una data");
         }
 
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate dataInserita = getDataInserita(giorno, dateFormatter);
+
+        // Controllo se la data è già preclusa prima di inserirla
+        if (DatePrecluseDao.isDataPreclusa(dataInserita)) {
+            throw new IllegalArgumentException("Errore: La data è già preclusa.");
+        }
+        DatePrecluseDao.aggiungiDataPreclusa(dataInserita);
+    }
+
+    private LocalDate getDataInserita(String giorno, DateTimeFormatter dateFormatter) {
         int giornoInt;
-        try{
-           giornoInt = Integer.parseInt(giorno);
-        }catch (Exception e){
+        try {
+            giornoInt = Integer.parseInt(giorno);
+        } catch (Exception e) {
             throw new IllegalArgumentException("Formato non valido");
         }
 
-        LocalDateTime primoGiornoMesePrecluso = LocalDateTime.now().plusMonths(3).withDayOfMonth(1);
-        boolean esistonoDate = DatePrecluseDao.esistonoDatePrecluseNelMese(primoGiornoMesePrecluso.getYear(),primoGiornoMesePrecluso.getMonthValue());
+        LocalDate primoGiornoMesePrecluso = getPrimaDataPrecludibile();
+
         LocalDate dataInserita;
         try {
             String dataCompleta = String.format("%02d/%02d/%d", giornoInt, primoGiornoMesePrecluso.getMonthValue(), primoGiornoMesePrecluso.getYear());
@@ -30,10 +38,15 @@ public class DatePrecluseService {
         } catch (Exception e) {
             throw new IllegalArgumentException("Il formato della data di inizio non è corretto");
         }
-        // Controllo se la data è già preclusa prima di inserirla
-        if (DatePrecluseDao.isDataPreclusa(dataInserita)) {
-            throw new IllegalArgumentException("Errore: La data è già preclusa.");
+        return dataInserita;
+    }
+
+    public LocalDate getPrimaDataPrecludibile() {
+        LocalDate now = LocalDate.now();
+        if (now.getDayOfMonth() < 16) {
+            return now.plusMonths(2).withDayOfMonth(1);
+        } else {
+            return now.plusMonths(3).withDayOfMonth(1);
         }
-        DatePrecluseDao.aggiungiDataPreclusa(dataInserita);
     }
 }

@@ -68,6 +68,8 @@ public class TipoVisitaDao {
                     }
                 }
 
+                //TODO: MANCA PUNTO DI INCONTRO
+
                 // Inserisce ogni volontario nella tabella tipovisita_volontario_nn
                 try (PreparedStatement stmt3 = conn.prepareStatement(insertVolontarioNN)) {
                     for (int volontarioId : volontariIds) {
@@ -177,5 +179,59 @@ public class TipoVisitaDao {
             throw new DatabaseException("Errore nel recupero dei tipi di visita associati al volontario: " + e.getMessage());
         }
         return titoliTipiVisita;
+    }
+
+    public static boolean siSovrappone(int luogoId, int[] giorniIds, LocalTime oraInizio, int durataMinuti, LocalDate dataInizio, LocalDate dataFine) {
+        String giorniIdsPlaceholders = String.join(",",
+                java.util.Collections.nCopies(giorniIds.length, "?")
+        );
+
+        String sql = String.format("""
+                SELECT COUNT(*)
+                FROM tipi_visita
+                JOIN luoghi ON tipi_visita.luogo_id = luoghi.id
+                JOIN giorni_settimana_tipi_visita ON giorni_settimana_tipi_visita.tipo_visita_id = tipi_visita.id
+                JOIN giorni_settimana ON giorni_settimana_tipi_visita.giorno_settimana_id = giorni_settimana.id
+                WHERE luoghi.id = ?
+                AND (
+                    (tipi_visita.data_inizio < ? AND ? < tipi_visita.data_fine)
+                    OR
+                    (tipi_visita.data_inizio < ? AND ? < tipi_visita.data_fine)
+                )
+                AND (
+                    (tipi_visita.ora_inizio < ? AND ? < DATE_ADD(ora_inizio, INTERVAL durata_minuti MINUTE))
+                    OR
+                    (tipi_visita.ora_inizio < ? AND ? < DATE_ADD(ora_inizio, INTERVAL durata_minuti MINUTE))
+                )
+                AND giorni_settimana.id IN (%s)
+                """, giorniIdsPlaceholders);
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, luogoId);
+            stmt.setDate(2,  Date.valueOf(dataInizio));
+            stmt.setDate(3,  Date.valueOf(dataInizio));
+            stmt.setDate(4,  Date.valueOf(dataFine));
+            stmt.setDate(5,  Date.valueOf(dataFine));
+            stmt.setTime(6,  Time.valueOf(oraInizio));
+            stmt.setTime(7,  Time.valueOf(oraInizio));
+            Time oraFine = Time.valueOf(oraInizio.plusMinutes(durataMinuti));
+            stmt.setTime(8,  oraFine);
+            stmt.setTime(9,  oraFine);
+
+            for (int i = 0; i < giorniIds.length; i++) {
+                stmt.setInt(i + 10, giorniIds[i]);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next())
+                    return rs.getInt(1) > 0;
+
+            throw new DatabaseException("Errore nel controllo sulla sovrapposizione");
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore nel controllo sulla sovrapposizione: " + e.getMessage());
+        }
     }
 }

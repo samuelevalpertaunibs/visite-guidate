@@ -98,13 +98,13 @@ CREATE TABLE date_precluse (
 );
 
 INSERT INTO giorni_settimana (`id`, `nome`) VALUES
-(1, 'Lunedì'),
-(2, 'Martedì'),
-(3, 'Mercoledì'),
-(4, 'Giovedì'),
-(5, 'Venerdì'),
-(6, 'Sabato'),
-(7, 'Domenica');
+(1, 'Domenica'),
+(2, 'Lunedì'),
+(3, 'Martedì'),
+(4, 'Mercoledì'),
+(5, 'Giovedì'),
+(6, 'Venerdì'),
+(7, 'Sabato');
 
 INSERT INTO ruoli (`id`, `nome`) VALUES
 (1, 'CONF'),
