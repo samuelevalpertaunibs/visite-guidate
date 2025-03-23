@@ -2,14 +2,10 @@ package com.unibs.views;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.unibs.controllers.ConfigController;
 
-public class ConfigView {
+public class InitConfigView {
     private final ConfigController controller;
-
     private final TextBox nomeComuneField;
     private final TextBox provinciaComuneField;
     private final TextBox regioneComuneField;
@@ -21,7 +17,7 @@ public class ConfigView {
     private final Button aggiungiComuneButton;
     private final Button confermaButton;
 
-    public ConfigView(ConfigController configController) {
+    public InitConfigView(ConfigController configController) {
         this.controller = configController;
 
         this.nomeComuneField = new TextBox();
@@ -31,14 +27,10 @@ public class ConfigView {
         this.erroreComuneLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         this.erroreNumeroMaxLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
 
-        this.aggiungiComuneButton = new Button("Aggiungi Comune", () -> {
-            controller.aggiungiComune(nomeComuneField.getText(), provinciaComuneField.getText(),
-                    regioneComuneField.getText());
-        });
+        this.aggiungiComuneButton = new Button("Aggiungi Comune", () -> controller.aggiungiComune(nomeComuneField.getText(), provinciaComuneField.getText(),
+                regioneComuneField.getText()));
 
-        this.confermaButton = new Button("Conferma", () -> {
-            controller.conferma(numeroMaxPersone.getText());
-        });
+        this.confermaButton = new Button("Conferma", () -> controller.conferma(numeroMaxPersone.getText()));
     }
 
     public Window creaFinestra() {
@@ -64,30 +56,6 @@ public class ConfigView {
 
         panel.addComponent(numeroMaxPersone);
         panel.addComponent(erroreNumeroMaxLabel);
-        // // Pulsante che apre il popup di conferma
-        // Button confirmButton = new Button("Mostra Conferma", () -> {
-
-        // MessageDialogButton result = new MessageDialogBuilder(
-        // controller.getGui(),
-        // "Conferma",
-        // "Sei sicuro di procedere?",
-
-        // MessageDialogButton.No;
-
-        // )
-
-        // Azione in base alla risposta
-        // if(result==MessageDialogButton.Yes)
-
-        // {
-        // MessageDialog.showMessageDialog(controller.getGui(), "Risultato", "Hai scelto
-        // Sì!");
-        // }else
-        // {
-        // MessageDialog.showMessageDialog(controller.getGui(), "Risultato", "Hai scelto
-        // No!");
-        // }
-        // });
 
         panel.addComponent(confermaButton);
 
@@ -95,29 +63,18 @@ public class ConfigView {
         return window;
     }
 
-    // public void chiediConferma(String title, String bodu) {
-    // MessageDialog result = new
-    // MessageDialogBuilder().setTitle(title).setText(body).addButton()
 
     public void showPopupMessage(String message) {
         Window window = new BasicWindow("Comune aggiunto");
 
-        // Create a label to display the message
         Panel panel = new Panel();
         panel.addComponent(new Label(message));
 
-        // Add a button to close the window
-        Button closeButton = new Button("Chiudi", new Runnable() {
-            @Override
-            public void run() {
-                window.close(); // Close the window when clicked
-            }
-        });
+        Button closeButton = new Button("Chiudi", window::close);
         panel.addComponent(closeButton);
 
         window.setComponent(panel);
 
-        // Add the window to the GUI
         controller.getGui().addWindowAndWait(window);
     }
 
@@ -131,20 +88,14 @@ public class ConfigView {
         panel.addComponent(new Label("Sei sicuro di voler procedere?"));
 
         // Create "Yes" and "No" buttons
-        Button yesButton = new Button("Sì", new Runnable() {
-            @Override
-            public void run() {
-                window.close();
-                controller.haConfermato();
-            }
+        Button yesButton = new Button("Sì", () -> {
+            window.close();
+            controller.haConfermato();
         });
 
-        Button noButton = new Button("No", new Runnable() {
-            @Override
-            public void run() {
-                window.close();
-                controller.nonConferma();
-            }
+        Button noButton = new Button("No", () -> {
+            window.close();
+            controller.nonConferma();
         });
 
         // Add buttons to the panel

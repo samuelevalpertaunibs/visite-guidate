@@ -2,7 +2,7 @@ package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import com.unibs.controllers.ConfigController;
 import com.unibs.models.Comune;
@@ -10,7 +10,6 @@ import com.unibs.models.Comune;
 public class SelezionaComuneView {
     private final ConfigController configController;
     private Comune comuneSelezionato = null;
-    //private
 
     public SelezionaComuneView(ConfigController configController) {
         this.configController = configController;
@@ -21,7 +20,7 @@ public class SelezionaComuneView {
 
         Panel panel = new Panel();
 
-        ArrayList<Comune> comuni = configController.getAmbitoTerritoriale();
+        List<Comune> comuni = configController.getAmbitoTerritoriale();
 
         for (Comune comune : comuni) {
             panel.addComponent(new Button(comune.getNome(), () -> {

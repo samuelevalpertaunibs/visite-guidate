@@ -24,12 +24,13 @@ public class LoginController {
     }
 
     private void handleSpecificUser(User currentUser) {
+        view.resetLogin();
         // TODO fix check with role name instead of == 1
         if (currentUser.getRole() == 1) {
             ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUser);
             configuratorController.start();
         } else {
-            // view.clearScreen("Ruolo non riconosciuto: accesso negato.");
+            view.showErrorMessage("Ruolo non riconosciuto");
         }
     }
 

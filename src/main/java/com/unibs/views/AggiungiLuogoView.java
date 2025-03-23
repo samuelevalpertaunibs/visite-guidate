@@ -11,25 +11,18 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.TextColor;
 
 public class AggiungiLuogoView {
-    private Consumer<Luogo> onLuogoAdded; // Callback per passare il luogo al controller
-    private TextBox nomeField;
-    private TextBox descrizioneField;
-    private final LuogoController luogoController;
+    private final TextBox nomeField;
+    private final TextBox descrizioneField;
     private Button selezionaComuneButton;
-    private Button confermaButton;
-    private final SelezionaComuneView selezionaComuneView;
     private Comune comuneSelezionato = null;
     private Luogo luogo = null;
     private final Label errorLabel;
-    private Button aggiungiButton;
+    private final Button aggiungiButton;
 
-    public AggiungiLuogoView(LuogoController luogoController, ConfigController configController,
+    public AggiungiLuogoView(LuogoController luogoController, ConfigController initController,
             Consumer<Luogo> onLuogoAdded) {
         this.nomeField = new TextBox();
         this.descrizioneField = new TextBox();
-        this.luogoController = luogoController;
-        this.selezionaComuneView = new SelezionaComuneView(configController);
-        this.onLuogoAdded = onLuogoAdded;
         this.errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
 
         aggiungiButton = new Button("Aggiungi", () -> {
@@ -43,15 +36,15 @@ public class AggiungiLuogoView {
                     onLuogoAdded.accept(this.luogo); // Passa il luogo alla view chiamante
                 }
 
-                configController.getGui().getActiveWindow().close();
+                initController.getGui().getActiveWindow().close();
             } catch (Exception e) {
                 showError(e.getMessage());
             }
         });
 
         this.selezionaComuneButton = new Button("Nessun comune selezionato", () -> {
-            SelezionaComuneView selezionaComuneView = new SelezionaComuneView(configController);
-            configController.getGui().addWindowAndWait(selezionaComuneView.creaFinestra());
+            SelezionaComuneView selezionaComuneView = new SelezionaComuneView(initController);
+            initController.getGui().addWindowAndWait(selezionaComuneView.creaFinestra());
 
             Comune comuneScelto = selezionaComuneView.getComuneSelezionato();
             if (comuneScelto != null) {
@@ -87,11 +80,6 @@ public class AggiungiLuogoView {
 
     private void showError(String message) {
         this.errorLabel.setText(message);
-    }
-
-    // Metodo per impostare il callback quando un luogo viene aggiunto
-    public void setOnLuogoAdded(Consumer<Luogo> onLuogoAdded) {
-        this.onLuogoAdded = onLuogoAdded;
     }
 
 }

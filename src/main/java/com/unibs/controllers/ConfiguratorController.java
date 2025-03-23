@@ -1,61 +1,64 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
-import com.googlecode.lanterna.gui2.Window;
-import com.unibs.services.ConfigService;
-import com.unibs.services.ConfiguratorService;
-import com.unibs.services.TipoVisitaService;
+import com.unibs.models.MenuOption;
 import com.unibs.models.User;
-import com.unibs.views.ConfiguratorView;
+import com.unibs.views.MenuView;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class ConfiguratorController implements IUserController {
-
-    private final ConfiguratorService configuratorService;
-    private final ConfiguratorView view;
     private final User user;
-    private final ConfigService configService;
-    private final MultiWindowTextGUI gui;
-    private final TipoVisitaService tipoVisitaService;
+    private final InitController initController;
+    private final DatePrecluseController datePrecluseController;
+    private final ConfigController configController;
+    private final MenuView menuView;
 
     public ConfiguratorController(MultiWindowTextGUI gui, User currentUser) {
-        this.configuratorService = new ConfiguratorService();
-        this.configService = new ConfigService();
-        this.tipoVisitaService = new TipoVisitaService();
-        this.view = new ConfiguratorView(this);
+        this.configController = new ConfigController(gui);
+        this.initController = new InitController(gui, configController);
+        this.datePrecluseController = new DatePrecluseController(gui);
+        this.menuView = new MenuView(gui);
         this.user = currentUser;
-        this.gui = gui;
     }
 
     @Override
     public void start() {
-
         // Se le configurazioni non sono ancora state inizializzate
-        if (!configService.isInitialized()) {
-            configService.initDefault();
-            ConfigController configController = new ConfigController(gui);
-            gui.addWindowAndWait(configController.getView());
-            // Config inizializzate, configurazione dati
-            TipoVisitaController tipoVisitaController = new TipoVisitaController(gui, configController);
-            // Chiamo il metodo apri invece che aggiungerla alla gui perchè la View è
-            // gestita da un altro controller
-            tipoVisitaController.apriAggiungiTipoVisita();
-        }
-
-        // TODO: before merge
-        DatePrecluseController controller = new DatePrecluseController(gui);
-        controller.apriAggiungiDatePrecluse();
-
+        assertInizializzazione();
         showMenu();
+    }
+
+    private void assertInizializzazione() {
+        initController.assertInizializzazione();
     }
 
     @Override
     public void showMenu() {
-        throw new UnsupportedOperationException("TODO: showMenu");
+
+        List<MenuOption> menuOptions = Arrays.asList(
+                new MenuOption("Inserisci date precluse", (v) -> inserisciDatePrecluse()),
+                new MenuOption("Modifica numero massimo persone", (v) -> modificaNumeroMaxPersone())
+        );
+
+        menuView.mostraMenu(menuOptions);
     }
 
-    @Override
-    public Window getView() {
-        return this.view.creaFinestra();
+    private void modificaNumeroMaxPersone() {
+        try {
+            configController.apriModificaNumeroMax();
+        } catch (Exception e) {
+            menuView.mostraErrore(e.getMessage());
+        }
+    }
+
+    private void inserisciDatePrecluse() {
+        try {
+            datePrecluseController.apriAggiungiDatePrecluse();
+        } catch (Exception e) {
+            menuView.mostraErrore(e.getMessage());
+        }
     }
 
 }

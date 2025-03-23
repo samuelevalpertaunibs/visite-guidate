@@ -9,12 +9,10 @@ public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
     private final AggiungiTipoVisitaView aggiungiTipoVisitaView;
     private final WindowBasedTextGUI gui;
-    private final ConfigController configController;
 
-    protected TipoVisitaController(WindowBasedTextGUI gui, ConfigController configController) {
-        this.tipoVisitaService = new TipoVisitaService();
+    protected TipoVisitaController(WindowBasedTextGUI gui) {
         this.gui = gui;
-        this.configController = configController;
+        this.tipoVisitaService = new TipoVisitaService();
         this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView(this, new LuogoController(gui));
     }
 
@@ -60,8 +58,6 @@ public class TipoVisitaController {
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
-        // Chiudo AggiungiTipoVisitaView
-        configController.setIsInitialized(true);
         gui.removeWindow(gui.getActiveWindow());
     }
 }

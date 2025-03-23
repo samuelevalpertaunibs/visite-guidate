@@ -89,14 +89,13 @@ public class ConfigDao {
         } catch (SQLException e) {
             throw new DatabaseException("Errore nel controllo dell'esistenza del comune.");
         }
-
         return false;
     }
 
     public static void initDefault() throws DatabaseException {
         // Salva i dati di default nel database
         try (Connection conn = DatabaseManager.getConnection()) {
-            String deleteExistingSql = "DELETE FROM config";
+            String deleteExistingSql = "DELETE FROM config where id = 1";
             // Elimina la configurazione gia esistente
             try (PreparedStatement deleteStmt = conn.prepareStatement(deleteExistingSql)) {
                 deleteStmt.executeUpdate();
@@ -115,7 +114,7 @@ public class ConfigDao {
 
     public static void setNumeroMax(int numeroMassimoIscrizioniPrenotazione) {
         try (Connection conn = DatabaseManager.getConnection()) {
-            String sql = "UPDATE config SET numero_max_iscrizioni = ?";
+            String sql = "UPDATE config SET numero_max_iscrizioni = ? WHERE id = 1";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
                 updateStmt.setInt(1, numeroMassimoIscrizioniPrenotazione);
                 updateStmt.executeUpdate();
@@ -129,7 +128,7 @@ public class ConfigDao {
 
     public static void setIsInitialized(boolean isInitialized) {
         try (Connection conn = DatabaseManager.getConnection()) {
-            String sql = "UPDATE config SET is_initialized = ?";
+            String sql = "UPDATE config SET is_initialized = ?  WHERE id = 1";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
                 updateStmt.setBoolean(1, isInitialized);
                 updateStmt.executeUpdate();
@@ -152,6 +151,19 @@ public class ConfigDao {
         } catch (Exception e) {
             throw new DatabaseException(e.getMessage());
         }
+    }
 
+    public static int getNumeroMax() {
+        String sql = "SELECT numero_max_iscrizioni FROM config WHERE id = 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            if  (rs.next())
+                return rs.getInt(1);
+            return 0;
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 }

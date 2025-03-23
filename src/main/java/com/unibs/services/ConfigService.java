@@ -5,7 +5,7 @@ import com.unibs.daos.ConfigDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ConfigService
@@ -22,20 +22,14 @@ public class ConfigService {
                 || comuneDaAggiungere.getRegione().isBlank())
             throw new IllegalArgumentException("I campi non possono essere vuoti.");
 
-        if (config != null && config.doesInclude(comuneDaAggiungere))
+        if (config.doesInclude(comuneDaAggiungere))
             throw new IllegalArgumentException("Il comune è gia presente.");
 
-        if (config != null) {
-            ConfigDao.aggiungiComune(comuneDaAggiungere);
-        }
+        ConfigDao.aggiungiComune(comuneDaAggiungere);
     }
 
     public Config getConfig() {
         return ConfigDao.getConfig();
-    }
-
-    private boolean doesInclude(Comune comuneDaAggiungere) {
-        return ConfigDao.doesInclude(comuneDaAggiungere.getNome(), comuneDaAggiungere.getProvincia(), comuneDaAggiungere.getRegione());
     }
 
     public void initDefault() {
@@ -65,7 +59,15 @@ public class ConfigService {
         return ConfigDao.getNumeroComuni() > 0;
     }
 
-    public ArrayList<Comune> getAmbitoTerritoriale() {
+    public List<Comune> getAmbitoTerritoriale() {
         return ConfigDao.getAmbitoTerritoriale();
+    }
+
+    public void setInizialized(boolean value) {
+        ConfigDao.setIsInitialized(value);
+    }
+
+    public int getNumeroMaxPersone() {
+        return ConfigDao.getNumeroMax();
     }
 }
