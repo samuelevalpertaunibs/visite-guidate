@@ -3,6 +3,7 @@ package com.unibs.controllers;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.TipoVisitaService;
 import com.unibs.views.AggiungiTipoVisitaView;
+import com.unibs.views.ElencoLuoghiConVisiteAssociate;
 import com.unibs.views.ElencoVolontariView;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class TipoVisitaController {
     private final WindowBasedTextGUI gui;
     private final LuogoController luogoController;
     private final VolontariController volontariController;
+    private final ElencoLuoghiConVisiteAssociate elencoLuoghiConVisiteAssociate;
 
     protected TipoVisitaController(WindowBasedTextGUI gui, LuogoController luogoController, VolontariController volontariController) {
         this.gui = gui;
@@ -22,6 +24,7 @@ public class TipoVisitaController {
         this.volontariController = volontariController;
         this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView(this);
         this.elencoVolontariView = new ElencoVolontariView(this);
+        this.elencoLuoghiConVisiteAssociate = new ElencoLuoghiConVisiteAssociate(this);
     }
 
     public void apriAggiungiTipoVisita() {
@@ -83,5 +86,9 @@ public class TipoVisitaController {
 
     public VolontariController getVolontariController() {
         return volontariController;
+    }
+
+    public void apriVisualizzaVisitePerLuoghi() {
+        gui.addWindowAndWait(elencoLuoghiConVisiteAssociate.creaFinestra());
     }
 }

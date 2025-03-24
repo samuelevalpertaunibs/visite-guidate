@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.views.MenuView;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,7 +42,8 @@ public class ConfiguratorController implements IUserController {
                 new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)),
                 new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)),
                 new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)),
-                new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi))
+                new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi)),
+                new MenuOption("Visualizza l’elenco dei luoghi con le relative visite associate", (v) -> handleMenuAction(this::visualizzaLuoghiConVisite))
         );
         menuView.mostraMenu(menuOptions);
     }
@@ -55,19 +57,23 @@ public class ConfiguratorController implements IUserController {
     }
 
     private void visualizzaElencoVolontari() {
-            tipoVisitaController.apriVisualizzaVisitePerVolontari();
+        tipoVisitaController.apriVisualizzaVisitePerVolontari();
     }
 
     private void modificaNumeroMaxPersone() {
-            configController.apriModificaNumeroMax();
+        configController.apriModificaNumeroMax();
     }
 
     private void inserisciDatePrecluse() {
-            datePrecluseController.apriAggiungiDatePrecluse();
+        datePrecluseController.apriAggiungiDatePrecluse();
     }
 
     private void visualizzaElencoLuoghi() {
         luogoController.apriVisualizzaElencoLuoghi();
+    }
+
+    private void visualizzaLuoghiConVisite() {
+        tipoVisitaController.apriVisualizzaVisitePerLuoghi();
     }
 
 }

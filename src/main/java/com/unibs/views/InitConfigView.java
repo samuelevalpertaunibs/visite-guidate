@@ -4,6 +4,8 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.ConfigController;
 
+import java.util.Arrays;
+
 public class InitConfigView {
     private final ConfigController controller;
     private final TextBox nomeComuneField;
@@ -26,7 +28,6 @@ public class InitConfigView {
         this.numeroMaxPersone = new TextBox();
         this.erroreComuneLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         this.erroreNumeroMaxLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
-
         this.aggiungiComuneButton = new Button("Aggiungi Comune", () -> controller.aggiungiComune(nomeComuneField.getText(), provinciaComuneField.getText(),
                 regioneComuneField.getText()));
 
@@ -37,7 +38,7 @@ public class InitConfigView {
         Window window = new BasicWindow("Inizializzazione corpo dati");
         Panel panel = new Panel();
 
-        panel.addComponent(new Label("Comune"));
+        panel.addComponent(new Label("Inserisci un comune da aggiungere all'ambito territoriale"));
 
         panel.addComponent(new Label("Nome"));
         panel.addComponent(nomeComuneField);
@@ -60,12 +61,13 @@ public class InitConfigView {
         panel.addComponent(confermaButton);
 
         window.setComponent(panel);
+        window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN));
         return window;
     }
 
 
-    public void showPopupMessage(String message) {
-        Window window = new BasicWindow("Comune aggiunto");
+    public void showPopupMessage(String title, String message) {
+        Window window = new BasicWindow(title);
 
         Panel panel = new Panel();
         panel.addComponent(new Label(message));
@@ -103,8 +105,6 @@ public class InitConfigView {
         panel.addComponent(noButton);
 
         window.setComponent(panel);
-
-        // Show the confirmation window
         controller.getGui().addWindowAndWait(window);
     }
 

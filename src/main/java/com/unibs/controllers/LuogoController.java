@@ -50,5 +50,4 @@ public class LuogoController {
     public void apriVisualizzaElencoLuoghi() {
         gui.addWindowAndWait(elencoLuoghiView.creaFinestra());
     }
-
 }

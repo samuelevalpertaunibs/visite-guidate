@@ -29,7 +29,7 @@ public class ConfigController {
         Comune comune = new Comune(0, nome, provincia, regione);
         try {
             configService.aggiungiComune(comune);
-            initConfigView.showPopupMessage("Il comune è stato aggiunto correttamente.");
+            initConfigView.showPopupMessage("Comune aggiunto", "Il comune è stato aggiunto correttamente.");
             initConfigView.resetComune();
             initConfigView.moveCursorToNumeroMax();
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class ConfigController {
 
     public void conferma(String numeroMaxPersone) {
         if (!configService.esisteAlmenoUnComune()) {
-            initConfigView.showPopupMessage("Inserisci almeno un comune.");
+            initConfigView.showPopupMessage("Errore", "Inserisci almeno un comune.");
             initConfigView.moveCursorToComune();
             return;
         }
