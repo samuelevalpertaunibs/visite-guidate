@@ -20,6 +20,7 @@ public class ModificaNumeroMaxView {
     }
 
     public Window creaFinestra(int numeroMassimoAttuale) {
+        pulisciCampi();
         Window window = new BasicWindow("Modifica Configurazione");
         Panel panel = new Panel();
 
@@ -57,4 +58,12 @@ public class ModificaNumeroMaxView {
     public void aggiornaNumeroAttuale(String numeroMax) {
         numeroMaxAttualeLabel.setText("Numero massimo attuale: " + numeroMax);
     }
+
+    public void pulisciCampi() {
+        numeroMassimoTextBox.setText("");
+        numeroMaxAttualeLabel.setText("");
+        feedbackLabel.setText("");
+    }
+
+
 }

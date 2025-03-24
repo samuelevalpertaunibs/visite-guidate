@@ -17,7 +17,7 @@ public class AggiungiDatePrecluseView {
     }
 
     public Window creaFinestra(String mese, int anno) {
-
+        pulisciCampi();
         Window window = new BasicWindow("Aggiungi Data Preclusa");
         Panel panel = new Panel();
 
@@ -31,6 +31,11 @@ public class AggiungiDatePrecluseView {
 
         window.setComponent(panel);
         return window;
+    }
+
+    private void pulisciCampi() {
+        dataTextBox.setText("");
+        feedbackLabel.setText("");
     }
 
     public void mostraErrore(String message) {

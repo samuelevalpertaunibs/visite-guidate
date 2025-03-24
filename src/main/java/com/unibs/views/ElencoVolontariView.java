@@ -17,7 +17,6 @@ public class ElencoVolontariView {
     }
 
     public Window creaFinestra() {
-
         Window window = new BasicWindow("Visualizza Elenco Volontari");
         Panel panel = new Panel();
 
