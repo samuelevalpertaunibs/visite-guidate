@@ -5,20 +5,24 @@ import com.unibs.services.LuogoService;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
 import com.unibs.views.AggiungiLuogoView;
-
-import java.util.ArrayList;
+import com.unibs.views.ElencoLuoghiView;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class LuogoController {
     private final LuogoService luogoService;
     private final WindowBasedTextGUI gui;
+    private final ElencoLuoghiView elencoLuoghiView;
+
+
 
     protected LuogoController(WindowBasedTextGUI gui) {
         this.luogoService = new LuogoService();
+        this.elencoLuoghiView = new ElencoLuoghiView(this);
         this.gui = gui;
     }
 
-    public ArrayList<Luogo> getLuoghi() {
+    public List<Luogo> getLuoghi() {
         return luogoService.getAllLuoghi();
     }
 
@@ -42,4 +46,9 @@ public class LuogoController {
     public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) {
         return luogoService.aggiungiLuogo(new Luogo(-1, nome, descrizione, comune));
     }
+
+    public void apriVisualizzaElencoLuoghi() {
+        gui.addWindowAndWait(elencoLuoghiView.creaFinestra());
+    }
+
 }

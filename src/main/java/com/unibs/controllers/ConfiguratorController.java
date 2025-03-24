@@ -13,7 +13,7 @@ public class ConfiguratorController implements IUserController {
     private final InitController initController;
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
-    private final VolontariController  volontariController;
+    private final VolontariController volontariController;
     private final TipoVisitaController tipoVisitaController;
     private final MenuView menuView;
     private final LuogoController luogoController;
@@ -40,7 +40,8 @@ public class ConfiguratorController implements IUserController {
         List<MenuOption> menuOptions = Arrays.asList(
                 new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)),
                 new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)),
-                new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari))
+                new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)),
+                new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi))
         );
         menuView.mostraMenu(menuOptions);
     }
@@ -63,6 +64,10 @@ public class ConfiguratorController implements IUserController {
 
     private void inserisciDatePrecluse() {
             datePrecluseController.apriAggiungiDatePrecluse();
+    }
+
+    private void visualizzaElencoLuoghi() {
+        luogoController.apriVisualizzaElencoLuoghi();
     }
 
 }

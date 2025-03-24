@@ -1,8 +1,7 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-
-import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.unibs.controllers.LuogoController;
@@ -20,7 +19,7 @@ public class SelezionaLuogoView {
         Window window = new BasicWindow("Seleziona Luogo");
 
         Panel panel = new Panel();
-        ArrayList<Luogo> luoghi = luogoController.getLuoghi();  // Ottieni la lista dei luoghi
+        List<Luogo> luoghi = luogoController.getLuoghi();  // Ottieni la lista dei luoghi
         for (Luogo luogo: luoghi) {
             panel.addComponent(new Button(luogo.getNome(), () -> {
                 if (onLuogoSelected != null) {
