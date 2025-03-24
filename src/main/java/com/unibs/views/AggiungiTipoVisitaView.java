@@ -215,7 +215,8 @@ public class AggiungiTipoVisitaView {
                 numeroMaxPartecipantiField.getText(),
                 selezionaLuogoButton.getLabel(),
                 volontariSelezionati.toArray(new String[0]), // Passa i volontari selezionati
-                giorniSelezionati.toArray(new String[0])
+                giorniSelezionati.toArray(new String[0]),
+                puntoIncontroField.getText()
         )));
 
         panel.addComponent(fineButton);

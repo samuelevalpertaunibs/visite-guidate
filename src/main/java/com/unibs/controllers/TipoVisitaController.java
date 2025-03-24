@@ -31,7 +31,7 @@ public class TipoVisitaController {
     public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio,
             String dataFine, String oraInizio, String durata, String entrataLibera,
             String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
-            String[] volontari, String[] giorni) {
+            String[] volontari, String[] giorni, String indirizzoPuntoIncontro) {
 
         // Controllo che il luogo sia stato selezionato, non è compito del service
         // perchè lui si aspetta un nomeLuogo
@@ -42,7 +42,7 @@ public class TipoVisitaController {
         try {
             tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio,
                     dataFine, oraInizio, durata, entrataLibera,
-                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari, giorni);
+                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari, giorni, indirizzoPuntoIncontro);
             aggiungiTipoVisitaView.clearAll();
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());

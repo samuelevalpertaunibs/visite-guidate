@@ -112,5 +112,32 @@ public class LuogoDao {
             throw new DatabaseException("Errore durante la verifica dell'esistenza del luogo: " + e.getMessage(), e);
         }
     }
+
+    public static Luogo getLuogoByNome(String nomeLuogoSelezionato) throws DatabaseException {
+        String sql = "SELECT * FROM luoghi WHERE nome = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nomeLuogoSelezionato);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    String nome = rs.getString("nome");
+                    String descrizione = rs.getString("descrizione");
+                    int comuneId = rs.getInt("comune_id");
+
+                    Comune comune = ComuneDao.getComuneById(comuneId); // Recupero il comune associato
+                    return new Luogo(id, nome, descrizione, comune);
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante la ricerca del luogo: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
 }
 

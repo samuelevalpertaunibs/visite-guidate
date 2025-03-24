@@ -8,14 +8,15 @@ import java.util.List;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
+import com.unibs.models.Luogo;
 
 public class TipoVisitaDao {
 
     public static void aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
                                       LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
-                                      int luogoId, int[] volontariIds, int[] giorniIds) {
+                                      Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro) {
 
-        String insertSql = "INSERT INTO tipi_visita (titolo, descrizione, data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+        String insertSql = "INSERT INTO tipi_visita (titolo, descrizione ,data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id, punto_incontro_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         String insertLuogoVisitaNN = "INSERT INTO tipi_visita_luoghi (tipo_visita_id, luogo_id) VALUES (?, ?)";
 
@@ -23,12 +24,34 @@ public class TipoVisitaDao {
 
         String insertGiorniNN = "INSERT INTO giorni_settimana_tipi_visita (tipo_visita_id, giorno_settimana_id) VALUES (?, ?)";
 
+        String insertPuntoIncontro = "INSERT INTO punti_incontro (indirizzo, comune_id) VALUES (?, ?)";
+
         Connection conn = null;
         try {
             conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false); // Disabilita auto-commit all'inizio
 
             int tipoVisitaId; // Per salvare l'ID della visita appena inserita
+            int puntoIncontroId;
+
+            try(PreparedStatement stmt = conn.prepareStatement(insertPuntoIncontro, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, indirizzoPuntoIncontro);
+                stmt.setInt(2, luogoDaAssociare.getIdComune());
+
+                int affectedRows = stmt.executeUpdate();
+                if (affectedRows == 0) {
+                    throw new DatabaseException("Inserimento punto di incontro fallito");
+                }
+
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    puntoIncontroId = rs.getInt(1);
+                } else {
+                    throw new DatabaseException("Errore nel recupero dell'ID generato.");
+                }
+            } catch (SQLException e) {
+                throw new DatabaseException("Impossibile inserire il punto di incontro, assicurati che sia univoco.");
+            }
 
             try (PreparedStatement stmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -41,7 +64,8 @@ public class TipoVisitaDao {
                 stmt.setBoolean(7, entrataLiberaBool);
                 stmt.setInt(8, numeroMin);
                 stmt.setInt(9, numeroMax);
-                stmt.setInt(10, luogoId);
+                stmt.setInt(10, luogoDaAssociare.getId());
+                stmt.setInt(11, puntoIncontroId);
 
                 int affectedRows = stmt.executeUpdate();
                 if (affectedRows == 0) {
@@ -53,22 +77,19 @@ public class TipoVisitaDao {
                 if (rs.next()) {
                     tipoVisitaId = rs.getInt(1);
                 } else {
-                    throw new DatabaseException("Errore nel recupero dell'ID generato");
-
+                    throw new DatabaseException("Errore nel recupero dell'ID generato.");
                 }
 
                 // Inserisce l'associazione tra visita e luogo
                 try (PreparedStatement stmt2 = conn.prepareStatement(insertLuogoVisitaNN)) {
                     stmt2.setInt(1, tipoVisitaId);
-                    stmt2.setInt(2, luogoId);
+                    stmt2.setInt(2, luogoDaAssociare.getId());
 
                     affectedRows = stmt2.executeUpdate();
                     if (affectedRows == 0) {
-                        throw new DatabaseException("Associazione tra luogo e tipo visita fallita");
+                        throw new DatabaseException("Associazione tra luogo e tipo visita fallita.");
                     }
                 }
-
-                //TODO: MANCA PUNTO DI INCONTRO
 
                 // Inserisce ogni volontario nella tabella tipovisita_volontario_nn
                 try (PreparedStatement stmt3 = conn.prepareStatement(insertVolontarioNN)) {
@@ -82,7 +103,7 @@ public class TipoVisitaDao {
                     // Controlla se almeno un'operazione è fallita
                     for (int result : batchResults) {
                         if (result == Statement.EXECUTE_FAILED) {
-                            throw new DatabaseException("Inserimento volontario fallito");
+                            throw new DatabaseException("Inserimento volontario fallito.");
                         }
                     }
                 }
@@ -99,14 +120,14 @@ public class TipoVisitaDao {
                     // Controlla se almeno un'operazione è fallita
                     for (int result : batchResults) {
                         if (result == Statement.EXECUTE_FAILED) {
-                            throw new DatabaseException("Inserimento giorni fallito");
+                            throw new DatabaseException("Inserimento giorni fallito.");
                         }
                     }
                 }
 
                 conn.commit(); // Se tutto va bene conferma la transazione
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             try {
                 if (conn != null) {
                     conn.rollback(); // Esegui il rollback se qualcosa va storto

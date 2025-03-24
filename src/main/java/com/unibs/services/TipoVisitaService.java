@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+import com.unibs.DatabaseException;
 import com.unibs.daos.GiorniSettimanaDao;
 import com.unibs.daos.TipoVisitaDao;
 import com.unibs.daos.LuogoDao;
 import com.unibs.daos.VolontarioDao;
+import com.unibs.models.Luogo;
 
 import java.util.List;
 
@@ -17,9 +19,11 @@ public class TipoVisitaService {
 
 	public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
 			String oraInizioString, String durataMinutiString, String entrataLibera, String numeroMinPartecipanti,
-			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni) {
+			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni, String indirizzoPuntoIncontro)  {
 		if (titolo == null || titolo.isEmpty())
 			throw new IllegalStateException("Il campo Titolo non può essere vuoto");
+		if (descrizione == null || descrizione.isEmpty())
+			throw new IllegalStateException("Il campo Descrizione non può essere vuoto");
 		if (dataInizioString == null || dataInizioString.isEmpty())
 			throw new IllegalStateException("Il campo Data inizio non può essere vuoto");
 		if (dataFineString == null || dataFineString.isEmpty())
@@ -98,7 +102,10 @@ public class TipoVisitaService {
 
 		boolean entrataLiberaBool = entrataLibera.equals("Sì");
 
-		int luogoId = LuogoDao.getIdByNome(nomeLuogoSelezionato);
+		Luogo luogoDaAssociare = LuogoDao.getLuogoByNome(nomeLuogoSelezionato);
+		if (luogoDaAssociare == null) {
+			throw new DatabaseException("Luogo non trovato.");
+		}
 
 		int[] volontariIds = new int[volontari.length];
 		for (int i = 0; i < volontari.length; i++) {
@@ -111,15 +118,14 @@ public class TipoVisitaService {
 		}
 
 		// Controllo overlap
-		if (TipoVisitaDao.siSovrappone(luogoId, giorniIds, oraInizio, durataMinuti, dataInizio, dataFine)) {
+		if (TipoVisitaDao.siSovrappone(luogoDaAssociare.getId(), giorniIds, oraInizio, durataMinuti, dataInizio, dataFine)) {
 			throw new  IllegalArgumentException("La visita si sovrappone ad un'altra.");
 		}
 
 		// Controlli fatti, aggiungere al DB
 		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
 				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,
-				numeroMax, luogoId, volontariIds, giorniIds);
-
+				numeroMax, luogoDaAssociare, volontariIds, giorniIds, indirizzoPuntoIncontro);
 	}
 
 	public List<String> getGiorniSettimana() {

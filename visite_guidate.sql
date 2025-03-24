@@ -32,10 +32,19 @@ CREATE TABLE luoghi (
   FOREIGN KEY (comune_id) REFERENCES comuni(id) ON DELETE CASCADE
 );
 
+CREATE TABLE punti_incontro (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  indirizzo VARCHAR(64) NOT NULL ,
+  comune_id INT UNSIGNED NOT NULL,
+  UNIQUE(indirizzo, comune_id),
+  FOREIGN KEY (comune_id) REFERENCES comuni(id) ON DELETE CASCADE
+);
+
 CREATE TABLE tipi_visita (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   titolo VARCHAR(64) NOT NULL,
   descrizione VARCHAR(512) NOT NULL,
+  punto_incontro_id INT UNSIGNED NOT NULL,
   data_inizio DATE NOT NULL,
   data_fine DATE NOT NULL,
   ora_inizio TIME NOT NULL,
@@ -44,14 +53,8 @@ CREATE TABLE tipi_visita (
   num_min_partecipanti INT NOT NULL,
   num_max_partecipanti INT NOT NULL,
   luogo_id INT UNSIGNED NOT NULL,
-  FOREIGN KEY (luogo_id) REFERENCES luoghi(id) ON DELETE CASCADE
-);
-
-CREATE TABLE punti_incontro (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  indirizzo VARCHAR(64) NOT NULL UNIQUE,
-  comune_id INT UNSIGNED NOT NULL,
-  FOREIGN KEY (comune_id) REFERENCES comuni(id) ON DELETE CASCADE
+  FOREIGN KEY (luogo_id) REFERENCES luoghi(id) ON DELETE CASCADE,
+  FOREIGN KEY (punto_incontro_id) REFERENCES punti_incontro(id) ON DELETE CASCADE
 );
 
 CREATE TABLE ruoli (
