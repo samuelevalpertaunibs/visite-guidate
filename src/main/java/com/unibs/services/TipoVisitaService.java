@@ -139,4 +139,8 @@ public class TipoVisitaService {
 	public List<String> getTitoliByVolontarioId(int volontarioId) {
 		return TipoVisitaDao.getTitoliByVolontarioId(volontarioId);
 	}
+
+	public List<String> getTitoliByLuogoId(int luogoId) {
+		return TipoVisitaDao.getTitoliByLuogoId(luogoId);
+	}
 }

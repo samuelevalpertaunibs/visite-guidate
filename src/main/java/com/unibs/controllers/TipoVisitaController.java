@@ -76,6 +76,10 @@ public class TipoVisitaController {
         return tipoVisitaService.getTitoliByVolontarioId(volontarioId);
     }
 
+    public List<String> getTitoliByLuogoId(int luogoId) {
+        return tipoVisitaService.getTitoliByLuogoId(luogoId);
+    }
+
     public void apriVisualizzaVisitePerVolontari() {
         gui.addWindowAndWait(elencoVolontariView.creaFinestra());
     }

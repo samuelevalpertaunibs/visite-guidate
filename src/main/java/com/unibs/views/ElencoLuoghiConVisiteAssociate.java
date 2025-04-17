@@ -3,9 +3,7 @@ package com.unibs.views;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.LuogoController;
 import com.unibs.controllers.TipoVisitaController;
-import com.unibs.controllers.VolontariController;
 import com.unibs.models.Luogo;
-import com.unibs.models.Volontario;
 
 import java.util.List;
 
@@ -26,13 +24,13 @@ public class ElencoLuoghiConVisiteAssociate {
 
         for (Luogo luogo : luoghi) {
             int luogoId = luogo.getId();
-            List<String> titoloTipiVisita = tipoVisitaController.getTitoliByVolontarioId(luogoId);
+            List<String> titoliTipiVisita = tipoVisitaController.getTitoliByLuogoId(luogoId);
 
             panel.addComponent(new Label(luogo.getNome()));
 
-            String visitaText = titoloTipiVisita.isEmpty()
+            String visitaText = titoliTipiVisita.isEmpty()
                     ? "\tNessun tipo di visita associato"
-                    : "\t" + String.join(", ", titoloTipiVisita);
+                    : "\t" + String.join(", ", titoliTipiVisita);
 
             panel.addComponent(new Label(visitaText));
             panel.addComponent(new EmptySpace());

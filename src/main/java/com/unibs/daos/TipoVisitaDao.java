@@ -165,23 +165,6 @@ public class TipoVisitaDao {
         return true;
     }
 
-    public static ArrayList<String> getTitoli() {
-        ArrayList<String> tipiVisita = new ArrayList<>();
-        String query = "SELECT titolo FROM tipi_visita";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                tipiVisita.add(rs.getString("titolo"));
-            }
-        } catch (Exception e) {
-            throw new DatabaseException("Errore nel recupero dei tipi di visita: " + e.getMessage());
-        }
-        return tipiVisita;
-    }
-
     public static List<String> getTitoliByVolontarioId(int volontarioId) {
         List<String> titoliTipiVisita = new ArrayList<>();
         String sql = "SELECT titolo FROM tipi_visita JOIN tipi_visita_volontari ON tipi_visita.id = tipi_visita_volontari.tipo_visita_id WHERE volontario_id = ?";
@@ -198,6 +181,26 @@ public class TipoVisitaDao {
 
         } catch (SQLException e) {
             throw new DatabaseException("Errore nel recupero dei tipi di visita associati al volontario: " + e.getMessage());
+        }
+        return titoliTipiVisita;
+    }
+
+    public static List<String> getTitoliByLuogoId(int luogoId) {
+        List<String> titoliTipiVisita = new ArrayList<>();
+        String sql = "SELECT titolo FROM tipi_visita JOIN tipi_visita_luoghi ON tipi_visita.id = tipi_visita_luoghi.tipo_visita_id WHERE tipi_visita.luogo_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, luogoId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                titoliTipiVisita.add(rs.getString("titolo"));
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore nel recupero dei tipi di visita associati al luogo: " + e.getMessage());
         }
         return titoliTipiVisita;
     }
