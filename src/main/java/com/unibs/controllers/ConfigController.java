@@ -6,6 +6,9 @@ import com.unibs.models.Comune;
 import com.unibs.models.Config;
 import com.unibs.views.InitConfigView;
 import com.unibs.views.ModificaNumeroMaxView;
+import com.unibs.views.RegimeNonAttivo;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class ConfigController {
@@ -13,12 +16,14 @@ public class ConfigController {
     private final WindowBasedTextGUI gui;
     private final InitConfigView initConfigView;
     private final ModificaNumeroMaxView modificaNumeroMaxView;
+    private final RegimeNonAttivo regimeNonAttivoView;
 
     public ConfigController(WindowBasedTextGUI gui) {
         this.configService = new ConfigService();
         this.initConfigView = new InitConfigView(this);
         this.modificaNumeroMaxView = new ModificaNumeroMaxView(this);
         this.gui = gui;
+        this.regimeNonAttivoView = new RegimeNonAttivo();
     }
 
     public void apriConfigurazione() {
@@ -80,8 +85,8 @@ public class ConfigController {
         return configService.isInitialized();
     }
 
-    public void setIsInizialed(boolean b) {
-        configService.setInizialized(b);
+    public void setInizializedOn(LocalDate date) {
+        configService.setInitializedOn(date);
     }
 
     public void apriModificaNumeroMax() {
@@ -109,5 +114,13 @@ public class ConfigController {
         }  catch (Exception e) {
             modificaNumeroMaxView.mostraErrore(e.getMessage());
         }
+    }
+
+    public boolean checkRegime() {
+        if (!configService.regimeAttivo()) {
+            gui.addWindowAndWait(regimeNonAttivoView.creaFinestra());
+            return false;
+        }
+        return true;
     }
 }

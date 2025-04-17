@@ -1,6 +1,8 @@
 package com.unibs.controllers;
 
 
+import java.time.LocalDate;
+
 public class InitController {
     private final ConfigController configController;
     private final TipoVisitaController tipoVisitaController;
@@ -15,7 +17,14 @@ public class InitController {
             configController.initDefault();
             configController.apriConfigurazione();
             tipoVisitaController.apriAggiungiTipoVisita();
-            configController.setIsInizialed(true);
+            configController.setInizializedOn(LocalDate.now());
         }
+    }
+
+    public boolean checkRegime() {
+        if (configController.isInitialized()) {
+            return configController.checkRegime();
+        }
+        return false;
     }
 }

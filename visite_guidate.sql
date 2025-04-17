@@ -7,7 +7,7 @@ USE visite_guidate;
 CREATE TABLE config (
   id TINYINT(1) UNSIGNED PRIMARY KEY DEFAULT '1',
   numero_max_iscrizioni INT UNSIGNED DEFAULT NULL,
-  is_initialized TINYINT(1) NOT NULL DEFAULT '0'
+  initialized_on DATE DEFAULT NULL
 );
 
 CREATE TABLE comuni (

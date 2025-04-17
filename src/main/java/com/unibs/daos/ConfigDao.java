@@ -1,9 +1,7 @@
 package com.unibs.daos;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import com.unibs.DatabaseException;
@@ -21,10 +19,11 @@ public class ConfigDao {
 
             if (rs.next()) {
                 int numeroMaxIscrizioni = rs.getInt("numero_max_iscrizioni");
-                boolean isInitialized = rs.getBoolean("is_initialized");
+                Date sqlDate = rs.getDate("initialized_on");
+                LocalDate initializedOn = (sqlDate != null) ? sqlDate.toLocalDate() : null;
                 ArrayList<Comune> ambitoTerritoriale = getAmbitoTerritoriale();
 
-                return new Config(ambitoTerritoriale, numeroMaxIscrizioni, isInitialized);
+                return new Config(ambitoTerritoriale, numeroMaxIscrizioni, initializedOn);
             }
 
             return null;
@@ -101,7 +100,7 @@ public class ConfigDao {
                 deleteStmt.executeUpdate();
             }
             // Inserisci i dati di default nel database
-            String insertConfigSql = "INSERT INTO `config` (`id`, `numero_max_iscrizioni`, `is_initialized`) VALUES (DEFAULT, NULL, DEFAULT)";
+            String insertConfigSql = "INSERT INTO `config` (`id`, `numero_max_iscrizioni`, `initialized_on`) VALUES (DEFAULT, NULL, NULL)";
             try (PreparedStatement stmt = conn.prepareStatement(insertConfigSql)) {
                 stmt.executeUpdate();
             }
@@ -126,11 +125,11 @@ public class ConfigDao {
 
     }
 
-    public static void setIsInitialized(boolean isInitialized) {
+    public static void setInitializedOn(LocalDate initializedOn) {
         try (Connection conn = DatabaseManager.getConnection()) {
-            String sql = "UPDATE config SET is_initialized = ?  WHERE id = 1";
+            String sql = "UPDATE config SET initialized_on = ?  WHERE id = 1";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
-                updateStmt.setBoolean(1, isInitialized);
+                updateStmt.setDate(1, Date.valueOf(initializedOn));
                 updateStmt.executeUpdate();
             }
 

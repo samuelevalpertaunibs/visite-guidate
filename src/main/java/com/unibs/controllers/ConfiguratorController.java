@@ -33,7 +33,9 @@ public class ConfiguratorController implements IUserController {
     @Override
     public void start() {
         initController.assertInizializzazione();
-        showMenu();
+        if (initController.checkRegime()){
+            showMenu();
+        }
     }
 
     @Override

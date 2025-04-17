@@ -5,6 +5,7 @@ import com.unibs.daos.ConfigDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -40,7 +41,7 @@ public class ConfigService {
         Config config = ConfigDao.getConfig();
         if (config == null)
             return false;
-        return config.getIsInitialized();
+        return config.getInitializedOn() != null;
     }
 
     public void setNumeroMaxPersone(String numeroMaxPersone) {
@@ -63,11 +64,26 @@ public class ConfigService {
         return ConfigDao.getAmbitoTerritoriale();
     }
 
-    public void setInizialized(boolean value) {
-        ConfigDao.setIsInitialized(value);
+    public void setInitializedOn(LocalDate initializedOn) {
+        ConfigDao.setInitializedOn(initializedOn);
     }
 
     public int getNumeroMaxPersone() {
         return ConfigDao.getNumeroMax();
+    }
+
+    public boolean regimeAttivo() {
+        Config config = ConfigDao.getConfig();
+        if (config == null)
+            return false;
+        if (config.getInitializedOn() == null)
+            return false;
+
+        LocalDate initializedOn = config.getInitializedOn();
+        LocalDate attivazioneRegime = initializedOn.withDayOfMonth(16);
+        if (initializedOn.getDayOfMonth() > 16)
+            attivazioneRegime = attivazioneRegime.plusMonths(1);
+
+        return !LocalDate.now().isBefore(attivazioneRegime);
     }
 }
