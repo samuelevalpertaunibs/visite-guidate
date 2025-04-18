@@ -16,6 +16,7 @@ public class ConfiguratorController implements IUserController {
     private final ConfigController configController;
     private final VolontariController volontariController;
     private final TipoVisitaController tipoVisitaController;
+    private final VisitaController visitaController;
     private final MenuView menuView;
     private final LuogoController luogoController;
 
@@ -24,6 +25,7 @@ public class ConfiguratorController implements IUserController {
         this.luogoController = new LuogoController(gui);
         this.volontariController = new VolontariController(gui);
         this.tipoVisitaController = new TipoVisitaController(gui, luogoController, volontariController);
+        this.visitaController = new VisitaController(gui);
         this.initController = new InitController(configController, tipoVisitaController);
         this.datePrecluseController = new DatePrecluseController(gui);
         this.menuView = new MenuView(gui);
@@ -45,7 +47,8 @@ public class ConfiguratorController implements IUserController {
                 new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)),
                 new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)),
                 new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi)),
-                new MenuOption("Visualizza l’elenco dei luoghi con le relative visite associate", (v) -> handleMenuAction(this::visualizzaLuoghiConVisite))
+                new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)),
+                new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite))
         );
         menuView.mostraMenu(menuOptions);
     }
@@ -74,8 +77,12 @@ public class ConfiguratorController implements IUserController {
         luogoController.apriVisualizzaElencoLuoghi();
     }
 
-    private void visualizzaLuoghiConVisite() {
+    private void visualizzaLuoghiConTipiVisita() {
         tipoVisitaController.apriVisualizzaVisitePerLuoghi();
+    }
+
+    private void visualizzaVisite() {
+        visitaController.apriVisualizzaVisitePerTipologia();
     }
 
 }
