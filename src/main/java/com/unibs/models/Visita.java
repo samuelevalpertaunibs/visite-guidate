@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 
 public class Visita {
-    private final int id;
     private final TipoVisita tipoVisita;
     private final LocalDate dataSvolgimento;
     private final StatoVisita stato;
@@ -17,15 +16,10 @@ public class Visita {
         CANCELLATA
     }
 
-    public Visita(int id, TipoVisita tipoVisita, LocalDate dataSvolgimento, StatoVisita stato) {
-        this.id = id;
+    public Visita(TipoVisita tipoVisita, LocalDate dataSvolgimento, StatoVisita stato) {
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
         this.stato = stato;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public TipoVisita getTipoVisita() {
