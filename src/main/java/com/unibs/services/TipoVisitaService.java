@@ -22,6 +22,8 @@ public class TipoVisitaService {
 			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro)  {
 		if (titolo == null || titolo.isEmpty())
 			throw new IllegalStateException("Il campo Titolo non può essere vuoto");
+		if (TipoVisitaDao.existsByTitle(titolo))
+			throw new IllegalStateException(titolo + " esiste già");
 		if (descrizione == null || descrizione.isEmpty())
 			throw new IllegalStateException("Il campo Descrizione non può essere vuoto");
 		if (dataInizioString == null || dataInizioString.isEmpty())

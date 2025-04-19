@@ -5,7 +5,7 @@ import com.unibs.models.Visita;
 import java.util.List;
 
 public class VisitaService {
-    public List<Visita> getVisiteByStato(Visita.StatoVisita stato) {
-        return VisitaDao.getVisiteByStato(stato);
+    public List<Visita> getVisitePreview(Visita.StatoVisita stato) {
+        return VisitaDao.getVisitePreview(stato);
     }
 }
