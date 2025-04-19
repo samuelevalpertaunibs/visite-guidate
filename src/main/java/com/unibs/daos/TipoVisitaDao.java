@@ -16,7 +16,7 @@ public class TipoVisitaDao {
                                       LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
                                       Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) {
 
-        String insertSql = "INSERT INTO tipi_visita (titolo, descrizione ,data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id, punto_incontro_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertSql = "INSERT INTO tipi_visita (titolo, descrizione ,data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id, indirizzo_incontro, comune_incontro, provincia_incontro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         String insertLuogoVisitaNN = "INSERT INTO tipi_visita_luoghi (tipo_visita_id, luogo_id) VALUES (?, ?)";
 
@@ -24,35 +24,12 @@ public class TipoVisitaDao {
 
         String insertGiorniNN = "INSERT INTO giorni_settimana_tipi_visita (tipo_visita_id, giorno_settimana_id) VALUES (?, ?)";
 
-        String insertPuntoIncontro = "INSERT INTO punti_incontro (indirizzo, comune, provincia) VALUES (?, ?, ?)";
-
         Connection conn = null;
         try {
             conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false); // Disabilita auto-commit all'inizio
 
             int tipoVisitaId; // Per salvare l'ID della visita appena inserita
-            int puntoIncontroId;
-
-            try(PreparedStatement stmt = conn.prepareStatement(insertPuntoIncontro, Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setString(1, indirizzoPuntoIncontro);
-                stmt.setString(2, comunePuntoIncontro);
-                stmt.setString(3, provinciaPuntoIncontro);
-
-                int affectedRows = stmt.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new DatabaseException("Inserimento punto di incontro fallito");
-                }
-
-                ResultSet rs = stmt.getGeneratedKeys();
-                if (rs.next()) {
-                    puntoIncontroId = rs.getInt(1);
-                } else {
-                    throw new DatabaseException("Errore nel recupero dell'ID generato.");
-                }
-            } catch (SQLException e) {
-                throw new DatabaseException("Impossibile inserire il punto di incontro, assicurati che sia univoco.");
-            }
 
             try (PreparedStatement stmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -66,7 +43,9 @@ public class TipoVisitaDao {
                 stmt.setInt(8, numeroMin);
                 stmt.setInt(9, numeroMax);
                 stmt.setInt(10, luogoDaAssociare.getId());
-                stmt.setInt(11, puntoIncontroId);
+                stmt.setString(11, indirizzoPuntoIncontro);
+                stmt.setString(12, comunePuntoIncontro);
+                stmt.setString(13, provinciaPuntoIncontro);
 
                 int affectedRows = stmt.executeUpdate();
                 if (affectedRows == 0) {
@@ -135,6 +114,10 @@ public class TipoVisitaDao {
                 }
             } catch (Exception rollbackEx) {
                 throw new DatabaseException("Errore nel rollback: " + rollbackEx.getMessage());
+            }
+            if ("23000".equals(e.getSQLState()) && e.getErrorCode() == 1062) {
+                // Unique non rispettata
+                throw new DatabaseException("Assicurati che il punto di incontro sia univoco");
             }
             throw new DatabaseException("Errore nella transazione: " + e.getMessage());
         } finally {
@@ -258,5 +241,25 @@ public class TipoVisitaDao {
         } catch (SQLException e) {
             throw new DatabaseException("Errore nel controllo sulla sovrapposizione: " + e.getMessage());
         }
+    }
+
+    public static boolean existsByTitle(String titolo) {
+        String sql = "SELECT COUNT(*) FROM tipi_visita WHERE titolo = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+             stmt.setString(1, titolo);
+             ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante il controllo della tabella tipo_visita: " + e.getMessage());
+        }
+
+        return false;
     }
 }

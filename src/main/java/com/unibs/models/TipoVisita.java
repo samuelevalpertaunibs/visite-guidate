@@ -4,19 +4,20 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class TipoVisita {
-    private final String nome;
+    private final String titolo;
     private final String descrizione;
-    private final LocalDate dataInizio;
-    private final LocalDate dataFine;
+    private LocalDate dataInizio;
+    private LocalDate dataFine;
     private final LocalTime oraInizio;
-    private final int durataMinuti;
+    private int durataMinuti;
     private final boolean entrataLibera;
-    private final int numMinPartecipanti;
-    private final int numMaxPartecipanti;
-    private final Luogo luogo;
+    private int numMinPartecipanti;
+    private int numMaxPartecipanti;
+    private Luogo luogo;
+    private final PuntoIncontro puntoIncontro;
 
-    public TipoVisita(String nome, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo) {
-        this.nome = nome;
+    public TipoVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro) {
+        this.titolo = titolo;
         this.descrizione = descrizione;
         this.dataInizio = dataInizio;
         this.dataFine = dataFine;
@@ -26,9 +27,38 @@ public class TipoVisita {
         this.numMinPartecipanti = numMinPartecipanti;
         this.numMaxPartecipanti = numMaxPartecipanti;
         this.luogo = luogo;
+        this.puntoIncontro = puntoIncontro;
     }
 
-    public String getNome() {return nome;}
+    public TipoVisita(String titolo, String descrizione, PuntoIncontro puntoIncontro, LocalTime oraInizio, boolean entrataLibera) {
+        this.titolo = titolo;
+        this.descrizione = descrizione;
+        this.puntoIncontro = puntoIncontro;
+        this.oraInizio = oraInizio;
+        this.entrataLibera = entrataLibera;
+    }
 
-    public Luogo getLuogo() {return luogo;}
+    public String getTitolo() {
+        return titolo;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public LocalTime getOraInizio() {
+        return oraInizio;
+    }
+
+    public boolean isEntrataLibera() {
+        return entrataLibera;
+    }
+
+    public Luogo getLuogo() {
+        return luogo;
+    }
+
+    public PuntoIncontro getPuntoIncontro() {
+        return puntoIncontro;
+    }
 }

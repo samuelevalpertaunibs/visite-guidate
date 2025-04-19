@@ -22,7 +22,7 @@ public class VisitaController {
         tui.addWindowAndWait(elencoVisiteView.creaFinestra());
     }
 
-    public List<Visita> getVisiteByStato(Visita.StatoVisita stato) {
-        return visitaService.getVisiteByStato(stato);
+    public List<Visita> getVisitePreview(Visita.StatoVisita stato) {
+        return visitaService.getVisitePreview(stato);
     }
 }
