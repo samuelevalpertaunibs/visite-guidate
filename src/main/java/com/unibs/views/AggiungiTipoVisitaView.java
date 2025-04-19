@@ -27,15 +27,15 @@ public class AggiungiTipoVisitaView {
     private final TextBox dataFineField;
     private final TextBox oraInizioField;
     private final TextBox durataField;
-    private final TextBox puntoIncontroField;
+    private final TextBox indirizzoField;
+    private final TextBox comuneField;
+    private final TextBox provinciaField;
     private final RadioBoxList<String> entrataLibera;
     private final TextBox numeroMinPartecipantiField;
     private final TextBox numeroMaxPartecipantiField;
-    private final Label puntoIncontroComuneLabel;
     private final Label errorLabel;
     private final Label volontariSelezionatiLabel;
     private final Label giorniSelezionatiLabel;
-
 
     private final List<String> volontariSelezionati = new ArrayList<>();
     private final List<String> giorniSelezionati = new ArrayList<>();
@@ -48,8 +48,9 @@ public class AggiungiTipoVisitaView {
 
         titoloField = new TextBox("");
         descrizioneField = new TextBox("");
-        puntoIncontroField = new TextBox("");
-        puntoIncontroComuneLabel = new Label("");
+        indirizzoField = new TextBox("");
+        comuneField = new TextBox("");
+        provinciaField = new TextBox("");
         dataInizioField = new TextBox("");
         dataFineField = new TextBox("");
         oraInizioField = new TextBox("");
@@ -74,7 +75,6 @@ public class AggiungiTipoVisitaView {
         selezionaLuogoView.setOnLuogoSelected((luogoSelezionato) -> {
             this.selezionaLuogoButton.setLabel(luogoSelezionato.getNome());
             this.selezionaLuogoButton.setEnabled(false);
-            this.puntoIncontroComuneLabel.setText(" - " + luogoSelezionato.getNomeComune());
         });
 
         tipoVisitaController.getGui().addWindowAndWait(selezionaLuogoView.creaFinestra());
@@ -91,14 +91,14 @@ public class AggiungiTipoVisitaView {
 
         for (String giorno : giorni) {
             CheckBox checkBox = new CheckBox(giorno);
-            if (volontariSelezionati.contains(giorno))
+            if (giorniSelezionati.contains(giorno))
                 checkBox.setChecked(true);
             checkBoxList.add(checkBox);
             panel.addComponent(checkBox);
         }
 
         Button confermaButton = new Button("Conferma", () -> {
-            giorni.clear();
+            giorniSelezionati.clear();
             for (CheckBox checkBox : checkBoxList) {
                 if (checkBox.isChecked()) {
                     giorniSelezionati.add(checkBox.getLabel());
@@ -151,59 +151,66 @@ public class AggiungiTipoVisitaView {
 
     public Window creaFinestra() {
         Window window = new BasicWindow("Aggiungi tipo di visita");
-        Panel panel = new Panel();
-        panel.addComponent(selezionaLuogoButton);
+        Panel mainPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
+        Panel leftPanel = new Panel();
+        Panel rightPanel = new Panel();
 
-        panel.addComponent(new Label("Titolo"));
-        panel.addComponent(titoloField);
+        leftPanel.addComponent(selezionaLuogoButton);
+        leftPanel.addComponent(new Label("Titolo"));
+        leftPanel.addComponent(titoloField);
 
-        panel.addComponent(new Label("Descrizione"));
-        panel.addComponent(descrizioneField);
+        leftPanel.addComponent(new Label("Descrizione"));
+        leftPanel.addComponent(descrizioneField);
+
+        leftPanel.addComponent(new Label("Data inizio (dd/MM)"));
+        leftPanel.addComponent(dataInizioField);
+
+        leftPanel.addComponent(new Label("Data fine (dd/MM)"));
+        leftPanel.addComponent(dataFineField);
+
+        leftPanel.addComponent(new Label("Ora inizio (HH:mm)"));
+        leftPanel.addComponent(oraInizioField);
+
+        leftPanel.addComponent(new Label("Durata (min)"));
+        leftPanel.addComponent(durataField);
 
         Panel puntoIncontroPanel = new Panel();
-        puntoIncontroPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
-        puntoIncontroPanel.addComponent(puntoIncontroField);
+        puntoIncontroPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+        puntoIncontroPanel.addComponent(new Label("Indirizzo"));
+        puntoIncontroPanel.addComponent(indirizzoField);
+        puntoIncontroPanel.addComponent(new Label("Comune"));
+        puntoIncontroPanel.addComponent(comuneField);
+        puntoIncontroPanel.addComponent(new Label("Provincia"));
+        puntoIncontroPanel.addComponent(provinciaField);
 
-        puntoIncontroPanel.addComponent(puntoIncontroComuneLabel);
-        panel.addComponent(new Label("Punto d'incontro"));
-        panel.addComponent(puntoIncontroPanel);
+        rightPanel.addComponent(puntoIncontroPanel.withBorder(Borders.singleLine("Punto d'incontro")));
 
-        panel.addComponent(new Label("Data inizio (dd/MM)"));
-        panel.addComponent(dataInizioField);
+        rightPanel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
+        rightPanel.addComponent(associaGiorniButton);
+        rightPanel.addComponent(giorniSelezionatiLabel);
+        rightPanel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
 
-        panel.addComponent(new Label("Data fine (dd/MM)"));
-        panel.addComponent(dataFineField);
-
-        panel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
-        panel.addComponent(associaGiorniButton);
-        panel.addComponent(giorniSelezionatiLabel);
-        panel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
-
-        panel.addComponent(new Label("Ora inizio (HH:mm)"));
-        panel.addComponent(oraInizioField);
-
-        panel.addComponent(new Label("Durata (min)"));
-        panel.addComponent(durataField);
-
-        panel.addComponent(new Label("Entrata libera?"));
-        panel.addComponent(entrataLibera);
+        rightPanel.addComponent(new Label("Entrata libera?"));
+        rightPanel.addComponent(entrataLibera);
 
         entrataLibera.setSelectedIndex(0); // TODO: NON FUNZIONA
 
-        panel.addComponent(new Label("Numero minimo partecipanti"));
-        panel.addComponent(numeroMinPartecipantiField);
+        rightPanel.addComponent(new Label("Numero minimo partecipanti"));
+        rightPanel.addComponent(numeroMinPartecipantiField);
 
-        panel.addComponent(new Label("Numero massimo partecipanti"));
-        panel.addComponent(numeroMaxPartecipantiField);
+        rightPanel.addComponent(new Label("Numero massimo partecipanti"));
+        rightPanel.addComponent(numeroMaxPartecipantiField);
 
-        panel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
-        panel.addComponent(associaVolontariButton);
-        panel.addComponent(volontariSelezionatiLabel);
+        leftPanel.addComponent(new com.googlecode.lanterna.gui2.EmptySpace());
+        rightPanel.addComponent(associaVolontariButton);
+        rightPanel.addComponent(volontariSelezionatiLabel);
 
-        panel.addComponent(errorLabel);
+        mainPanel.addComponent(leftPanel);
+        mainPanel.addComponent(rightPanel);
+        mainPanel.addComponent(errorLabel);
 
-        panel.addComponent(new EmptySpace());
-        panel.addComponent(new Button("Aggiungi", () -> tipoVisitaController.aggiungiTipoVisita(
+        mainPanel.addComponent(new EmptySpace());
+        mainPanel.addComponent(new Button("Aggiungi", () -> tipoVisitaController.aggiungiTipoVisita(
                 titoloField.getText(),
                 descrizioneField.getText(),
                 dataInizioField.getText(),
@@ -216,12 +223,14 @@ public class AggiungiTipoVisitaView {
                 selezionaLuogoButton.getLabel(),
                 volontariSelezionati.toArray(new String[0]), // Passa i volontari selezionati
                 giorniSelezionati.toArray(new String[0]),
-                puntoIncontroField.getText()
+                indirizzoField.getText(),
+                comuneField.getText(),
+                provinciaField.getText()
         )));
 
-        panel.addComponent(fineButton);
+        mainPanel.addComponent(fineButton);
 
-        window.setComponent(panel);
+        window.setComponent(mainPanel);
         return window;
     }
 
@@ -232,7 +241,9 @@ public class AggiungiTipoVisitaView {
     public void clearAll() {
         titoloField.setText("");
         descrizioneField.setText("");
-        puntoIncontroField.setText("");
+        indirizzoField.setText("");
+        comuneField.setText("");
+        provinciaField.setText("");
         dataInizioField.setText("");
         dataFineField.setText("");
         oraInizioField.setText("");
@@ -248,9 +259,6 @@ public class AggiungiTipoVisitaView {
 
         selezionaLuogoButton.setLabel("Nessun luogo selezionato");
         selezionaLuogoButton.setEnabled(true);
-
-        puntoIncontroComuneLabel.setText("");
-
 
         errorLabel.setText("");
     }

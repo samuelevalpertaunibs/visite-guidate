@@ -14,7 +14,7 @@ public class TipoVisitaDao {
 
     public static void aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
                                       LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
-                                      Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro) {
+                                      Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) {
 
         String insertSql = "INSERT INTO tipi_visita (titolo, descrizione ,data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id, punto_incontro_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -24,7 +24,7 @@ public class TipoVisitaDao {
 
         String insertGiorniNN = "INSERT INTO giorni_settimana_tipi_visita (tipo_visita_id, giorno_settimana_id) VALUES (?, ?)";
 
-        String insertPuntoIncontro = "INSERT INTO punti_incontro (indirizzo, comune_id) VALUES (?, ?)";
+        String insertPuntoIncontro = "INSERT INTO punti_incontro (indirizzo, comune, provincia) VALUES (?, ?, ?)";
 
         Connection conn = null;
         try {
@@ -36,7 +36,8 @@ public class TipoVisitaDao {
 
             try(PreparedStatement stmt = conn.prepareStatement(insertPuntoIncontro, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, indirizzoPuntoIncontro);
-                stmt.setInt(2, luogoDaAssociare.getIdComune());
+                stmt.setString(2, comunePuntoIncontro);
+                stmt.setString(3, provinciaPuntoIncontro);
 
                 int affectedRows = stmt.executeUpdate();
                 if (affectedRows == 0) {
