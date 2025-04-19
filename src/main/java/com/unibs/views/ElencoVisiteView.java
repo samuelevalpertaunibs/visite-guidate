@@ -2,6 +2,7 @@ package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;
+import com.googlecode.lanterna.gui2.table.TableModel;
 import com.unibs.controllers.VisitaController;
 import com.unibs.models.Visita;
 
@@ -21,7 +22,7 @@ public class ElencoVisiteView {
 
         // === Sinistra: Lista stati visita ===
         Panel statoPanel = new Panel(new LinearLayout(Direction.VERTICAL));
-        statoPanel.addComponent(new Label("Stato visita:"));
+        //statoPanel.addComponent(new Label("Stato visita:"));
 
         ActionListBox statoList = new ActionListBox();
 
@@ -35,12 +36,17 @@ public class ElencoVisiteView {
             final Visita.StatoVisita statoFinal = stato;
 
             statoList.addItem(stato.name(), () -> {
+
+                if (statoFinal == Visita.StatoVisita.CANCELLATA) {
+                    visiteTable.setTableModel(new TableModel<>("Titolo", "Data di (mancato) svolgimento"));
+                    //List<Visita> visite = visitaController.getVisiteCancellateToString();
+                }
                 visiteTable.getTableModel().clear();
 
                 List<Visita> visite = visitaController.getVisiteByStato(statoFinal);
                 for (Visita v : visite) {
                     visiteTable.getTableModel().addRow(
-                            String.valueOf(v.getId()),
+                            //String.valueOf(v.getId()),
                             v.getTipoVisita().getNome(),
                             v.getDataSvolgimento().toString()
                     );
@@ -53,7 +59,7 @@ public class ElencoVisiteView {
         statoPanel.addComponent(new Button("Chiudi", window::close));
 
         // === Aggiunta pannelli ===
-        mainPanel.addComponent(statoPanel.withBorder(Borders.singleLine("Stati")));
+        mainPanel.addComponent(statoPanel.withBorder(Borders.singleLine("Filtra")));
         visitePanel.addComponent(visiteTable);
         mainPanel.addComponent(visitePanel.withBorder(Borders.singleLine("Visite")));
 

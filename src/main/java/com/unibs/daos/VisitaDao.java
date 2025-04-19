@@ -2,7 +2,6 @@ package com.unibs.daos;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
-import com.unibs.models.TipoVisita;
 import com.unibs.models.Visita;
 
 import java.sql.Connection;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VisitaDao {
+
     public static List<Visita> getVisiteByStato(Visita.StatoVisita stato) {
         List<Visita> visite = new ArrayList<>();
 
@@ -36,7 +36,7 @@ public class VisitaDao {
 
                 //TODO: tipoVisita è null, da sistemare
                 //TipoVisita tipoVisita = new TipoVisita(tipoId, tipoNome);
-                visite.add(new Visita(id, null, data, statoVisita));
+                //visite.add(new Visita(id, null, data, statoVisita));
             }
 
         } catch (Exception e) {

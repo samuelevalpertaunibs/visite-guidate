@@ -19,7 +19,7 @@ public class TipoVisitaService {
 
 	public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
 			String oraInizioString, String durataMinutiString, String entrataLibera, String numeroMinPartecipanti,
-			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni, String indirizzoPuntoIncontro)  {
+			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro)  {
 		if (titolo == null || titolo.isEmpty())
 			throw new IllegalStateException("Il campo Titolo non può essere vuoto");
 		if (descrizione == null || descrizione.isEmpty())
@@ -44,6 +44,8 @@ public class TipoVisitaService {
 			throw new IllegalStateException("Seleziona almeno un volontario da associare al tipo di visita.");
 		if (giorni == null || giorni.length < 1)
 			throw new IllegalStateException("Seleziona almeno un giorno della settimana.");
+		if (indirizzoPuntoIncontro == null || indirizzoPuntoIncontro.isEmpty() || comunePuntoIncontro == null || comunePuntoIncontro.isEmpty() || provinciaPuntoIncontro == null || provinciaPuntoIncontro.isEmpty())
+			throw new IllegalStateException("Inserisci tutti i campi relativi al punto d'incontro.");
 
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		LocalDate dataInizio;
@@ -125,7 +127,7 @@ public class TipoVisitaService {
 		// Controlli fatti, aggiungere al DB
 		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
 				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,
-				numeroMax, luogoDaAssociare, volontariIds, giorniIds, indirizzoPuntoIncontro);
+				numeroMax, luogoDaAssociare, volontariIds, giorniIds, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
 	}
 
 	public List<String> getGiorniSettimana() {
