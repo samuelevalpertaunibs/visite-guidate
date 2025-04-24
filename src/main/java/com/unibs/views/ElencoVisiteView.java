@@ -68,6 +68,7 @@ public class ElencoVisiteView {
         visitePanel.addComponent(visiteTable);
         mainPanel.addComponent(visitePanel.withBorder(Borders.singleLine("Visite")));
 
+        window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(mainPanel);
 
         return window;

@@ -6,6 +6,8 @@ import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.ConfigController;
 
+import java.util.List;
+
 public class ModificaNumeroMaxView {
     private final TextBox numeroMassimoTextBox;
     private final Label numeroMaxAttualeLabel;
@@ -41,6 +43,7 @@ public class ModificaNumeroMaxView {
         panel.addComponent(confermaButton);
         panel.addComponent(esciButton);
 
+        window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
         return window;
     }

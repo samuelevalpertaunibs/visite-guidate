@@ -39,6 +39,7 @@ public class ElencoLuoghiConVisiteAssociate {
         Button closeButton = new Button("Chiudi", window::close);
         panel.addComponent(closeButton);
 
+        window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
 
         return window;

@@ -4,6 +4,8 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.controllers.DatePrecluseController;
 
+import java.util.List;
+
 public class AggiungiDatePrecluseView {
     private final Button precludeButton;
     private final TextBox dataTextBox;
@@ -18,7 +20,7 @@ public class AggiungiDatePrecluseView {
 
     public Window creaFinestra(String mese, int anno) {
         pulisciCampi();
-        Window window = new BasicWindow("Aggiungi Data Preclusa");
+        Window window = new BasicWindow("Aggiungi date precluse");
         Panel panel = new Panel();
 
         panel.addComponent(new Label("Inserisci un giorno da precludere per " + mese + " " + anno));
@@ -29,6 +31,7 @@ public class AggiungiDatePrecluseView {
         Button esciButton = new Button("Esci", window::close);
         panel.addComponent(esciButton);
 
+        window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
         return window;
     }

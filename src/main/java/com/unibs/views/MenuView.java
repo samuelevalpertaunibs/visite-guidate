@@ -30,6 +30,7 @@ public class MenuView {
         menuPanel.addComponent(new Button("Esci", window::close));
         menuPanel.addComponent(errorLabel);
 
+        window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(menuPanel);
 
         // Avvia la finestra
