@@ -3,10 +3,9 @@ package com.unibs.controllers;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.ConfigService;
 import com.unibs.models.Comune;
-import com.unibs.models.Config;
 import com.unibs.views.InitConfigView;
 import com.unibs.views.ModificaNumeroMaxView;
-import com.unibs.views.RegimeNonAttivo;
+import com.unibs.views.RegimeNonAttivoView;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,14 +15,14 @@ public class ConfigController {
     private final WindowBasedTextGUI gui;
     private final InitConfigView initConfigView;
     private final ModificaNumeroMaxView modificaNumeroMaxView;
-    private final RegimeNonAttivo regimeNonAttivoView;
+    private final RegimeNonAttivoView regimeNonAttivoView;
 
     public ConfigController(WindowBasedTextGUI gui) {
         this.configService = new ConfigService();
         this.initConfigView = new InitConfigView(this);
         this.modificaNumeroMaxView = new ModificaNumeroMaxView(this);
         this.gui = gui;
-        this.regimeNonAttivoView = new RegimeNonAttivo();
+        this.regimeNonAttivoView = new RegimeNonAttivoView();
     }
 
     public void apriConfigurazione() {
@@ -31,50 +30,33 @@ public class ConfigController {
     }
 
     public void aggiungiComune(String nome, String provincia, String regione) {
-        Comune comune = new Comune(0, nome, provincia, regione);
+        Comune comuneDaAggiungere = new Comune(0, nome, provincia, regione);
         try {
-            configService.aggiungiComune(comune);
-            initConfigView.showPopupMessage("Comune aggiunto", "Il comune è stato aggiunto correttamente.");
+            configService.aggiungiComune(comuneDaAggiungere);
+            StringBuilder sb = new StringBuilder();
+            sb.append("Ambito territoriale:\n");
+            List<Comune> ambitoTerritoriale = configService.getAmbitoTerritoriale();
+            for (Comune comune : ambitoTerritoriale) {
+                sb.append(" - ").append(comune.toString()).append("\n");
+            }
+            initConfigView.mostraAmbito(sb.toString());
             initConfigView.resetComune();
-            initConfigView.moveCursorToNumeroMax();
+            initConfigView.moveCursorToProsegui();
         } catch (Exception e) {
-            initConfigView.showComuneErrorMessage(e.getMessage());
+            initConfigView.mostraErroreComune(e.getMessage());
             initConfigView.moveCursorToComune();
         }
     }
 
     public void conferma(String numeroMaxPersone) {
-        if (!configService.esisteAlmenoUnComune()) {
-            initConfigView.showPopupMessage("Errore", "Inserisci almeno un comune.");
-            initConfigView.moveCursorToComune();
-            return;
-        }
         try {
             configService.setNumeroMaxPersone(numeroMaxPersone);
-            Config config = configService.getConfig();
-            StringBuilder sb = new StringBuilder();
-            sb.append("Ambito territoriale:\n");
-            for (Comune comune : config.getAmbitoTerritoriale()) {
-                sb.append(" - ").append(comune.toString()).append("\n");
-            }
-            sb.append(String.format("\nNumero max persone: %d\n", config.getNumeroMassimoIscrizioniPrenotazione()));
-            initConfigView.showConfirmMessage(sb.toString());
+            gui.removeWindow(gui.getActiveWindow());
         } catch (Exception e) {
-            initConfigView.showNumeroMaxErrorMessage(e.getMessage());
+            initConfigView.mostraErroreNumeroMax(e.getMessage());
             initConfigView.resetNumeroMax();
             initConfigView.moveCursorToNumeroMax();
         }
-    }
-
-    public void nonConferma() {
-        initConfigView.resetNumeroMax();
-        initConfigView.resetComune();
-        initConfigView.resetError();
-        initConfigView.moveCursorToComune();
-    }
-
-    public void haConfermato() {
-        gui.removeWindow(gui.getActiveWindow());
     }
 
     public void initDefault() {
@@ -122,5 +104,18 @@ public class ConfigController {
             return false;
         }
         return true;
+    }
+
+    public void confermaAmbito() {
+        try {
+            if (!configService.esisteAlmenoUnComune()) {
+                initConfigView.mostraErroreComune("Inserisci almeno un comune");
+                initConfigView.moveCursorToComune();
+                return;
+            }
+            initConfigView.mostraNumeroMaxPanel();
+        } catch (Exception e) {
+            initConfigView.mostraErroreComune(e.getMessage());
+        }
     }
 }

@@ -11,7 +11,7 @@ public class LoginController {
     private final LoginService loginService;
     private final LoginView view;
     private final MultiWindowTextGUI gui;
-    CambioPasswordView cambioPasswordView;
+    private CambioPasswordView cambioPasswordView;
 
     public LoginController(MultiWindowTextGUI gui) {
         this.loginService = new LoginService();
@@ -30,7 +30,7 @@ public class LoginController {
             ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUtente);
             configuratorController.start();
         } else {
-            view.showErrorMessage("Ruolo non riconosciuto");
+            view.mostraErrore("Ruolo non riconosciuto");
         }
     }
 
@@ -39,47 +39,47 @@ public class LoginController {
             Utente utente = loginService.authenticate(username, password);
 
             if (utente == null) {
-                view.showPopupMessage("Credenziali errate. Riprova");
+                view.resetLogin();
+                view.mostraErrore("Credenziali errate");
                 return;
             }
 
             if (utente.isFirstLogin()) {
+                view.close();
                 cambioPasswordView = new CambioPasswordView(this, utente);
                 gui.addWindowAndWait(cambioPasswordView.creaFinestra());
-                view.resetLogin();
+                gui.addWindowAndWait(view.creaFinestra());
             } else {
+                view.close();
                 utente = loginService.updateLastLogin(utente);
                 handleSpecificUser(utente);
+                gui.addWindowAndWait(view.creaFinestra());
             }
         } catch (Exception e) {
-            view.showErrorMessage(e.getMessage());
+            view.resetLogin();
+            view.mostraErrore(e.getMessage());
         }
     }
 
     public void updatePassword(Utente utente, String newPassword, String newPasswordConfirm) {
-
-        // Faccio i controlli nel controller in questo caso perchè è una cosa slegata
-        // dal serviceCambioPassword
+        // Faccio i controlli nel controller in questo caso perchè è una cosa slegata dal serviceCambioPassword
         if (newPassword.isEmpty() || newPasswordConfirm.isEmpty()) {
-            cambioPasswordView.mostraErrore("I campi non possono essere vuoti.");
             cambioPasswordView.resetCampi();
+            cambioPasswordView.mostraErrore("I campi non possono essere vuoti");
             return;
         }
         if (!newPassword.equals(newPasswordConfirm)) {
-            cambioPasswordView.mostraErrore("Le password non coincidono.");
             cambioPasswordView.resetCampi();
+            cambioPasswordView.mostraErrore("Le password non coincidono");
             return;
         }
         try {
             loginService.updatePassword(utente, newPassword);
             cambioPasswordView.close();
         } catch (Exception e) {
-            cambioPasswordView.mostraErrore(e.getMessage());
             cambioPasswordView.resetCampi();
+            cambioPasswordView.mostraErrore(e.getMessage());
         }
     }
 
-    public WindowBasedTextGUI getGui() {
-        return this.gui;
-    }
 }

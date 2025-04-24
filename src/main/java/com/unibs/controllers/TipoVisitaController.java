@@ -39,7 +39,7 @@ public class TipoVisitaController {
         // Controllo che il luogo sia stato selezionato, non è compito del service
         // perchè lui si aspetta un nomeLuogo
         if (nomeLuogoSelezionato.equalsIgnoreCase("Nessun luogo selezionato")) {
-            aggiungiTipoVisitaView.mostraErrore("Seleziona un luogo prima di preseguire");
+            aggiungiTipoVisitaView.mostraErrore("Seleziona un luogo prima di proseguire");
             return;
         }
         try {
@@ -47,6 +47,13 @@ public class TipoVisitaController {
                     dataFine, oraInizio, durata, entrataLibera,
                     numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari, giorni, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
             aggiungiTipoVisitaView.clearAll();
+            StringBuilder sb = new StringBuilder();
+            sb.append("Tipi di visita aggiunti:\n");
+            List<String> tipiVisita = tipoVisitaService.getPreviewTipiVisita();
+            for (String tipi : tipiVisita) {
+                sb.append(" - ").append(tipi).append("\n");
+            }
+            aggiungiTipoVisitaView.mostraVisite(sb.toString());
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
@@ -63,7 +70,7 @@ public class TipoVisitaController {
     public void chiudiFinestraAggiungiTipoVisita() {
         try {
             if (tipoVisitaService.isEmpty()) {
-                aggiungiTipoVisitaView.mostraErrore("Inserisci almeno un tipo di visita.");
+                aggiungiTipoVisitaView.mostraErrore("Inserisci almeno un tipo di visita");
                 return;
             }
         } catch (Exception e) {

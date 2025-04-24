@@ -16,8 +16,7 @@ public class SelezionaLuogoView {
     }
 
     public Window creaFinestra() {
-        Window window = new BasicWindow("Seleziona Luogo");
-
+        Window window = new BasicWindow("Seleziona luogo");
         Panel panel = new Panel();
         List<Luogo> luoghi = luogoController.getLuoghi();  // Ottieni la lista dei luoghi
         for (Luogo luogo: luoghi) {
@@ -29,7 +28,7 @@ public class SelezionaLuogoView {
             }));
         }
 
-        panel.addComponent(new Button("+ Aggiungi luogo", () -> {
+        panel.addComponent(new Button("+ Aggiungi un luogo", () -> {
             luogoController.creaInterfacciaAggiungiLuogo(nuovoLuogo -> {
                 if (nuovoLuogo != null && onLuogoSelected != null) {
                     onLuogoSelected.accept(nuovoLuogo);
@@ -39,6 +38,7 @@ public class SelezionaLuogoView {
             window.close();
         }));
 
+        window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
         return window;
     }

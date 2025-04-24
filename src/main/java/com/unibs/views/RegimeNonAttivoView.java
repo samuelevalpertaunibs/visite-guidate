@@ -2,7 +2,7 @@ package com.unibs.views;
 import com.googlecode.lanterna.gui2.*;
 
 
-public class RegimeNonAttivo {
+public class RegimeNonAttivoView {
 
     public Window creaFinestra() {
         Window window = new BasicWindow("ATTENZIONE");

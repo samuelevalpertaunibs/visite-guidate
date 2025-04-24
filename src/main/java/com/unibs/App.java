@@ -13,6 +13,9 @@ public class App {
             Screen screen = new DefaultTerminalFactory().createScreen();
             screen.startScreen();
 
+            AppContext.SCREEN_WIDTH = screen.getTerminalSize().getColumns();
+            AppContext.SCREEN_HEIGHT = screen.getTerminalSize().getRows();
+
             MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
             LoginController loginController = new LoginController(gui);
 

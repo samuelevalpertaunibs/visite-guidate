@@ -147,4 +147,8 @@ public class TipoVisitaService {
 	public List<String> getTitoliByLuogoId(int luogoId) {
 		return TipoVisitaDao.getTitoliByLuogoId(luogoId);
 	}
+
+	public List<String> getPreviewTipiVisita() {
+		return TipoVisitaDao.getPreviewTipiVisita();
+	}
 }

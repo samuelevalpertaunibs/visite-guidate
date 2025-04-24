@@ -39,10 +39,6 @@ public class LuogoController {
         this.gui.addWindowAndWait(view.creaFinestra());
     }
 
-    public WindowBasedTextGUI getGui() {
-        return gui;
-    }
-
     public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) {
         return luogoService.aggiungiLuogo(new Luogo(-1, nome, descrizione, comune));
     }

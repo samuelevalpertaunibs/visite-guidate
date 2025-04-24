@@ -14,7 +14,7 @@ public class LoginService {
     public Utente authenticate(String username, String password)
             throws DatabaseException, IllegalArgumentException {
         if (username.isBlank() || password.isBlank())
-            throw new IllegalArgumentException("Username e password non possono essere vuoti.");
+            throw new IllegalArgumentException("Username e password non possono essere vuoti");
 
         Utente utente = UtenteDao.findByUsername(username);
 
@@ -34,8 +34,17 @@ public class LoginService {
         String hashedNewPassword = hashPassword(newPassword, salt);
 
         if (oldPassword.equals(hashedNewPassword)) {
-            throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente.");
+            throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente");
         }
+
+        if (newPassword.length() < 8 ||
+                !newPassword.matches(".*[a-z].*") ||
+                !newPassword.matches(".*[A-Z].*") ||
+                !newPassword.matches(".*\\d.*") ||
+                !newPassword.matches(".*[+*@?=)(/&%$£!].*")) {
+            throw new IllegalArgumentException("La nuova password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero ed un carattere speciale");
+        }
+
         utente.setPasswordHash(hashedNewPassword);
         utente.setLastLogin(LocalDate.now());
 

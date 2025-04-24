@@ -262,4 +262,23 @@ public class TipoVisitaDao {
 
         return false;
     }
+
+    public static ArrayList<String> getPreviewTipiVisita() {
+        String sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id";
+        ArrayList<String> tipiVisita = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                tipiVisita.add(rs.getString(1) + " presso " + rs.getString(2));
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore durante il controllo della tabella tipo_visita: " + e.getMessage());
+        }
+
+        return tipiVisita;
+    }
 }
