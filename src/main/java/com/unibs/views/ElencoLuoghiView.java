@@ -21,7 +21,7 @@ public class ElencoLuoghiView {
         List<Luogo> luoghi = luogoController.getLuoghi();
 
         for (Luogo luogo : luoghi) {
-            String message = String.format("-\tNome: %s\n\tDescrizione: %s\n\tComune: %s", luogo.getNome(), luogo.getDescrizione(), luogo.getComune());
+            String message = String.format("Nome: %s\nDescrizione: %s\nComune: %s", luogo.getNome(), luogo.getDescrizione(), luogo.getComune());
             panel.addComponent(new Label(message));
             panel.addComponent(new EmptySpace());
         }

@@ -36,8 +36,7 @@ public class TipoVisitaController {
             String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
             String[] volontari, String[] giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) {
 
-        // Controllo che il luogo sia stato selezionato, non è compito del service
-        // perchè lui si aspetta un nomeLuogo
+        // Controllo che il luogo sia stato selezionato, non è compito del service perchè lui si aspetta un nomeLuogo
         if (nomeLuogoSelezionato.equalsIgnoreCase("Nessun luogo selezionato")) {
             aggiungiTipoVisitaView.mostraErrore("Seleziona un luogo prima di proseguire");
             return;
@@ -48,7 +47,6 @@ public class TipoVisitaController {
                     numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari, giorni, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
             aggiungiTipoVisitaView.clearAll();
             StringBuilder sb = new StringBuilder();
-            sb.append("Tipi di visita aggiunti:\n");
             List<String> tipiVisita = tipoVisitaService.getPreviewTipiVisita();
             for (String tipi : tipiVisita) {
                 sb.append(" - ").append(tipi).append("\n");

@@ -26,11 +26,11 @@ public class ElencoLuoghiConVisiteAssociate {
             int luogoId = luogo.getId();
             List<String> titoliTipiVisita = tipoVisitaController.getTitoliByLuogoId(luogoId);
 
-            panel.addComponent(new Label(luogo.getNome()));
+            panel.addComponent(new Label("Luogo: " + luogo.getNome()));
 
             String visitaText = titoliTipiVisita.isEmpty()
-                    ? "\tNessun tipo di visita associato"
-                    : "\t" + String.join(", ", titoliTipiVisita);
+                    ? "Nessun tipo di visita associato"
+                    : "Tipi di visita associati: " + String.join(", ", titoliTipiVisita);
 
             panel.addComponent(new Label(visitaText));
             panel.addComponent(new EmptySpace());

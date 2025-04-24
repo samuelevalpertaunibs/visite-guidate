@@ -26,11 +26,11 @@ public class ElencoVolontariView {
             int volontarioId = volontario.getId();
             List<String> titoloTipiVisita = tipoVisitaController.getTitoliByVolontarioId(volontarioId);
 
-            panel.addComponent(new Label(volontario.getUsername()));
+            panel.addComponent(new Label("Volontario: " + volontario.getUsername()));
 
             String visitaText = titoloTipiVisita.isEmpty()
-                    ? "\tNessun tipo di visita associato"
-                    : "\t" + String.join(", ", titoloTipiVisita);
+                    ? "Nessun tipo di visita associato"
+                    : "Visite associate: " + String.join(", ", titoloTipiVisita);
 
             panel.addComponent(new Label(visitaText));
             panel.addComponent(new EmptySpace());
