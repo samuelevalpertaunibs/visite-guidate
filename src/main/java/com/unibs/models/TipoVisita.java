@@ -14,9 +14,11 @@ public class TipoVisita {
     private int numMinPartecipanti;
     private int numMaxPartecipanti;
     private Luogo luogo;
-    private final PuntoIncontro puntoIncontro;
+    private PuntoIncontro puntoIncontro;
+    private final int id;
 
-    public TipoVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro) {
+    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro) {
+        this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;
         this.dataInizio = dataInizio;
@@ -30,12 +32,17 @@ public class TipoVisita {
         this.puntoIncontro = puntoIncontro;
     }
 
-    public TipoVisita(String titolo, String descrizione, PuntoIncontro puntoIncontro, LocalTime oraInizio, boolean entrataLibera) {
+    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti, int numMaxPartecipanti) {
+        this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;
-        this.puntoIncontro = puntoIncontro;
+        this.dataInizio = dataInizio;
+        this.dataFine = dataFine;
         this.oraInizio = oraInizio;
+        this.durataMinuti = durataMinuti;
         this.entrataLibera = entrataLibera;
+        this.numMinPartecipanti = numMinPartecipanti;
+        this.numMaxPartecipanti = numMaxPartecipanti;
     }
 
     public String getTitolo() {
@@ -50,6 +57,18 @@ public class TipoVisita {
         return oraInizio;
     }
 
+    public LocalDate getDataInizio() {
+        return dataInizio;
+    }
+
+    public LocalDate getDataFine() {
+        return dataFine;
+    }
+
+    public int getDurataMinuti() {
+        return durataMinuti;
+    }
+
     public boolean isEntrataLibera() {
         return entrataLibera;
     }
@@ -61,4 +80,20 @@ public class TipoVisita {
     public PuntoIncontro getPuntoIncontro() {
         return puntoIncontro;
     }
+
+    @Override
+    public String toString() {
+        return "Titolo: " + titolo + "\n" +
+                "Descrizione: " + descrizione + "\n" +
+                "Data inizio: " + dataInizio + "\n" +
+                "Data fine: " + dataFine + "\n" +
+                "Ora inizio: " + oraInizio + "\n" +
+                "Durata (minuti): " + durataMinuti + "\n" +
+                "Entrata libera: " + (entrataLibera ? "Sì" : "No") + "\n" +
+                "Numero minimo partecipanti: " + numMinPartecipanti + "\n" +
+                "Numero massimo partecipanti: " + numMaxPartecipanti + "\n" +
+                "Luogo: " + (luogo != null ? luogo.getNome() : "N/D") + "\n" +
+                "Punto incontro: " + (puntoIncontro != null ? puntoIncontro.toString() : "N/D");
+    }
+
 }

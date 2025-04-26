@@ -22,9 +22,6 @@ public class InitController {
     }
 
     public boolean checkRegime() {
-        if (configController.isInitialized()) {
-            return configController.checkRegime();
-        }
-        return false;
+        return configController.checkRegime();
     }
 }

@@ -1,9 +1,12 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.models.TipoVisita;
+import com.unibs.models.Volontario;
 import com.unibs.services.TipoVisitaService;
 import com.unibs.views.AggiungiTipoVisitaView;
 import com.unibs.views.ElencoLuoghiConVisiteAssociate;
+import com.unibs.views.ElencoVisiteVolontarioView;
 import com.unibs.views.ElencoVolontariView;
 
 import java.util.List;
@@ -48,8 +51,8 @@ public class TipoVisitaController {
             aggiungiTipoVisitaView.clearAll();
             StringBuilder sb = new StringBuilder();
             List<String> tipiVisita = tipoVisitaService.getPreviewTipiVisita();
-            for (String tipi : tipiVisita) {
-                sb.append(" - ").append(tipi).append("\n");
+            for (String tipo : tipiVisita) {
+                sb.append(" - ").append(tipo).append("\n");
             }
             aggiungiTipoVisitaView.mostraVisite(sb.toString());
         } catch (Exception e) {
@@ -99,5 +102,14 @@ public class TipoVisitaController {
 
     public void apriVisualizzaVisitePerLuoghi() {
         gui.addWindowAndWait(elencoLuoghiConVisiteAssociate.creaFinestra());
+    }
+
+    public void apriVisualizzaVisiteVolontario(Volontario volontario) {
+        ElencoVisiteVolontarioView view = new ElencoVisiteVolontarioView(volontario, this);
+        gui.addWindowAndWait(view.creaFinestra());
+    }
+
+    public List<TipoVisita> getVisiteByVolontario(int id) {
+        return tipoVisitaService.getVisiteByVolontario(id);
     }
 }

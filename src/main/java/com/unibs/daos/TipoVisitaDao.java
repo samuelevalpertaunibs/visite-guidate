@@ -8,7 +8,10 @@ import java.util.List;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
+import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
+import com.unibs.models.PuntoIncontro;
+import com.unibs.models.TipoVisita;
 
 public class TipoVisitaDao {
 
@@ -17,8 +20,6 @@ public class TipoVisitaDao {
                                       Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) {
 
         String insertSql = "INSERT INTO tipi_visita (titolo, descrizione ,data_inizio, data_fine, ora_inizio, durata_minuti, entrata_libera, num_min_partecipanti, num_max_partecipanti, luogo_id, indirizzo_incontro, comune_incontro, provincia_incontro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        String insertLuogoVisitaNN = "INSERT INTO tipi_visita_luoghi (tipo_visita_id, luogo_id) VALUES (?, ?)";
 
         String insertVolontarioNN = "INSERT INTO tipi_visita_volontari (tipo_visita_id, volontario_id) VALUES (?, ?)";
 
@@ -58,17 +59,6 @@ public class TipoVisitaDao {
                     tipoVisitaId = rs.getInt(1);
                 } else {
                     throw new DatabaseException("Errore nel recupero dell'ID generato.");
-                }
-
-                // Inserisce l'associazione tra visita e luogo
-                try (PreparedStatement stmt2 = conn.prepareStatement(insertLuogoVisitaNN)) {
-                    stmt2.setInt(1, tipoVisitaId);
-                    stmt2.setInt(2, luogoDaAssociare.getId());
-
-                    affectedRows = stmt2.executeUpdate();
-                    if (affectedRows == 0) {
-                        throw new DatabaseException("Associazione tra luogo e tipo visita fallita.");
-                    }
                 }
 
                 // Inserisce ogni volontario nella tabella tipovisita_volontario_nn
@@ -171,7 +161,7 @@ public class TipoVisitaDao {
 
     public static List<String> getTitoliByLuogoId(int luogoId) {
         List<String> titoliTipiVisita = new ArrayList<>();
-        String sql = "SELECT titolo FROM tipi_visita JOIN tipi_visita_luoghi ON tipi_visita.id = tipi_visita_luoghi.tipo_visita_id WHERE tipi_visita.luogo_id = ?";
+        String sql = "SELECT titolo FROM tipi_visita WHERE luogo_id = ?";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -281,4 +271,98 @@ public class TipoVisitaDao {
 
         return tipiVisita;
     }
+
+    public static TipoVisita getVisitaByTitolo(String titolo) {
+        String sql = """
+        SELECT tv.id, tv.titolo, tv.descrizione, tv.data_inizio, tv.data_fine, tv.ora_inizio,
+               tv.durata_minuti, tv.entrata_libera, tv.num_min_partecipanti, tv.num_max_partecipanti,
+               l.id AS luogo_id, l.nome AS luogo_nome, l.descrizione AS luogo_descrizione,
+               c.id AS comune_id, c.nome AS comune_nome, c.provincia AS comune_provincia, c.regione AS comune_regione,
+               tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro
+        FROM tipi_visita tv
+        JOIN luoghi l ON tv.luogo_id = l.id
+        JOIN comuni c ON l.comune_id = c.id
+        WHERE tv.titolo = ?
+    """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, titolo);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+
+                Comune comune = new Comune(
+                        rs.getInt("comune_id"),
+                        rs.getString("comune_nome"),
+                        rs.getString("comune_provincia"),
+                        rs.getString("comune_regione")
+                        );
+
+                Luogo luogo = new Luogo(
+                        rs.getInt("luogo_id"),
+                        rs.getString("luogo_nome"),
+                        rs.getString("luogo_descrizione"),
+                        comune
+                );
+
+                PuntoIncontro puntoIncontro = new PuntoIncontro(
+                        rs.getString("indirizzo_incontro"),
+                        rs.getString("comune_incontro"),
+                        rs.getString("provincia_incontro")
+                );
+
+                return new TipoVisita(
+                        rs.getInt("id"),
+                        rs.getString("titolo"),
+                        rs.getString("descrizione"),
+                        rs.getDate("data_inizio").toLocalDate(),
+                        rs.getDate("data_fine").toLocalDate(),
+                        rs.getTime("ora_inizio").toLocalTime(),
+                        rs.getInt("durata_minuti"),
+                        rs.getBoolean("entrata_libera"),
+                        rs.getInt("num_min_partecipanti"),
+                        rs.getInt("num_max_partecipanti"),
+                        luogo,
+                        puntoIncontro
+                );
+            } else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            throw new DatabaseException("Errore nel recupero del tipo visita con titolo: " + titolo + " - " + e.getMessage());
+        }
+    }
+
+//    public static ArrayList<TipoVisita> getByVolontarioIdAndMese(int volontarioId, int mese) {
+//        ArrayList<TipoVisita> ids = new ArrayList<>();
+//        String query = """
+//                SELECT tv.id FROM tipi_visita tv
+//                JOIN tipi_visita_volontari nn  ON tv.id = nn.tipo_visita_id
+//                WHERE nn.volontario_id = ?
+//                AND MONTH(tv.data_inizio) <= ?
+//                AND MONTH(tv.data_fine) >= ?
+//               """;
+//
+//        try (Connection conn = DatabaseManager.getConnection();
+//             PreparedStatement stmt = conn.prepareStatement(query)) {
+//
+//            stmt.setInt(1, volontarioId);
+//            stmt.setInt(2, mese);
+//            stmt.setInt(3, mese);
+//            ResultSet rs = stmt.executeQuery();
+//
+//            while (rs.next()) {
+//                int id = rs.getInt("id");
+//                ids.add(id);
+//            }
+//
+//            return ids.toArray(new Integer[0]);
+//
+//        } catch (SQLException e) {
+//            throw new DatabaseException("Errore nel recupero dei tipi visita associati al volontario: " + volontarioId + " - " + e.getMessage());
+//        }
+//    }
 }

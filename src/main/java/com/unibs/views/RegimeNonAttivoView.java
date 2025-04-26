@@ -1,6 +1,8 @@
 package com.unibs.views;
 import com.googlecode.lanterna.gui2.*;
 
+import java.util.List;
+
 
 public class RegimeNonAttivoView {
 
@@ -12,7 +14,7 @@ public class RegimeNonAttivoView {
 
         Button closeButton = new Button("Chiudi", window::close);
         panel.addComponent(closeButton);
-
+        window.setHints(List.of(Window.Hint.CENTERED, Window.Hint.MENU_POPUP));
         window.setComponent(panel);
         return window;
     }

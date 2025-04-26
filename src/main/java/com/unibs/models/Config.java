@@ -1,21 +1,21 @@
 package com.unibs.models;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 
 public class Config {
 
-    private final ArrayList<Comune> ambitoTerritoriale;
+    private List<Comune> ambitoTerritoriale;
     private int numeroMassimoIscrizioniPrenotazione;
     private final LocalDate initializedOn;
 
-    public Config(ArrayList<Comune> ambitoTerritoriale, int numeroMassimoIscrizioniPrenotazione, LocalDate initializedOn) {
+    public Config(List<Comune> ambitoTerritoriale, int numeroMassimoIscrizioniPrenotazione, LocalDate initializedOn) {
         this.ambitoTerritoriale = ambitoTerritoriale;
         this.numeroMassimoIscrizioniPrenotazione = numeroMassimoIscrizioniPrenotazione;
         this.initializedOn = initializedOn;
     }
 
-    public ArrayList<Comune> getAmbitoTerritoriale() {
+    public List<Comune> getAmbitoTerritoriale() {
         return ambitoTerritoriale;
     }
 
@@ -44,4 +44,11 @@ public class Config {
     }
 
 
+    public void setAmbitoTerritoriale(List<Comune> ambitoTerritoriale) {
+        this.ambitoTerritoriale = ambitoTerritoriale;
+    }
+
+    public int getNumeroComuni() {
+        return ambitoTerritoriale.size();
+    }
 }

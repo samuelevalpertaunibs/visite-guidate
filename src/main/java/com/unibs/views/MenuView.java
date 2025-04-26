@@ -16,10 +16,11 @@ public class MenuView {
     }
 
     // Mostra il menu con le opzioni dinamiche
-    public void mostraMenu(List<MenuOption> options) {
-        Window window = new BasicWindow("Menu principale");
+    public void mostraMenu(List<MenuOption> options, String title) {
+        Window window = new BasicWindow(title);
 
         Panel menuPanel = new Panel();
+        menuPanel.addComponent(new EmptySpace());
         menuPanel.setLayoutManager(new GridLayout(1));
 
         // Aggiungi i bottoni per ogni opzione

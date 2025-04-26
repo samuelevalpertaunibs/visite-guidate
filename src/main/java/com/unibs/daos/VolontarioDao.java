@@ -55,4 +55,9 @@ public class VolontarioDao {
             throw new DatabaseException("Errore durante la ricerca del volontario per nome: " + e.getMessage());
         }
     }
+
+//    public static List<LocalDate> getDateSelezionabiliPerVolontario(int volontarioId) {
+//        ArrayList<LocalDate> date = new ArrayList<>();
+//        String query = "SELECT * FROM utenti WHERE ruolo_id = 2";
+//    }
 }
