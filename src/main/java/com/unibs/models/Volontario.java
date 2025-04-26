@@ -9,4 +9,7 @@ public class Volontario extends Utente {
         super(id, username, passwordHash, salt, ruolo, lastLogin);
     }
 
+    public Volontario(Utente utente) {
+        super(utente.getId(), utente.getUsername(), utente.getUsername(), utente.getSalt(), 2, utente.getLastLogin());
+    }
 }

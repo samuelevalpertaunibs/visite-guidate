@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.VisitaService;
 import com.unibs.views.ElencoVisiteView;
 import com.unibs.models.Visita;
+import com.unibs.views.ElencoVisiteVolontarioView;
 
 import java.util.List;
 

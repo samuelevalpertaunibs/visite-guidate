@@ -14,8 +14,6 @@ public class LuogoController {
     private final WindowBasedTextGUI gui;
     private final ElencoLuoghiView elencoLuoghiView;
 
-
-
     protected LuogoController(WindowBasedTextGUI gui) {
         this.luogoService = new LuogoService();
         this.elencoLuoghiView = new ElencoLuoghiView(this);
@@ -23,7 +21,7 @@ public class LuogoController {
     }
 
     public List<Luogo> getLuoghi() {
-        return luogoService.getAllLuoghi();
+        return luogoService.findAll();
     }
 
     public void creaInterfacciaAggiungiLuogo(Consumer<Luogo> onLuogoCreated) {
@@ -40,7 +38,7 @@ public class LuogoController {
     }
 
     public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) {
-        return luogoService.aggiungiLuogo(new Luogo(-1, nome, descrizione, comune));
+        return luogoService.aggiungiLuogo(nome, descrizione, comune);
     }
 
     public void apriVisualizzaElencoLuoghi() {

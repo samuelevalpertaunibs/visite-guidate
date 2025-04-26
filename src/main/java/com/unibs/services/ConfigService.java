@@ -5,85 +5,125 @@ import com.unibs.daos.ConfigDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * ConfigService
  */
 public class ConfigService {
+    private final ConfigDao configDao;
+    private final Logger LOGGER = Logger.getLogger(ConfigService.class.getName());
 
-    public void aggiungiComune(Comune comuneDaAggiungere) throws DatabaseException, IllegalArgumentException {
-        Config config = getConfig();
-        if (config == null) {
-            throw new DatabaseException("Config non trovata");
+    public ConfigService() {
+        this.configDao = new ConfigDao();
+    }
+
+    public Config getConfig() throws DatabaseException {
+        try {
+            Config config = configDao.getConfig()
+                    .orElseThrow(() -> new DatabaseException("Configurazione non trovata."));
+
+            List<Comune> ambitoTerritoriale = configDao.getAmbitoTerritoriale();
+            config.setAmbitoTerritoriale(ambitoTerritoriale);
+
+            return config;
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dell'ambito territoriale", e);
+            throw new DatabaseException("Ambito territoriale non trovato.");
         }
+    }
 
-        if (comuneDaAggiungere.getNome().isBlank() || comuneDaAggiungere.getProvincia().isBlank()
-                || comuneDaAggiungere.getRegione().isBlank())
+    public void aggiungiComune(String nome, String provincia, String regione) throws DatabaseException, IllegalArgumentException {
+        if (nome.isBlank() || provincia.isBlank() || regione.isBlank())
             throw new IllegalArgumentException("I campi non possono essere vuoti.");
+
+        Config config = getConfig();
+        Comune comuneDaAggiungere = new Comune(0, nome, provincia, regione);
 
         if (config.doesInclude(comuneDaAggiungere))
             throw new IllegalArgumentException("Il comune è gia presente.");
 
-        ConfigDao.aggiungiComune(comuneDaAggiungere);
+        try {
+            configDao.aggiungiComune(comuneDaAggiungere);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del comune", e);
+            throw new DatabaseException("Impossibile inserire il comune.");
+
+        }
     }
 
-    public Config getConfig() {
-        return ConfigDao.getConfig();
-    }
-
-    public void initDefault() {
-        ConfigDao.initDefault();
+    public void initDefault() throws DatabaseException {
+        try {
+            configDao.initDefault();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante l'inizializzazione delle configurazioni di default", e);
+            throw new DatabaseException("Errore durante l'inizializzazione della configurazione.");
+        }
     }
 
     public boolean isInitialized() {
-        Config config = ConfigDao.getConfig();
-        if (config == null)
+        try {
+            Config config = getConfig();
+            return config.getInitializedOn() != null;
+        } catch (DatabaseException e) {
             return false;
-        return config.getInitializedOn() != null;
+        }
     }
 
-    public void setNumeroMaxPersone(String numeroMaxPersone) {
+    public void setNumeroMaxPersone(String numeroMaxPersone) throws DatabaseException {
         try {
             int numeroMax = Integer.parseInt(numeroMaxPersone);
             if (numeroMax < 1 || numeroMax > 100)
                 throw new IllegalArgumentException("Il numero max deve essere positivo e minore di 100.");
-            ConfigDao.setNumeroMax(numeroMax);
+            configDao.setNumeroMax(numeroMax);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Il numero massimo di persone non è valido.");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la modifica della configurazione", e);
+            throw new DatabaseException("Errore durante la modifica del numero massimo di persone.");
         }
 
     }
 
     public boolean esisteAlmenoUnComune() {
-        return ConfigDao.getNumeroComuni() > 0;
+        try {
+            Config config = getConfig();
+            return config.getNumeroComuni() > 0;
+        } catch (DatabaseException e) {
+            return false;
+        }
     }
 
-    public List<Comune> getAmbitoTerritoriale() {
-        return ConfigDao.getAmbitoTerritoriale();
-    }
-
-    public void setInitializedOn(LocalDate initializedOn) {
-        ConfigDao.setInitializedOn(initializedOn);
-    }
-
-    public int getNumeroMaxPersone() {
-        return ConfigDao.getNumeroMax();
+    public void setInitializedOn(LocalDate initializedOn) throws DatabaseException {
+        try {
+            configDao.setInitializedOn(initializedOn);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la modifica della configurazione", e);
+            throw new DatabaseException("Errore durante la modifica della configurazione.");
+        }
     }
 
     public boolean regimeAttivo() {
-        Config config = ConfigDao.getConfig();
-        if (config == null)
-            return false;
-        if (config.getInitializedOn() == null)
-            return false;
+        try {
+            Config config = getConfig();
+            if (config.getInitializedOn() == null)
+                return false;
 
-        LocalDate initializedOn = config.getInitializedOn();
-        LocalDate attivazioneRegime = initializedOn.withDayOfMonth(16);
-        if (initializedOn.getDayOfMonth() > 16)
-            attivazioneRegime = attivazioneRegime.plusMonths(1);
+            LocalDate initializedOn = config.getInitializedOn();
+            LocalDate attivazioneRegime = initializedOn.withDayOfMonth(16);
 
-        return !LocalDate.now().isBefore(attivazioneRegime);
+            if (initializedOn.getDayOfMonth() > 16)
+                attivazioneRegime = attivazioneRegime.plusMonths(1);
+
+            return !LocalDate.now().isBefore(attivazioneRegime);
+
+        } catch (DatabaseException e) {
+            return false;
+        }
     }
 }

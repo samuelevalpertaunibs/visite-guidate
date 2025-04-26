@@ -6,7 +6,7 @@ public class Luogo {
     private final String descrizione;
     private Comune comune;
 
-    public Luogo(int id, String nome, String descrizione, Comune comune) {
+    public Luogo(Integer id, String nome, String descrizione, Comune comune) {
         this.id = id;
         this.nome = nome;
         this.descrizione = descrizione;
@@ -32,7 +32,7 @@ public class Luogo {
     @Override
     public String toString() {
         return String.format(
-                "%s, %s\n\tSituato a %s.",
+                "Nome: %s\nDescrizione: %s\nComune: %s",
                 nome, descrizione, comune.toString());
     }
 
@@ -44,7 +44,7 @@ public class Luogo {
         this.comune = comune;
     }
 
-    public int getIdComune() {
+    public int getComuneId() {
         return comune.getId();
     }
 

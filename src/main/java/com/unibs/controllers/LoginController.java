@@ -29,6 +29,9 @@ public class LoginController {
         if (currentUtente.getRole() == 1) {
             ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUtente);
             configuratorController.start();
+        } else if (currentUtente.getRole() == 2) {
+            VolontarioController volontarioController = new VolontarioController(this.gui, currentUtente);
+            volontarioController.start();
         } else {
             view.mostraErrore("Ruolo non riconosciuto");
         }

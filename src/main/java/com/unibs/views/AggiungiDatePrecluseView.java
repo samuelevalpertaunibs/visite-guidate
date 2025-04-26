@@ -48,6 +48,5 @@ public class AggiungiDatePrecluseView {
 
     public void mostraSuccesso(String message) {
         feedbackLabel.setText(message);
-        feedbackLabel.setForegroundColor(TextColor.ANSI.GREEN);
     }
 }

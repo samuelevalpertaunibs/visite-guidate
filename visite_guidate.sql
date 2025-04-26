@@ -82,15 +82,6 @@ CREATE TABLE utenti
     FOREIGN KEY (ruolo_id) REFERENCES ruoli (id) ON DELETE CASCADE
 );
 
-CREATE TABLE tipi_visita_luoghi
-(
-    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    tipo_visita_id INT UNSIGNED NOT NULL,
-    luogo_id       INT UNSIGNED NOT NULL,
-    FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita (id) ON DELETE CASCADE,
-    FOREIGN KEY (luogo_id) REFERENCES luoghi (id) ON DELETE CASCADE
-);
-
 CREATE TABLE tipi_visita_volontari
 (
     id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -130,7 +121,7 @@ VALUES (1, 'CONF'),
 INSERT INTO `utenti` (`username`, `password_hash`, `salt`, `ruolo_id`, `last_login`)
 VALUES ('conf', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e', 0xb58f6b3d21a3058fd90df2e8f8f1afc0,
         1, NULL),
-       ('volontario1', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e',
+       ('vol1', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e',
         0xb58f6b3d21a3058fd90df2e8f8f1afc0, 2, NULL),
-       ('volontario2', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e',
+       ('vol2', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e',
         0xb58f6b3d21a3058fd90df2e8f8f1afc0, 2, NULL);

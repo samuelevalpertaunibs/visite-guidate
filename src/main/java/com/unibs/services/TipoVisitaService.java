@@ -10,7 +10,9 @@ import com.unibs.daos.TipoVisitaDao;
 import com.unibs.daos.LuogoDao;
 import com.unibs.daos.VolontarioDao;
 import com.unibs.models.Luogo;
+import com.unibs.models.TipoVisita;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TipoVisitaService {
@@ -106,7 +108,7 @@ public class TipoVisitaService {
 
 		boolean entrataLiberaBool = entrataLibera.equals("Sì");
 
-		Luogo luogoDaAssociare = LuogoDao.getLuogoByNome(nomeLuogoSelezionato);
+		Luogo luogoDaAssociare = luogoDao.findByNome(nomeLuogoSelezionato);
 		if (luogoDaAssociare == null) {
 			throw new DatabaseException("Luogo non trovato.");
 		}
@@ -151,4 +153,17 @@ public class TipoVisitaService {
 	public List<String> getPreviewTipiVisita() {
 		return TipoVisitaDao.getPreviewTipiVisita();
 	}
+
+    public ArrayList<TipoVisita> getVisiteByVolontario(int id) {
+		ArrayList<TipoVisita> visite = new ArrayList<>();
+		for (String titolo: this.getTitoliByVolontarioId(id)) {
+			TipoVisita tipoVisita = TipoVisitaDao.getVisitaByTitolo(titolo);
+			if (tipoVisita == null) {
+				throw new DatabaseException("Errore durante il recupero di un tipo di visita");
+			}
+			visite.add(tipoVisita);
+		}
+
+		return visite;
+    }
 }

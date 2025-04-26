@@ -2,15 +2,18 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.unibs.models.MenuOption;
+import com.unibs.models.TipoVisita;
 import com.unibs.models.Utente;
+import com.unibs.models.Volontario;
+import com.unibs.views.InserisciDisponibilitaView;
 import com.unibs.views.MenuView;
 
 import java.util.Arrays;
 import java.util.List;
 
 
-public class ConfiguratorController implements IUserController {
-    private final Utente utente;
+public class VolontarioController implements IUserController {
+    private final Volontario utente;
     private final InitController initController;
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
@@ -19,8 +22,10 @@ public class ConfiguratorController implements IUserController {
     private final VisitaController visitaController;
     private final MenuView menuView;
     private final LuogoController luogoController;
+    private final MultiWindowTextGUI gui;
 
-    public ConfiguratorController(MultiWindowTextGUI gui, Utente currentUtente) {
+    public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente) {
+        this.gui = gui;
         this.configController = new ConfigController(gui);
         this.luogoController = new LuogoController(gui);
         this.volontariController = new VolontariController(gui);
@@ -29,12 +34,11 @@ public class ConfiguratorController implements IUserController {
         this.initController = new InitController(configController, tipoVisitaController);
         this.datePrecluseController = new DatePrecluseController(gui);
         this.menuView = new MenuView(gui);
-        this.utente = currentUtente;
+        this.utente = new Volontario(currentUtente);
     }
 
     @Override
     public void start() {
-        initController.assertInizializzazione();
         if (initController.checkRegime()){
             showMenu();
         }
@@ -43,12 +47,8 @@ public class ConfiguratorController implements IUserController {
     @Override
     public void showMenu() {
         List<MenuOption> menuOptions = Arrays.asList(
-                new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)),
-                new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)),
-                new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)),
-                new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi)),
-                new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)),
-                new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite))
+                new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::visualizzaVisite)),
+                new MenuOption("Inserisci disponibilità", (v) -> handleMenuAction(this::inserisciDisponibilita))
         );
         menuView.mostraMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ");
     }
@@ -61,28 +61,21 @@ public class ConfiguratorController implements IUserController {
         }
     }
 
-    private void visualizzaElencoVolontari() {
-        tipoVisitaController.apriVisualizzaVisitePerVolontari();
-    }
-
-    private void modificaNumeroMaxPersone() {
-        configController.apriModificaNumeroMax();
-    }
-
-    private void inserisciDatePrecluse() {
-        datePrecluseController.apriAggiungiDatePrecluse();
-    }
-
-    private void visualizzaElencoLuoghi() {
-        luogoController.apriVisualizzaElencoLuoghi();
-    }
-
-    private void visualizzaLuoghiConTipiVisita() {
-        tipoVisitaController.apriVisualizzaVisitePerLuoghi();
-    }
-
     private void visualizzaVisite() {
-        visitaController.apriVisualizzaVisitePerTipologia();
+        tipoVisitaController.apriVisualizzaVisiteVolontario(utente);
+    }
+
+    /*
+    Il volontario puo inserire le disponibilità per il mese i+1 entro il 15/i.
+    Il volontario puo sempre modificare le sue disponibilita in quanto il piano del mese i+1 verrà generato non prima del 16/i,
+    di conseguenza nel giorno in cui verra generato il piano del mese i+1 il volontario potrà modificare solo le disponibilita del mese i+2, senza creare conflitti.
+     */
+    private void inserisciDisponibilita() {
+        //new InserisciDisponibilitaView(this).mostra(gui, utente.getId());
+    }
+
+    public List<String> getDatePerVolontario(int volontarioId) {
+        return null;
     }
 
 }

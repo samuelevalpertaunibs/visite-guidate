@@ -1,6 +1,5 @@
 package com.unibs.daos;
 
-import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
 import com.unibs.models.Comune;
 
@@ -9,12 +8,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class ComuneDao {
-    public static Comune getComuneById(int id) throws DatabaseException {
+    public Optional<Comune> findById(int id) throws SQLException {
         String sql = "SELECT * FROM comuni WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -22,37 +22,35 @@ public class ComuneDao {
                     String nome = rs.getString("nome");
                     String provincia = rs.getString("provincia");
                     String regione = rs.getString("regione");
-                    return new Comune(id, nome, provincia, regione);
+                    return Optional.of(new Comune(id, nome, provincia, regione));
                 }
             }
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore durante il recupero del comune: " + e.getMessage(), e);
         }
-        return null;
+        return Optional.empty();
     }
 
-    public static ArrayList<Comune> getAllComuni() throws DatabaseException {
+    // Se un record nel database non esiste o non è valido, semplicemente non lo aggiungo alla lista, quindi non uso Optional
+    public ArrayList<Comune> findAll() throws SQLException {
         String sql = "SELECT * FROM comuni";
         ArrayList<Comune> comuni = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String nome = rs.getString("nome");
-                String provincia = rs.getString("provincia");
-                String regione = rs.getString("regione");
-
-                Comune comune = new Comune(id, nome, provincia, regione);
-                comuni.add(comune);
+                comuni.add(mapComune(rs));
             }
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore durante il recupero dei luoghi: " + e.getMessage(), e);
         }
 
         return comuni;
+    }
+
+    private Comune mapComune(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String nome = rs.getString("nome");
+        String provincia = rs.getString("provincia");
+        String regione = rs.getString("regione");
+        return new Comune(id, nome, provincia, regione);
     }
 }

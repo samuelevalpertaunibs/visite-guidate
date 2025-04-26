@@ -1,6 +1,7 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.models.Config;
 import com.unibs.services.ConfigService;
 import com.unibs.models.Comune;
 import com.unibs.views.InitConfigView;
@@ -30,13 +31,12 @@ public class ConfigController {
     }
 
     public void aggiungiComune(String nome, String provincia, String regione) {
-        Comune comuneDaAggiungere = new Comune(0, nome, provincia, regione);
         try {
-            configService.aggiungiComune(comuneDaAggiungere);
+            configService.aggiungiComune(nome, provincia, regione);
+            Config config = configService.getConfig();
             StringBuilder sb = new StringBuilder();
             sb.append("Ambito territoriale:\n");
-            List<Comune> ambitoTerritoriale = configService.getAmbitoTerritoriale();
-            for (Comune comune : ambitoTerritoriale) {
+            for (Comune comune : config.getAmbitoTerritoriale()) {
                 sb.append(" - ").append(comune.toString()).append("\n");
             }
             initConfigView.mostraAmbito(sb.toString());
@@ -77,11 +77,13 @@ public class ConfigController {
     }
 
     public int getNumeroMax() {
-        return configService.getNumeroMaxPersone();
+        Config config = configService.getConfig();
+        return config.getNumeroMassimoIscrizioniPrenotazione();
     }
 
     public List<Comune> getAmbitoTerritoriale() {
-        return configService.getAmbitoTerritoriale();
+        Config config = configService.getConfig();
+        return config.getAmbitoTerritoriale();
     }
 
     public WindowBasedTextGUI getGui() {

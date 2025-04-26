@@ -59,7 +59,6 @@ public class AggiungiLuogoView {
                 comuneSelezionato = comuneScelto;
                 selezionaComuneButton.setLabel(comuneSelezionato.getNome());
                 aggiungiButton.takeFocus();
-
             }
         });
 
