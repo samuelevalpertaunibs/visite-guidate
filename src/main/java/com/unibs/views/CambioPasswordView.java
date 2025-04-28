@@ -3,8 +3,6 @@ package com.unibs.views;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.controllers.LoginController;
-import com.unibs.models.Utente;
 import java.util.List;
 
 import static com.googlecode.lanterna.TerminalTextUtils.getWordWrappedText;
@@ -15,24 +13,19 @@ public class CambioPasswordView {
     private final TextBox passwordField;
     private final TextBox confirmPasswordField;
     private final Label errorLabel;
-    private final LoginController controller;
-    private final Utente utente;
     private final Button confermaButton;
     private int defaultWindowRows;
     private int defaultWindowCols;
 
-
-    public CambioPasswordView(LoginController controller, Utente utente) {
-        this.controller = controller;
-        this.utente = utente;
+    public CambioPasswordView() {
         passwordField = new TextBox(new TerminalSize(18, 1)).setMask('*');
         confirmPasswordField = new TextBox(new TerminalSize(18, 1)).setMask('*');
         errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED).setPreferredSize(new TerminalSize(18, 1));
-        confermaButton = new Button("Conferma", this::onConferma);
+        confermaButton = new Button("Conferma");
         window = new BasicWindow("Cambio Password");
     }
 
-    public Window creaFinestra() {
+    private Window creaFinestra() {
         Panel panel = new Panel();
 
         panel.addComponent(new EmptySpace());
@@ -57,13 +50,6 @@ public class CambioPasswordView {
         return window;
     }
 
-    private void onConferma() {
-        mostraErrore("");
-        String newPassword = passwordField.getText();
-        String confirmPassword = confirmPasswordField.getText();
-        controller.updatePassword(utente, newPassword,  confirmPassword);
-    }
-
     public void resetCampi() {
         passwordField.setText("");
         confirmPasswordField.setText("");
@@ -78,7 +64,24 @@ public class CambioPasswordView {
         window.setFixedSize(new TerminalSize(defaultWindowCols, defaultWindowRows + errorRows));
     }
 
-    public void close() {
+    public void chiudi() {
         window.close();
+    }
+
+    public void mostra(MultiWindowTextGUI gui) {
+        Window window = creaFinestra();
+        gui.addWindowAndWait(window);
+    }
+
+    public Button getConfermaButton() {
+        return confermaButton;
+    }
+
+    public String getPassword() {
+        return passwordField.getText();
+    }
+
+    public String getConfermaPassword() {
+        return confirmPasswordField.getText();
     }
 }

@@ -1,62 +1,174 @@
 package com.unibs.controllers;
 
+import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.models.TipoVisita;
-import com.unibs.models.Volontario;
-import com.unibs.services.TipoVisitaService;
-import com.unibs.views.AggiungiTipoVisitaView;
-import com.unibs.views.ElencoLuoghiConVisiteAssociate;
-import com.unibs.views.ElencoVisiteVolontarioView;
-import com.unibs.views.ElencoVolontariView;
+import com.unibs.DatabaseException;
+import com.unibs.models.*;
+import com.unibs.services.*;
+import com.unibs.views.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
-    private final AggiungiTipoVisitaView aggiungiTipoVisitaView;
-    private final ElencoVolontariView elencoVolontariView;
+    private final LuogoService luogoService;
+    private AggiungiTipoVisitaView aggiungiTipoVisitaView;
     private final WindowBasedTextGUI gui;
-    private final LuogoController luogoController;
-    private final VolontariController volontariController;
-    private final ElencoLuoghiConVisiteAssociate elencoLuoghiConVisiteAssociate;
+    private SelezionaLuogoView selezionaLuogoView;
+    private AggiungiLuogoView aggiungiLuogoView;
+    private Luogo luogoSelezionato;
+    private Comune comuneSelezionato;
+    private List<Giorno> giorniSelezionati;
+    private List<Volontario> volontariSelezionati;
+    private final ConfigService configService;
+    private final GiornoService giornoService;
+    private final UtenteService utenteService;
 
-    protected TipoVisitaController(WindowBasedTextGUI gui, LuogoController luogoController, VolontariController volontariController) {
+    protected TipoVisitaController(WindowBasedTextGUI gui, LuogoService luogoService, ConfigService configService, GiornoService giornoService, UtenteService utenteService) {
         this.gui = gui;
+        this.luogoService = luogoService;
+        this.configService = configService;
+        this.giornoService = giornoService;
+        this.utenteService = utenteService;
         this.tipoVisitaService = new TipoVisitaService();
-        this.luogoController = luogoController;
-        this.volontariController = volontariController;
-        this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView(this);
-        this.elencoVolontariView = new ElencoVolontariView(this);
-        this.elencoLuoghiConVisiteAssociate = new ElencoLuoghiConVisiteAssociate(this);
+        this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView();
     }
 
     public void apriAggiungiTipoVisita() {
-        gui.addWindowAndWait(aggiungiTipoVisitaView.creaFinestra());
+        aggiungiTipoVisitaView = new AggiungiTipoVisitaView();
+        initListenerAggiungiTipoVisitaView();
+        aggiungiTipoVisitaView.mostra(gui);
     }
 
-    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio,
-            String dataFine, String oraInizio, String durata, String entrataLibera,
-            String numeroMinPartecipanti, String numeroMaxPartecipanti, String nomeLuogoSelezionato,
-            String[] volontari, String[] giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) {
+    private void initListenerAggiungiTipoVisitaView () {
+        aggiungiTipoVisitaView.getFineButton().addListener(this::chiudiAggiungiTipoVisita);
+        aggiungiTipoVisitaView.getSelezionaLuogoButton().addListener(this::apriSelezioneLuogo);
+        aggiungiTipoVisitaView.getAssociaGiorniButton().addListener(this::apriSelezionaGiorni);
+        aggiungiTipoVisitaView.getAssociaVolontariButton().addListener(this::apriSelezionaVolontari);
+        aggiungiTipoVisitaView.getAggiungiButton().addListener(this::aggiungiTipoVisita);
+    }
 
-        // Controllo che il luogo sia stato selezionato, non è compito del service perchè lui si aspetta un nomeLuogo
-        if (nomeLuogoSelezionato.equalsIgnoreCase("Nessun luogo selezionato")) {
-            aggiungiTipoVisitaView.mostraErrore("Seleziona un luogo prima di proseguire");
-            return;
-        }
+    private void aggiungiTipoVisita(Button button) {
         try {
-            tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio,
-                    dataFine, oraInizio, durata, entrataLibera,
-                    numeroMinPartecipanti, numeroMaxPartecipanti, nomeLuogoSelezionato, volontari, giorni, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
+            String titolo = aggiungiTipoVisitaView.getTitolo();
+            String descrizione = aggiungiTipoVisitaView.getDescrizione();
+            String dataInizio = aggiungiTipoVisitaView.getDataInizio();
+            String dataFine = aggiungiTipoVisitaView.getDataFine();
+            String oraInizio = aggiungiTipoVisitaView.getOraInizio();
+            String durata = aggiungiTipoVisitaView.getDurata();
+            boolean entrataLibera = aggiungiTipoVisitaView.getEntrataLibera();
+            String numeroMin = aggiungiTipoVisitaView.getNumeroMinPartecipanti();
+            String numeroMax = aggiungiTipoVisitaView.getNumeroMaxPartecipanti();
+            String indirizzo = aggiungiTipoVisitaView.getIndirizzo();
+            String comune = aggiungiTipoVisitaView.getComune();
+            String provincia = aggiungiTipoVisitaView.getProvincia();
+            tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio, dataFine, oraInizio, durata, entrataLibera, numeroMin, numeroMax, luogoSelezionato, volontariSelezionati, giorniSelezionati, indirizzo, comune, provincia);
             aggiungiTipoVisitaView.clearAll();
+
+            // Aggiorno il pannello del recap dei TipoVisita aggiunti
             StringBuilder sb = new StringBuilder();
             List<String> tipiVisita = tipoVisitaService.getPreviewTipiVisita();
             for (String tipo : tipiVisita) {
                 sb.append(" - ").append(tipo).append("\n");
             }
-            aggiungiTipoVisitaView.mostraVisite(sb.toString());
+
+            aggiungiTipoVisitaView.aggiornaVisite(sb.toString());
+            luogoSelezionato = null;
+            giorniSelezionati = null;
+            volontariSelezionati = null;
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
+        }
+    }
+
+    private void apriSelezionaGiorni(Button button) {
+        try {
+            List<Giorno> giorni = giornoService.getGiorni();
+            SelezioneMultiplaView<Giorno> selezioneMultiplaGiorni = new SelezioneMultiplaView<>(giorni);
+            Set<Giorno> setSelezionati = new HashSet<>(giorniSelezionati);
+            giorniSelezionati = selezioneMultiplaGiorni.mostra(gui, setSelezionati, "Seleziona i giorni della settimana in cui verra svolta la visita");
+            aggiungiTipoVisitaView.aggiornaGiorniSelezionati(giorniSelezionati);
+        } catch (DatabaseException e) {
+            aggiungiTipoVisitaView.mostraErrore(e.getMessage());
+        }
+    }
+
+    private void apriSelezionaVolontari(Button button) {
+        try {
+            List<Volontario> volontari = utenteService.findAllVolontari();
+            SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontari);
+            Set<Volontario> setSelezionati = new HashSet<>(volontariSelezionati);
+            volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, setSelezionati, "Seleziona i volontari associabili alla visita");
+            aggiungiTipoVisitaView.aggiornaVolontariSelezionati(volontariSelezionati);
+        } catch (DatabaseException e) {
+            aggiungiTipoVisitaView.mostraErrore(e.getMessage());
+        }
+    }
+
+    private void chiudiAggiungiTipoVisita(Button button) {
+        try {
+            if (tipoVisitaService.esisteAlmenoUnaVisita()) {
+                aggiungiTipoVisitaView.chiudi();
+            } else {
+                aggiungiTipoVisitaView.mostraErrore("Inserisci almeno un tipo di visita");
+            }
+        } catch (DatabaseException e) {
+            aggiungiTipoVisitaView.mostraErrore(e.getMessage());
+        }
+    }
+
+    private void apriSelezioneLuogo(Button button) {
+        selezionaLuogoView = new SelezionaLuogoView();
+        initListenerSelezionaLuogoView();
+        try {
+            List<Luogo> luoghi = luogoService.findAll();
+            luogoSelezionato = selezionaLuogoView.mostra(gui, luoghi);
+        } catch (DatabaseException e) {
+            aggiungiTipoVisitaView.mostraErrore(e.getMessage());
+        }
+
+        // Aggiorno la view principale dopo aver selezionato un luogo
+        aggiungiTipoVisitaView.aggiornaLuogoLabel("Luogo selezionato");
+        button.setLabel(luogoSelezionato.getNome());
+        button.setEnabled(false);
+    }
+
+    private void initListenerSelezionaLuogoView() {
+        selezionaLuogoView.getAggiungiLuogoButton().addListener(this::apriAggiungiLuogo);
+    }
+
+    private void apriAggiungiLuogo(Button button) {
+        aggiungiLuogoView = new AggiungiLuogoView();
+        initListenerAggiungiLuogoView();
+        luogoSelezionato = aggiungiLuogoView.mostra(gui);
+    }
+
+    private void initListenerAggiungiLuogoView() {
+        aggiungiLuogoView.getAggiungiLuogoButton().addListener(this::aggiungiLuogo);
+        aggiungiLuogoView.getSelezionaComuneButton().addListener(this::apriSelezionaComune);
+    }
+
+    private void aggiungiLuogo(Button button) {
+        String nome = aggiungiLuogoView.getNome();
+        String descrizione = aggiungiLuogoView.getDescrizione();
+        try {
+            luogoSelezionato = luogoService.aggiungiLuogo(nome, descrizione, comuneSelezionato);
+            aggiungiLuogoView.chiudi();
+        } catch (Exception e) {
+            aggiungiLuogoView.mostraErrore(e.getMessage());
+        }
+    }
+
+    private void apriSelezionaComune(Button button) {
+        SelezionaComuneView selezionaComuneView = new SelezionaComuneView();
+        try {
+            List<Comune> comuni = configService.getAmbitoTerritoriale();
+            comuneSelezionato = selezionaComuneView.mostra(gui, comuni);
+            button.setLabel(comuneSelezionato.getNome());
+        } catch (DatabaseException e) {
+            aggiungiLuogoView.mostraErrore(e.getMessage());
         }
     }
 
@@ -64,49 +176,24 @@ public class TipoVisitaController {
         return this.gui;
     }
 
-    public List<String> getGiorniSettimana() {
-        return tipoVisitaService.getGiorniSettimana();
-    }
-
-    public void chiudiFinestraAggiungiTipoVisita() {
-        try {
-            if (tipoVisitaService.isEmpty()) {
-                aggiungiTipoVisitaView.mostraErrore("Inserisci almeno un tipo di visita");
-                return;
-            }
-        } catch (Exception e) {
-            aggiungiTipoVisitaView.mostraErrore(e.getMessage());
-        }
-        gui.removeWindow(gui.getActiveWindow());
-    }
-
-    public List<String> getTitoliByVolontarioId(int volontarioId) {
-        return tipoVisitaService.getTitoliByVolontarioId(volontarioId);
-    }
-
-    public List<String> getTitoliByLuogoId(int luogoId) {
-        return tipoVisitaService.getTitoliByLuogoId(luogoId);
-    }
-
     public void apriVisualizzaVisitePerVolontari() {
-        gui.addWindowAndWait(elencoVolontariView.creaFinestra());
-    }
-
-    public LuogoController getLuogoController() {
-        return luogoController;
-    }
-
-    public VolontariController getVolontariController() {
-        return volontariController;
+        ElencoVolontariView elencoVolontariView = new ElencoVolontariView();
+        List<Volontario> volontari = utenteService.findAllVolontari();
+        for (Volontario v : volontari) {
+            List<String> titoliTipiVisitaAssociati = tipoVisitaService.getTitoliByVolontarioId(v.getId());
+            elencoVolontariView.aggiungiVolontario(v, titoliTipiVisitaAssociati);
+        }
+        elencoVolontariView.mostra(gui);
     }
 
     public void apriVisualizzaVisitePerLuoghi() {
-        gui.addWindowAndWait(elencoLuoghiConVisiteAssociate.creaFinestra());
-    }
-
-    public void apriVisualizzaVisiteVolontario(Volontario volontario) {
-        ElencoVisiteVolontarioView view = new ElencoVisiteVolontarioView(volontario, this);
-        gui.addWindowAndWait(view.creaFinestra());
+        ElencoLuoghiConVisiteAssociateView elencoLuoghiConVisiteAssociateView = new ElencoLuoghiConVisiteAssociateView();
+        List<Luogo> luogi = luogoService.findAll();
+        for (Luogo l : luogi) {
+            List<String> titoliTipiVisitaAssociati = tipoVisitaService.getTitoliByLuogoId(l.getId());
+            elencoLuoghiConVisiteAssociateView.aggiungiLuogo(l, titoliTipiVisitaAssociati);
+        }
+        elencoLuoghiConVisiteAssociateView.mostra(gui);
     }
 
     public List<TipoVisita> getVisiteByVolontario(int id) {

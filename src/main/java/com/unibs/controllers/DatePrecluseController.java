@@ -3,6 +3,7 @@ package com.unibs.controllers;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.DatePrecluseService;
 import com.unibs.views.AggiungiDatePrecluseView;
+import com.googlecode.lanterna.gui2.Button;
 
 import java.time.LocalDate;
 import java.time.format.TextStyle;
@@ -14,10 +15,10 @@ public class DatePrecluseController {
     private final WindowBasedTextGUI gui;
     private final AggiungiDatePrecluseView aggiungiDatePrecluseView;
 
-    protected DatePrecluseController(WindowBasedTextGUI gui) {
-        this.precluseService = new DatePrecluseService();
+    public DatePrecluseController(WindowBasedTextGUI gui, DatePrecluseService precluseService) {
+        this.precluseService = precluseService;
         this.gui = gui;
-        this.aggiungiDatePrecluseView = new AggiungiDatePrecluseView(this);
+        this.aggiungiDatePrecluseView = new AggiungiDatePrecluseView();
     }
 
     public void apriAggiungiDatePrecluse() {
@@ -25,16 +26,24 @@ public class DatePrecluseController {
         String mese = primaDataPrecludibile.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN);
         mese = mese.substring(0, 1).toUpperCase() + mese.substring(1);
         int anno = primaDataPrecludibile.getYear();
-        gui.addWindowAndWait(aggiungiDatePrecluseView.creaFinestra(mese, anno));
+        initDatePrecluseViewListener();
+        aggiungiDatePrecluseView.mostra(gui, mese, anno);
     }
 
-    public void aggiungiDataPreclusa(String data) {
+    private void initDatePrecluseViewListener() {
+        aggiungiDatePrecluseView.getPrecludiButton().addListener(this::aggiungiDataPreclusa);
+    }
+
+    private void aggiungiDataPreclusa(Button button) {
         try {
             aggiungiDatePrecluseView.mostraErrore(""); // Pulisce eventuali errori precedenti
-            precluseService.aggiungiDataPrecluse(data);
-            aggiungiDatePrecluseView.mostraSuccesso("Data aggiunta con successo!"); // Mostra il messaggio di successo
+            String dataDaPrecludere = aggiungiDatePrecluseView.getData();
+            precluseService.aggiungiDataPreclusa(dataDaPrecludere);
+            aggiungiDatePrecluseView.mostraSuccesso("Data preclusa con successo!"); // Mostra il messaggio di successo
         } catch (Exception e) {
             aggiungiDatePrecluseView.mostraErrore(e.getMessage());
+        } finally {
+            aggiungiDatePrecluseView.pulisci();
         }
     }
 }

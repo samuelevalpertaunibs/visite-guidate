@@ -4,7 +4,6 @@ import com.unibs.DatabaseException;
 import com.unibs.daos.LuogoDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
-import com.unibs.models.TipoVisita;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -46,7 +45,10 @@ public class LuogoService {
     }
 
     public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) throws DatabaseException, IllegalArgumentException {
-        if (nome.isBlank() || descrizione.isBlank() || comune == null)
+        if (comune == null)
+            throw new IllegalArgumentException("Seleziona un comune.");
+
+        if (nome.isBlank() || descrizione.isBlank())
             throw new IllegalArgumentException("I campi non possono essere vuoti.");
 
         if (findByNome(nome).isPresent()) {

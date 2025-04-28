@@ -4,12 +4,9 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.AppContext;
-import com.unibs.controllers.ConfigController;
-
 import java.util.List;
 
 public class InitConfigView {
-    private final ConfigController controller;
     private final TextBox nomeComuneField;
     private final TextBox provinciaComuneField;
     private final TextBox regioneComuneField;
@@ -27,9 +24,8 @@ public class InitConfigView {
     private final EmptySpace emptySpace;
     private final Label ambitoTerritorialeLabel;
 
-    public InitConfigView(ConfigController configController) {
+    public InitConfigView() {
         TerminalSize defaultSize = new TerminalSize(16, 1);
-        this.controller = configController;
         this.nomeComuneField = new TextBox(defaultSize);
         this.provinciaComuneField = new TextBox(defaultSize);
         this.regioneComuneField = new TextBox(defaultSize);
@@ -37,17 +33,16 @@ public class InitConfigView {
         this.window = new BasicWindow("INIZIALIZZAZIONE CORPO DATI - Configurazione");
         this.erroreComuneLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         this.erroreNumeroMaxLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
-        this.aggiungiComuneButton = new Button("Aggiungi Comune", () -> controller.aggiungiComune(nomeComuneField.getText(), provinciaComuneField.getText(),
-                regioneComuneField.getText()));
+        this.aggiungiComuneButton = new Button("Aggiungi Comune");
         this.comunePanel = new Panel();
         this.numeroMaxPanel = new Panel();
-        this.proseguiButton = new Button("Prosegui", controller::confermaAmbito);
-        this.confermaButton = new Button("Conferma", () -> controller.conferma(numeroMaxField.getText()));
+        this.proseguiButton = new Button("Prosegui");
+        this.confermaButton = new Button("Conferma");
         this.emptySpace = new EmptySpace();
         this.ambitoTerritorialeLabel = new Label("L'ambito territoriale è vuoto");
     }
 
-    public Window creaFinestra() {
+    private void creaFinestra() {
         comunePanel.addComponent(new Label("Inserisci un comune da aggiungere all'ambito territoriale"));
         comunePanel.addComponent(new Label("Nome"));
         comunePanel.addComponent(nomeComuneField);
@@ -79,7 +74,35 @@ public class InitConfigView {
 
         window.setComponent(comunePanel);
         window.setHints(List.of(Window.Hint.FIT_TERMINAL_WINDOW, Window.Hint.CENTERED, Window.Hint.EXPANDED));
-        return window;
+    }
+
+    public void mostra(WindowBasedTextGUI gui) {
+        creaFinestra();
+        gui.addWindowAndWait(window);
+    }
+
+    public Button getAggiungiComuneButton() {
+        return aggiungiComuneButton;
+    }
+
+    public Button getConfermaButton() {
+        return confermaButton;
+    }
+
+    public Button getProseguiButton() {
+        return proseguiButton;
+    }
+
+    public String getNome() {
+        return nomeComuneField.getText();
+    }
+
+    public String getProvincia() {
+        return provinciaComuneField.getText();
+    }
+
+    public String getRegione() {
+        return regioneComuneField.getText();
     }
 
     public void mostraErroreComune(String message) {
@@ -124,5 +147,13 @@ public class InitConfigView {
 
     public void moveCursorToProsegui() {
         proseguiButton.takeFocus();
+    }
+
+    public void chiudi() {
+        window.close();
+    }
+
+    public String getNumeroMax() {
+        return numeroMaxField.getText();
     }
 }

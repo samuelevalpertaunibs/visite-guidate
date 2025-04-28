@@ -88,7 +88,7 @@ public class ConfigDao {
             String sql = "UPDATE config SET numero_max_iscrizioni = ? WHERE id = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
                 updateStmt.setInt(1, numeroMassimoIscrizioniPrenotazione);
-                updateStmt.setInt(1, DEFAULT_CONFIG_ID);
+                updateStmt.setInt(2, DEFAULT_CONFIG_ID);
 
                 updateStmt.executeUpdate();
             }

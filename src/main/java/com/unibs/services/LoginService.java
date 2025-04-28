@@ -10,13 +10,14 @@ import com.unibs.daos.UtenteDao;
 import com.unibs.models.Utente;
 
 public class LoginService {
+    UtenteDao utenteDao = new UtenteDao();
 
-    public Utente authenticate(String username, String password)
+    public Utente autentica(String username, String password)
             throws DatabaseException, IllegalArgumentException {
         if (username.isBlank() || password.isBlank())
             throw new IllegalArgumentException("Username e password non possono essere vuoti");
 
-        Utente utente = UtenteDao.findByUsername(username);
+        Utente utente = utenteDao.findByUsername(username);
 
         if (utente != null) {
             String passwordHash = hashPassword(password, utente.getSalt());
@@ -28,20 +29,27 @@ public class LoginService {
         return null;
     }
 
-    public void updatePassword(Utente utente, String newPassword) throws DatabaseException, IllegalArgumentException {
+    public void updatePassword(Utente utente, String nuovaPassword, String confermaPassword) throws DatabaseException, IllegalArgumentException {
+
+        if (nuovaPassword == null || nuovaPassword.isBlank() || confermaPassword == null || confermaPassword.isBlank())
+            throw new IllegalArgumentException("I campi non possono essere vuoti.");
+
+        if (!nuovaPassword.equals(confermaPassword))
+            throw new IllegalArgumentException("le password non coincidono.");
+
         String oldPassword = utente.getPasswordHash();
         byte[] salt = utente.getSalt();
-        String hashedNewPassword = hashPassword(newPassword, salt);
+        String hashedNewPassword = hashPassword(nuovaPassword, salt);
 
         if (oldPassword.equals(hashedNewPassword)) {
             throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente");
         }
 
-        if (newPassword.length() < 8 ||
-                !newPassword.matches(".*[a-z].*") ||
-                !newPassword.matches(".*[A-Z].*") ||
-                !newPassword.matches(".*\\d.*") ||
-                !newPassword.matches(".*[+*@?=)(/&%$£!].*")) {
+        if (nuovaPassword.length() < 8 ||
+                !nuovaPassword.matches(".*[a-z].*") ||
+                !nuovaPassword.matches(".*[A-Z].*") ||
+                !nuovaPassword.matches(".*\\d.*") ||
+                !nuovaPassword.matches(".*[+*@?=)(/&%$£!].*")) {
             throw new IllegalArgumentException("La nuova password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero ed un carattere speciale");
         }
 
@@ -49,7 +57,7 @@ public class LoginService {
         utente.setLastLogin(LocalDate.now());
 
         try {
-            UtenteDao.updatePassword(utente);
+            utenteDao.updatePassword(utente);
         } catch (DatabaseException e) {
             // Ripristina il vecchio stato in caso di errore
             utente.setPasswordHash(oldPassword);
@@ -58,16 +66,16 @@ public class LoginService {
         }
     }
 
-    public Utente updateLastLogin(Utente utente) throws DatabaseException {
-        String username = utente.getUsername();
-        int updated = UtenteDao.updateLastLogin(username);
-        if (updated > 0) {
-            return UtenteDao.findByUsername(username);
+    public LocalDate updateLastLogin(Utente utente) throws DatabaseException {
+        try {
+            String username = utente.getUsername();
+            return utenteDao.updateLastLogin(username);
+        } catch (Exception e) {
+            throw new DatabaseException("Errore durante l'aggiornamento dell'ultimo accesso");
         }
-        return null;
     }
 
-    public String hashPassword(String password, byte[] salt) {
+    private String hashPassword(String password, byte[] salt) {
         MessageDigest md;
         try {
             md = MessageDigest.getInstance("SHA-256");

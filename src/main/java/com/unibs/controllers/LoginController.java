@@ -1,6 +1,6 @@
 package com.unibs.controllers;
 
-import com.unibs.services.LoginService;
+import com.unibs.services.*;
 import com.unibs.models.Utente;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.views.CambioPasswordView;
@@ -9,80 +9,91 @@ import com.unibs.views.LoginView;
 public class LoginController {
 
     private final LoginService loginService;
-    private final LoginView view;
+    private LoginView view;
     private final MultiWindowTextGUI gui;
     private CambioPasswordView cambioPasswordView;
+    private Utente utente;
 
     public LoginController(MultiWindowTextGUI gui) {
         this.loginService = new LoginService();
-        this.view = new LoginView(this);
         this.gui = gui;
     }
 
-    public Window getView() {
-        return this.view.creaFinestra();
-    }
-
     private void handleSpecificUser(Utente currentUtente) {
-        view.resetLogin();
-        // TODO fix check with role name instead of == 1
+        this.utente = currentUtente;
         if (currentUtente.getRole() == 1) {
-            ConfiguratorController configuratorController = new ConfiguratorController(this.gui, currentUtente);
-            configuratorController.start();
+            inizializzaConfiguratore();
         } else if (currentUtente.getRole() == 2) {
-            VolontarioController volontarioController = new VolontarioController(this.gui, currentUtente);
-            volontarioController.start();
+            inizializzaVolontario();
         } else {
-            view.mostraErrore("Ruolo non riconosciuto");
+            view.mostraErrore("Ruolo non riconosciuto.");
         }
     }
 
-    public void verificaCredenziali(String username, String password) {
-        try {
-            Utente utente = loginService.authenticate(username, password);
+    private void inizializzaConfiguratore() {
+        LuogoService luogoService = new  LuogoService ();
+        ConfigService configService = new  ConfigService ();
+        GiornoService giornoService = new  GiornoService ();
+        UtenteService utenteService = new UtenteService();
+        TipoVisitaService tipoVisitaService = new  TipoVisitaService();
+        VisitaService visitaService = new  VisitaService ();
+        DatePrecluseService datePrecluseService = new  DatePrecluseService();
+        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, luogoService, configService, giornoService, utenteService, tipoVisitaService, visitaService, datePrecluseService);
+        configuratoreController.start();
+    }
 
+    private void inizializzaVolontario() {
+        ConfigService configService = new  ConfigService();
+        VolontarioController volontarioController = new VolontarioController(gui, utente, configService);
+        volontarioController.start();
+    }
+
+    public void apriLogin(MultiWindowTextGUI gui) {
+        view = new LoginView();
+        view.getLoginButton().addListener(this::verificaCredenziali);
+        view.mostra(gui);
+    }
+
+    private void verificaCredenziali(Button button) {
+        String username = view.getUsername();
+        String password = view.getPassword();
+        try {
+            utente = loginService.autentica(username, password);
             if (utente == null) {
                 view.resetLogin();
-                view.mostraErrore("Credenziali errate");
-                return;
-            }
-
-            if (utente.isFirstLogin()) {
-                view.close();
-                cambioPasswordView = new CambioPasswordView(this, utente);
-                gui.addWindowAndWait(cambioPasswordView.creaFinestra());
-                gui.addWindowAndWait(view.creaFinestra());
+                view.mostraErrore("Credenziali errate.");
             } else {
-                view.close();
-                utente = loginService.updateLastLogin(utente);
-                handleSpecificUser(utente);
-                gui.addWindowAndWait(view.creaFinestra());
+                view.chiudi();
+                if (utente.isFirstLogin()) {
+                    cambioPasswordView = new CambioPasswordView();
+                    initListenerCambioPasswordView();
+                    cambioPasswordView.mostra(gui);
+                } else {
+                    utente.setLastLogin(loginService.updateLastLogin(utente));
+                    handleSpecificUser(utente);
+                }
+                apriLogin(gui);
             }
         } catch (Exception e) {
-            view.resetLogin();
             view.mostraErrore(e.getMessage());
         }
     }
 
-    public void updatePassword(Utente utente, String newPassword, String newPasswordConfirm) {
-        // Faccio i controlli nel controller in questo caso perchè è una cosa slegata dal serviceCambioPassword
-        if (newPassword.isEmpty() || newPasswordConfirm.isEmpty()) {
-            cambioPasswordView.resetCampi();
-            cambioPasswordView.mostraErrore("I campi non possono essere vuoti");
-            return;
-        }
-        if (!newPassword.equals(newPasswordConfirm)) {
-            cambioPasswordView.resetCampi();
-            cambioPasswordView.mostraErrore("Le password non coincidono");
-            return;
-        }
+    private void initListenerCambioPasswordView() {
+        cambioPasswordView.getConfermaButton().addListener(this::updatePassword);
+    }
+
+    private void updatePassword(Button button) {
+        cambioPasswordView.mostraErrore("");
+        String password = cambioPasswordView.getPassword();
+        String confermaPassword = cambioPasswordView.getConfermaPassword();
         try {
-            loginService.updatePassword(utente, newPassword);
-            cambioPasswordView.close();
+            loginService.updatePassword(utente, password, confermaPassword);
+            cambioPasswordView.chiudi();
+            loginService.updateLastLogin(utente);
         } catch (Exception e) {
             cambioPasswordView.resetCampi();
             cambioPasswordView.mostraErrore(e.getMessage());
         }
     }
-
 }

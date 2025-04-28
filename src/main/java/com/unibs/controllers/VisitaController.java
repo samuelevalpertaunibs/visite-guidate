@@ -4,26 +4,33 @@ import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.VisitaService;
 import com.unibs.views.ElencoVisiteView;
 import com.unibs.models.Visita;
-import com.unibs.views.ElencoVisiteVolontarioView;
 
 import java.util.List;
 
 public class VisitaController {
-    private final WindowBasedTextGUI tui;
+    private final WindowBasedTextGUI gui;
     private final VisitaService visitaService;
-    private final ElencoVisiteView elencoVisiteView;
+    private ElencoVisiteView elencoVisiteView;
 
-    public VisitaController(WindowBasedTextGUI tui) {
-        this.tui = tui;
-        this.visitaService = new VisitaService();
-        this.elencoVisiteView = new ElencoVisiteView(this);
+    public VisitaController(WindowBasedTextGUI gui, VisitaService visitaService) {
+        this.gui = gui;
+        this.visitaService = visitaService;
     }
 
     public void apriVisualizzaVisitePerTipologia() {
-        tui.addWindowAndWait(elencoVisiteView.creaFinestra());
+        elencoVisiteView = new ElencoVisiteView();
+        initElencoVisiteViewListener();
+        elencoVisiteView.mostra(gui);
     }
 
-    public List<Visita> getVisitePreview(Visita.StatoVisita stato) {
-        return visitaService.getVisitePreview(stato);
+    private void initElencoVisiteViewListener() {
+        try {
+            elencoVisiteView.setStati(List.of(Visita.StatoVisita.values()), stato -> {
+                List<Visita> visite = visitaService.getVisitePreview(stato);
+                elencoVisiteView.aggiornaVisiteTable(visite, stato);
+            });
+        } catch (Exception e) {
+            elencoVisiteView.mostraErrore(e.getMessage());
+        }
     }
 }

@@ -2,22 +2,25 @@ package com.unibs.models;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 public class TipoVisita {
+    private final int id;
     private final String titolo;
     private final String descrizione;
-    private LocalDate dataInizio;
-    private LocalDate dataFine;
+    private final LocalDate dataInizio;
+    private final LocalDate dataFine;
     private final LocalTime oraInizio;
     private int durataMinuti;
     private final boolean entrataLibera;
-    private int numMinPartecipanti;
-    private int numMaxPartecipanti;
+    private final int numMinPartecipanti;
+    private final int numMaxPartecipanti;
     private Luogo luogo;
     private PuntoIncontro puntoIncontro;
-    private final int id;
+    private List<Giorno> giorni;
+    private List<Volontario> volontari;
 
-    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro) {
+    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro, List<Giorno> giorni, List<Volontario> volontari) {
         this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;
@@ -30,9 +33,11 @@ public class TipoVisita {
         this.numMaxPartecipanti = numMaxPartecipanti;
         this.luogo = luogo;
         this.puntoIncontro = puntoIncontro;
+        this.giorni = giorni;
+        this.volontari = volontari;
     }
 
-    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti, int numMaxPartecipanti) {
+    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti, int numMaxPartecipanti, PuntoIncontro puntoIncontro) {
         this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;
@@ -43,6 +48,7 @@ public class TipoVisita {
         this.entrataLibera = entrataLibera;
         this.numMinPartecipanti = numMinPartecipanti;
         this.numMaxPartecipanti = numMaxPartecipanti;
+        this.puntoIncontro = puntoIncontro;
     }
 
     public String getTitolo() {

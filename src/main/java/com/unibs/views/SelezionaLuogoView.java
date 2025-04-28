@@ -1,49 +1,46 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import java.util.List;
-import java.util.function.Consumer;
-
-import com.unibs.controllers.LuogoController;
 import com.unibs.models.Luogo;
 
-public class SelezionaLuogoView {
-    private final LuogoController luogoController;
-    private Consumer<Luogo> onLuogoSelected;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-    public SelezionaLuogoView(LuogoController luogoController) {
-        this.luogoController = luogoController;
+public class SelezionaLuogoView {
+    private Window window;
+    private final Button aggiungiLuogoButton;
+    private final AtomicReference<Luogo> luogoSelezionato;
+
+    public SelezionaLuogoView() {
+        this.luogoSelezionato = new AtomicReference<>(null);
+        this.aggiungiLuogoButton = new Button("+ Aggiungi Luogo");
     }
 
-    public Window creaFinestra() {
-        Window window = new BasicWindow("Seleziona luogo");
+    public Button getAggiungiLuogoButton() {
+        return aggiungiLuogoButton;
+    }
+
+    private void creaFinestra(List<Luogo> luoghi) {
+        window = new BasicWindow("Seleziona luogo");
         Panel panel = new Panel();
-        List<Luogo> luoghi = luogoController.getLuoghi();  // Ottieni la lista dei luoghi
-        for (Luogo luogo: luoghi) {
+
+        for (Luogo luogo : luoghi) {
             panel.addComponent(new Button(luogo.getNome(), () -> {
-                if (onLuogoSelected != null) {
-                    onLuogoSelected.accept(luogo);  // Passa il luogo selezionato al callback
-                }
+                luogoSelezionato.set(luogo);
                 window.close();
             }));
         }
 
-        panel.addComponent(new Button("+ Aggiungi un luogo", () -> {
-            luogoController.creaInterfacciaAggiungiLuogo(nuovoLuogo -> {
-                if (nuovoLuogo != null && onLuogoSelected != null) {
-                    onLuogoSelected.accept(nuovoLuogo);
-                }
-            });
-
-            window.close();
-        }));
+        panel.addComponent(aggiungiLuogoButton);
 
         window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
-        return window;
     }
 
-    public void setOnLuogoSelected(Consumer<Luogo> onLuogoSelected) {
-        this.onLuogoSelected = onLuogoSelected;
+    public Luogo mostra(WindowBasedTextGUI gui, List<Luogo> luoghi) {
+        creaFinestra(luoghi);
+        gui.addWindowAndWait(window);
+        return luogoSelezionato.get();
     }
+
 }
