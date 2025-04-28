@@ -1,57 +1,56 @@
 package com.unibs.controllers;
 
+import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.models.Comune;
 import com.unibs.models.Config;
 import com.unibs.services.ConfigService;
-import com.unibs.models.Comune;
 import com.unibs.views.InitConfigView;
 import com.unibs.views.ModificaNumeroMaxView;
-import com.unibs.views.RegimeNonAttivoView;
-
-import java.time.LocalDate;
-import java.util.List;
 
 public class ConfigController {
     private final ConfigService configService;
     private final WindowBasedTextGUI gui;
-    private final InitConfigView initConfigView;
-    private final ModificaNumeroMaxView modificaNumeroMaxView;
-    private final RegimeNonAttivoView regimeNonAttivoView;
+    private InitConfigView initConfigView;
+    private ModificaNumeroMaxView modificaNumeroMaxView;
 
-    public ConfigController(WindowBasedTextGUI gui) {
-        this.configService = new ConfigService();
-        this.initConfigView = new InitConfigView(this);
-        this.modificaNumeroMaxView = new ModificaNumeroMaxView(this);
+    public ConfigController(WindowBasedTextGUI gui, ConfigService configService) {
+        this.configService = configService;
         this.gui = gui;
-        this.regimeNonAttivoView = new RegimeNonAttivoView();
     }
 
     public void apriConfigurazione() {
-        gui.addWindowAndWait(initConfigView.creaFinestra());
+        initConfigView = new InitConfigView();
+        initListenerInitConfigView();
+        initConfigView.mostra(gui);
     }
 
-    public void aggiungiComune(String nome, String provincia, String regione) {
+    private void initListenerInitConfigView() {
+        initConfigView.getAggiungiComuneButton().addListener(this::aggiungiComune);
+        initConfigView.getConfermaButton().addListener(this::confermaConfig);
+        initConfigView.getProseguiButton().addListener(this::confermaAmbito);
+    }
+
+    private void aggiungiComune(Button button) {
+        String nome = initConfigView.getNome();
+        String provincia = initConfigView.getProvincia();
+        String regione = initConfigView.getRegione();
         try {
             configService.aggiungiComune(nome, provincia, regione);
-            Config config = configService.getConfig();
-            StringBuilder sb = new StringBuilder();
-            sb.append("Ambito territoriale:\n");
-            for (Comune comune : config.getAmbitoTerritoriale()) {
-                sb.append(" - ").append(comune.toString()).append("\n");
-            }
-            initConfigView.mostraAmbito(sb.toString());
+            String ambitoTerritorialeRecap = generaAmbitoTerritorialeRecap();
+            initConfigView.mostraAmbito(ambitoTerritorialeRecap);
             initConfigView.resetComune();
             initConfigView.moveCursorToProsegui();
         } catch (Exception e) {
             initConfigView.mostraErroreComune(e.getMessage());
-            initConfigView.moveCursorToComune();
         }
     }
 
-    public void conferma(String numeroMaxPersone) {
+    private void confermaConfig(Button button) {
         try {
+            String numeroMaxPersone = initConfigView.getNumeroMax();
             configService.setNumeroMaxPersone(numeroMaxPersone);
-            gui.removeWindow(gui.getActiveWindow());
+            initConfigView.chiudi();
         } catch (Exception e) {
             initConfigView.mostraErroreNumeroMax(e.getMessage());
             initConfigView.resetNumeroMax();
@@ -59,59 +58,46 @@ public class ConfigController {
         }
     }
 
-    public void initDefault() {
-        configService.initDefault();
-    }
-
-    public boolean isInitialized() {
-        return configService.isInitialized();
-    }
-
-    public void setInizializedOn(LocalDate date) {
-        configService.setInitializedOn(date);
+    private String generaAmbitoTerritorialeRecap() {
+        try {
+            Config config = configService.getConfig();
+            StringBuilder sb = new StringBuilder();
+            sb.append("Ambito territoriale:\n");
+            for (Comune comune : config.getAmbitoTerritoriale()) {
+                sb.append(" - ").append(comune.toString()).append("\n");
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            initConfigView.mostraErroreComune(e.getMessage());
+        }
+        return null;
     }
 
     public void apriModificaNumeroMax() {
-        int numeroMaxAttuale = getNumeroMax();
-        gui.addWindowAndWait(modificaNumeroMaxView.creaFinestra(numeroMaxAttuale));
+        modificaNumeroMaxView = new ModificaNumeroMaxView();
+        int numeroMaxAttuale = configService.getNumeroMax();
+        modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAttuale);
+        modificaNumeroMaxView.getConfermaButton().addListener(this::setNumeroMaxPersone);
+        modificaNumeroMaxView.mostra(gui);
     }
 
-    public int getNumeroMax() {
-        Config config = configService.getConfig();
-        return config.getNumeroMassimoIscrizioniPrenotazione();
-    }
-
-    public List<Comune> getAmbitoTerritoriale() {
-        Config config = configService.getConfig();
-        return config.getAmbitoTerritoriale();
-    }
-
-    public WindowBasedTextGUI getGui() {
-        return gui;
-    }
-
-    public void setNumeroMaxPersone(String numeroMaxPersone) {
+    private void setNumeroMaxPersone(Button button) {
         try {
-            configService.setNumeroMaxPersone(numeroMaxPersone);
-            modificaNumeroMaxView.mostraSuccesso("Numero massimo aggiornato con successo!");
-            modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxPersone);
-        }  catch (Exception e) {
+            String numeroMaxPersone = modificaNumeroMaxView.getNumeroMaxInserito();
+            int numeroMaxAggiornato = configService.setNumeroMaxPersone(numeroMaxPersone);
+            modificaNumeroMaxView.mostraSuccesso("Numero massimo aggiornato con successo.");
+            modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAggiornato);
+        } catch (Exception e) {
             modificaNumeroMaxView.mostraErrore(e.getMessage());
+        } finally {
+            modificaNumeroMaxView.pulisci();
         }
     }
 
-    public boolean checkRegime() {
-        if (!configService.regimeAttivo()) {
-            gui.addWindowAndWait(regimeNonAttivoView.creaFinestra());
-            return false;
-        }
-        return true;
-    }
-
-    public void confermaAmbito() {
+    private void confermaAmbito(Button button) {
         try {
             if (!configService.esisteAlmenoUnComune()) {
-                initConfigView.mostraErroreComune("Inserisci almeno un comune");
+                initConfigView.mostraErroreComune("Inserisci almeno un comune.");
                 initConfigView.moveCursorToComune();
                 return;
             }

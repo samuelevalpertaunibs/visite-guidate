@@ -1,43 +1,59 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
+import com.unibs.services.*;
 import com.unibs.views.MenuView;
+import com.unibs.views.RegimeNonAttivoView;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class ConfiguratorController implements IUserController {
+public class ConfiguratoreController implements IUserController {
     private final Utente utente;
-    private final InitController initController;
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
-    private final VolontariController volontariController;
     private final TipoVisitaController tipoVisitaController;
     private final VisitaController visitaController;
     private final MenuView menuView;
     private final LuogoController luogoController;
+    private final ConfigService configService;
+    private final WindowBasedTextGUI gui;
 
-    public ConfiguratorController(MultiWindowTextGUI gui, Utente currentUtente) {
-        this.configController = new ConfigController(gui);
+    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, LuogoService luogoService, ConfigService configService, GiornoService giornoService, UtenteService utenteService, TipoVisitaService tipoVisitaService, VisitaService visitaService, DatePrecluseService datePrecluseService) {
+        this.configController = new ConfigController(gui, configService);
+        this.gui = gui;
         this.luogoController = new LuogoController(gui);
-        this.volontariController = new VolontariController(gui);
-        this.tipoVisitaController = new TipoVisitaController(gui, luogoController, volontariController);
-        this.visitaController = new VisitaController(gui);
-        this.initController = new InitController(configController, tipoVisitaController);
-        this.datePrecluseController = new DatePrecluseController(gui);
+        this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, utenteService);
+        this.visitaController = new VisitaController(gui, visitaService);
+        this.configService = configService;
+        this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
         this.menuView = new MenuView(gui);
         this.utente = currentUtente;
     }
 
     @Override
     public void start() {
-        initController.assertInizializzazione();
-        if (initController.checkRegime()){
-            showMenu();
+        if (configService.isInitialized()) {
+            if (configService.regimeAttivo()) {
+                showMenu();
+            } else {
+                mostraAvvisoNonRegime(gui);
+            }
+        } else {
+            inizializzaBaseDiDati();
         }
+    }
+
+    public void inizializzaBaseDiDati() {
+        configService.initDefault();
+        configController.apriConfigurazione();
+        tipoVisitaController.apriAggiungiTipoVisita();
+        configService.setInitializedOn(LocalDate.now());
     }
 
     @Override
@@ -63,6 +79,10 @@ public class ConfiguratorController implements IUserController {
 
     private void visualizzaElencoVolontari() {
         tipoVisitaController.apriVisualizzaVisitePerVolontari();
+    }
+
+    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+        new RegimeNonAttivoView().mostra(gui);
     }
 
     private void modificaNumeroMaxPersone() {

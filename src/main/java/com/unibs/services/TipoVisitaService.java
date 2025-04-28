@@ -1,30 +1,35 @@
 package com.unibs.services;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import com.unibs.DatabaseException;
-import com.unibs.daos.GiorniSettimanaDao;
 import com.unibs.daos.TipoVisitaDao;
-import com.unibs.daos.LuogoDao;
-import com.unibs.daos.VolontarioDao;
-import com.unibs.models.Luogo;
-import com.unibs.models.TipoVisita;
+import com.unibs.models.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TipoVisitaService {
-
+	private static final Logger LOGGER = Logger.getLogger(TipoVisitaService.class.getName());
 	private static final int MINUTES_PER_DAY = 24 * 60;
 
-	public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
-			String oraInizioString, String durataMinutiString, String entrataLibera, String numeroMinPartecipanti,
-			String numeroMaxPartecipanti, String nomeLuogoSelezionato, String[] volontari, String[] giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro)  {
+	private final TipoVisitaDao tipoVisitaDao;
+
+	public TipoVisitaService() {
+		this.tipoVisitaDao = new TipoVisitaDao();
+	}
+
+	public TipoVisita aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
+								   String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti,
+								   String numeroMaxPartecipanti, Luogo luogoSelezionato, List<Volontario> volontari, List<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
 		if (titolo == null || titolo.isEmpty())
 			throw new IllegalStateException("Il campo Titolo non può essere vuoto");
-		if (TipoVisitaDao.existsByTitle(titolo))
+		if (tipoVisitaDao.esisteConTitolo(titolo))
 			throw new IllegalStateException(titolo + " esiste già");
 		if (descrizione == null || descrizione.isEmpty())
 			throw new IllegalStateException("Il campo Descrizione non può essere vuoto");
@@ -36,17 +41,15 @@ public class TipoVisitaService {
 			throw new IllegalStateException("Il campo Ora inzio non può essere vuoto");
 		if (durataMinutiString == null || durataMinutiString.isEmpty())
 			throw new IllegalStateException("Il campo Durata non può essere vuoto");
-		if (entrataLibera == null || entrataLibera.isEmpty())
-			throw new IllegalStateException("Il campo Entrata libera non può essere vuoto");
 		if (numeroMinPartecipanti == null || numeroMinPartecipanti.isEmpty())
 			throw new IllegalStateException("Il campo Numero minimo partecipanti non può essere vuoto");
 		if (numeroMaxPartecipanti == null || numeroMaxPartecipanti.isEmpty())
 			throw new IllegalStateException("Il campo Numero massimo partecipanti non può essere vuoto");
-		if (nomeLuogoSelezionato == null || nomeLuogoSelezionato.isEmpty())
+		if (luogoSelezionato == null)
 			throw new IllegalStateException("Seleziona un luogo prima di preseguire");
-		if (volontari == null || volontari.length < 1)
+		if (volontari == null || volontari.isEmpty())
 			throw new IllegalStateException("Seleziona almeno un volontario da associare al tipo di visita.");
-		if (giorni == null || giorni.length < 1)
+		if (giorni == null || giorni.isEmpty())
 			throw new IllegalStateException("Seleziona almeno un giorno della settimana.");
 		if (indirizzoPuntoIncontro == null || indirizzoPuntoIncontro.isEmpty() || comunePuntoIncontro == null || comunePuntoIncontro.isEmpty() || provinciaPuntoIncontro == null || provinciaPuntoIncontro.isEmpty())
 			throw new IllegalStateException("Inserisci tutti i campi relativi al punto d'incontro.");
@@ -73,18 +76,18 @@ public class TipoVisitaService {
 		try {
 			oraInizio = LocalTime.parse(oraInizioString, timeFormatter);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Il formato dell'ora di inizio non è corretto");
+			throw new IllegalArgumentException("Il formato dell'ora di inizio non è corretto.");
 		}
 
 		int durataMinuti;
 		try {
 			durataMinuti = Integer.parseInt(durataMinutiString);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Il formato della durata non è corretto");
+			throw new IllegalArgumentException("Il formato della durata non è corretto.");
 		}
 
 		if (oraInizio.getHour() * 60 + oraInizio.getMinute() + durataMinuti > MINUTES_PER_DAY)
-			throw new IllegalArgumentException("La visita deve conludersi ento le 24 del giorno stesso");
+			throw new IllegalArgumentException("La visita deve conludersi ento le 24 del giorno stesso.");
 
 		int numeroMax;
 		try {
@@ -106,58 +109,57 @@ public class TipoVisitaService {
 			throw new IllegalArgumentException("Il numero minimo di partecipanti non è valido.");
 		}
 
-		boolean entrataLiberaBool = entrataLibera.equals("Sì");
+		int[] volontariIds = volontari.stream()
+				.mapToInt(Volontario::getId)
+				.toArray();
 
-		Luogo luogoDaAssociare = luogoDao.findByNome(nomeLuogoSelezionato);
-		if (luogoDaAssociare == null) {
-			throw new DatabaseException("Luogo non trovato.");
-		}
-
-		int[] volontariIds = new int[volontari.length];
-		for (int i = 0; i < volontari.length; i++) {
-			volontariIds[i] = VolontarioDao.getIdByUsername(volontari[i]);
-		}
-
-		int[] giorniIds = new int[giorni.length];
-		for (int i = 0; i < giorni.length; i++) {
-			giorniIds[i] = GiorniSettimanaDao.getIdByNome(giorni[i]);
-		}
+		int[] giorniIds = giorni.stream().mapToInt(Giorno::id).toArray();
 
 		// Controllo overlap
-		if (TipoVisitaDao.siSovrappone(luogoDaAssociare.getId(), giorniIds, oraInizio, durataMinuti, dataInizio, dataFine)) {
+		if (tipoVisitaDao.siSovrappone(luogoSelezionato.getId(), giorniIds, oraInizio, durataMinuti, dataInizio, dataFine)) {
 			throw new  IllegalArgumentException("La visita si sovrappone ad un'altra.");
 		}
 
 		// Controlli fatti, aggiungere al DB
-		TipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
-				oraInizio, durataMinuti, entrataLiberaBool, numeroMin,
-				numeroMax, luogoDaAssociare, volontariIds, giorniIds, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
+		try {
+			int tipoVisitaId = tipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
+					oraInizio, durataMinuti, entrataLibera, numeroMin,
+					numeroMax, luogoSelezionato, volontariIds, giorniIds, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
+			PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
+			return new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numeroMin, numeroMax, luogoSelezionato, puntoIncontro, giorni, volontari);
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del comune", e);
+			if ("23000".equals(e.getSQLState()) && e.getErrorCode() == 1062) {
+				throw new DatabaseException("Assicurati che il punto di incontro sia univoco.");
+			}
+			throw new DatabaseException("Errore nell'inserimento del tipo di visita.");
+		}
 	}
 
-	public List<String> getGiorniSettimana() {
-		return GiorniSettimanaDao.getGiorniSettimana();
-	}
-
-	public boolean isEmpty() {
-		return TipoVisitaDao.isEmpty();
+	public boolean esisteAlmenoUnaVisita() throws DatabaseException {
+		try {
+			return tipoVisitaDao.esisteAlmenoUnaVisita();
+		} catch (SQLException e) {
+			throw new DatabaseException("Impossibile verificare l'esistenza di almeno un tipo di visita.");
+		}
 	}
 
 	public List<String> getTitoliByVolontarioId(int volontarioId) {
-		return TipoVisitaDao.getTitoliByVolontarioId(volontarioId);
+		return tipoVisitaDao.getTitoliByVolontarioId(volontarioId);
 	}
 
 	public List<String> getTitoliByLuogoId(int luogoId) {
-		return TipoVisitaDao.getTitoliByLuogoId(luogoId);
+		return tipoVisitaDao.getTitoliByLuogoId(luogoId);
 	}
 
 	public List<String> getPreviewTipiVisita() {
-		return TipoVisitaDao.getPreviewTipiVisita();
+		return tipoVisitaDao.getPreviewTipiVisita();
 	}
 
     public ArrayList<TipoVisita> getVisiteByVolontario(int id) {
 		ArrayList<TipoVisita> visite = new ArrayList<>();
 		for (String titolo: this.getTitoliByVolontarioId(id)) {
-			TipoVisita tipoVisita = TipoVisitaDao.getVisitaByTitolo(titolo);
+			TipoVisita tipoVisita = tipoVisitaDao.getVisitaByTitolo(titolo);
 			if (tipoVisita == null) {
 				throw new DatabaseException("Errore durante il recupero di un tipo di visita");
 			}

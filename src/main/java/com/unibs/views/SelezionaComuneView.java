@@ -3,28 +3,25 @@ package com.unibs.views;
 import com.googlecode.lanterna.gui2.*;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.unibs.controllers.ConfigController;
 import com.unibs.models.Comune;
 
 public class SelezionaComuneView {
-    private final ConfigController configController;
-    private Comune comuneSelezionato = null;
+    private final AtomicReference<Comune> comuneSelezionato;
+    private Window window;
 
-    public SelezionaComuneView(ConfigController configController) {
-        this.configController = configController;
+    public SelezionaComuneView() {
+        this.comuneSelezionato = new AtomicReference<>(null);
     }
 
-    public Window creaFinestra() {
-        Window window = new BasicWindow("Seleziona un Comune");
-
+    public Window creaFinestra(List<Comune> comuni) {
+        window = new BasicWindow("Seleziona un Comune");
         Panel panel = new Panel();
-
-        List<Comune> comuni = configController.getAmbitoTerritoriale();
 
         for (Comune comune : comuni) {
             panel.addComponent(new Button(comune.getNome(), () -> {
-                comuneSelezionato = comune;
+                comuneSelezionato.set(comune);
                 window.close();
             }));
         }
@@ -34,7 +31,9 @@ public class SelezionaComuneView {
         return window;
     }
 
-    public Comune getComuneSelezionato() {
-        return this.comuneSelezionato;
+    public Comune mostra(WindowBasedTextGUI gui, List<Comune> comuni) {
+        creaFinestra(comuni);
+        gui.addWindowAndWait(window);
+        return comuneSelezionato.get();
     }
 }

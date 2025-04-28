@@ -2,32 +2,30 @@ package com.unibs.views;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.controllers.DatePrecluseController;
 
 import java.util.List;
 
 public class AggiungiDatePrecluseView {
-    private final Button precludeButton;
+    private final Button precludiButton;
     private final TextBox dataTextBox;
     private final Label feedbackLabel;
 
 
-    public AggiungiDatePrecluseView(DatePrecluseController precluseController) {
+    public AggiungiDatePrecluseView() {
         this.dataTextBox = new TextBox("");
         this.feedbackLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
-        this.precludeButton = new Button("Precludi", () -> precluseController.aggiungiDataPreclusa(dataTextBox.getText()));
+        this.precludiButton = new Button("Precludi");
     }
 
-    public Window creaFinestra(String mese, int anno) {
+    private Window creaFinestra(String mese, int anno) {
         pulisciCampi();
         Window window = new BasicWindow("Aggiungi date precluse");
         Panel panel = new Panel();
 
         panel.addComponent(new Label("Inserisci un giorno da precludere per " + mese + " " + anno));
         panel.addComponent(dataTextBox);
-        panel.addComponent(new EmptySpace());
         panel.addComponent(feedbackLabel);
-        panel.addComponent(precludeButton);
+        panel.addComponent(precludiButton);
         Button esciButton = new Button("Esci", window::close);
         panel.addComponent(esciButton);
 
@@ -48,5 +46,24 @@ public class AggiungiDatePrecluseView {
 
     public void mostraSuccesso(String message) {
         feedbackLabel.setText(message);
+        feedbackLabel.setForegroundColor(TextColor.ANSI.BLACK);
+    }
+
+    public void mostra(WindowBasedTextGUI gui, String mese, int anno) {
+        Window window = creaFinestra(mese, anno);
+        gui.addWindowAndWait(window);
+    }
+
+    public Button getPrecludiButton() {
+        return precludiButton;
+    }
+
+    public String getData() {
+        return dataTextBox.getText();
+    }
+
+    public void pulisci() {
+        dataTextBox.setText("");
+        dataTextBox.takeFocus();
     }
 }

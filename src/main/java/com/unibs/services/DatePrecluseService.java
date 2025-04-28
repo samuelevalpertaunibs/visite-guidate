@@ -1,24 +1,36 @@
 package com.unibs.services;
 
+import com.unibs.DatabaseException;
 import com.unibs.daos.DatePrecluseDao;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DatePrecluseService {
-    public void aggiungiDataPrecluse(String giorno) {
+    private static final Logger LOGGER = Logger.getLogger(DatePrecluseService.class.getName());
+    private final DatePrecluseDao datePrecluseDao = new DatePrecluseDao();
+
+    public void aggiungiDataPreclusa(String giorno) throws IllegalArgumentException, DatabaseException {
         if (giorno == null || giorno.isEmpty()) {
-            throw new IllegalArgumentException("Inserisci una data");
+            throw new IllegalArgumentException("Inserisci una data.");
         }
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate dataInserita = getDataInserita(giorno, dateFormatter);
 
-        // Controllo se la data è già preclusa prima di inserirla
-        if (DatePrecluseDao.isDataPreclusa(dataInserita)) {
-            throw new IllegalArgumentException("Errore: La data è già preclusa.");
+        try {
+            // Controllo se la data è già preclusa prima di inserirla
+            if (datePrecluseDao.isDataPreclusa(dataInserita)) {
+                throw new IllegalArgumentException("Errore: La data è già preclusa.");
+            }
+            datePrecluseDao.aggiungiDataPreclusa(dataInserita);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta della data preclusa", e);
+            throw new DatabaseException("Impossibile precludere la data.");
         }
-        DatePrecluseDao.aggiungiDataPreclusa(dataInserita);
     }
 
     private LocalDate getDataInserita(String giorno, DateTimeFormatter dateFormatter) {
@@ -26,7 +38,7 @@ public class DatePrecluseService {
         try {
             giornoInt = Integer.parseInt(giorno);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Formato non valido");
+            throw new IllegalArgumentException("Formato non valido.");
         }
 
         LocalDate primoGiornoMesePrecluso = getPrimaDataPrecludibile();

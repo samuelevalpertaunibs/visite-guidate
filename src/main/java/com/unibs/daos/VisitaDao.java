@@ -1,6 +1,5 @@
 package com.unibs.daos;
 
-import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
 import com.unibs.models.PuntoIncontro;
 import com.unibs.models.TipoVisita;
@@ -9,6 +8,7 @@ import com.unibs.models.Visita;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class VisitaDao {
     /**
      * Ritorno una lista di Visite, i cui tipi di visita associati sono solo PARZIALMENTE inizializzati
      */
-    public static List<Visita> getVisitePreview(Visita.StatoVisita stato) {
+    public List<Visita> getVisitePreview(Visita.StatoVisita stato) throws SQLException {
         List<Visita> visite = new ArrayList<>();
         Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
 
@@ -41,7 +41,7 @@ public class VisitaDao {
                         t.num_min_partecipanti,
                         t.num_max_partecipanti,
                         v.data_svolgimento,
-                        v.stato,
+                        v.stato
                     FROM
                         visite v
                     JOIN
@@ -79,17 +79,13 @@ public class VisitaDao {
                 TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
                 if (tipoVisita == null) {
                     PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
-                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti);
+                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, puntoIncontro);
                     tipoVisitaCache.put(tipoVisitaId, tipoVisita);
                 }
 
                 visite.add(new Visita(tipoVisita, dataSvolgimento, statoVisita));
             }
-
-        } catch (Exception e) {
-            throw new DatabaseException("Errore nel recupero delle visite per stato: " + e.getMessage());
         }
-
         return visite;
     }
 

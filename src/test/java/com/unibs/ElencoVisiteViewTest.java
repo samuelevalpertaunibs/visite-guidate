@@ -4,7 +4,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.unibs.controllers.VisitaController;
-import com.unibs.views.ElencoVisiteView;
+import com.unibs.services.VisitaService;
 
 public class ElencoVisiteViewTest {
 
@@ -19,11 +19,11 @@ public class ElencoVisiteViewTest {
             WindowBasedTextGUI gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace());
 
             // Controller e view
-            VisitaController controller = new VisitaController(gui); // se richiede il GUI
-            ElencoVisiteView view = new ElencoVisiteView(controller);
+            VisitaService visitaService = new VisitaService();
+            VisitaController controller = new VisitaController(gui, visitaService); // se richiede il GUI
 
-            Window window = view.creaFinestra();
-            gui.addWindowAndWait(window);
+            controller.apriVisualizzaVisitePerTipologia();
+
             screen.stopScreen();
         } catch (Exception e) {
             e.printStackTrace();

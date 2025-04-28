@@ -1,12 +1,12 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.models.Volontario;
+import com.unibs.models.Luogo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElencoVolontariView {
+public class ElencoLuoghiConVisiteAssociateView {
     Panel panel;
     ArrayList<Component> components = new ArrayList<>();
 
@@ -27,8 +27,8 @@ public class ElencoVolontariView {
         return window;
     }
 
-    public void aggiungiVolontario(Volontario volontario, List<String> titoliTipiVisita) {
-        components.add(new Label("Volontario: " + volontario.getUsername()));
+    public void aggiungiLuogo(Luogo luogo, List<String> titoliTipiVisita) {
+        components.add(new Label("Luogo: " + luogo.getNome()));
 
         String visitaText = titoliTipiVisita.isEmpty()
                 ? "Nessun tipo di visita associato"

@@ -75,12 +75,13 @@ public class ConfigService {
         }
     }
 
-    public void setNumeroMaxPersone(String numeroMaxPersone) throws DatabaseException {
+    public int setNumeroMaxPersone(String numeroMaxPersone) throws DatabaseException {
         try {
             int numeroMax = Integer.parseInt(numeroMaxPersone);
             if (numeroMax < 1 || numeroMax > 100)
                 throw new IllegalArgumentException("Il numero max deve essere positivo e minore di 100.");
             configDao.setNumeroMax(numeroMax);
+            return numeroMax;
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Il numero massimo di persone non è valido.");
         } catch (SQLException e) {
@@ -125,5 +126,13 @@ public class ConfigService {
         } catch (DatabaseException e) {
             return false;
         }
+    }
+
+    public List<Comune> getAmbitoTerritoriale() throws DatabaseException {
+        return getConfig().getAmbitoTerritoriale();
+    }
+
+    public int getNumeroMax() {
+        return getConfig().getNumeroMassimoIscrizioniPrenotazione();
     }
 }

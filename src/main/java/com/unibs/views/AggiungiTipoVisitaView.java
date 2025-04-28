@@ -1,7 +1,7 @@
 package com.unibs.views;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
@@ -10,53 +10,60 @@ import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.Window;
-import com.unibs.controllers.LuogoController;
-import com.unibs.controllers.TipoVisitaController;
-import com.unibs.controllers.VolontariController;
+import com.unibs.models.Giorno;
 import com.unibs.models.Volontario;
 
 public class AggiungiTipoVisitaView {
-    private final TipoVisitaController tipoVisitaController;
-    private final VolontariController volontariController;
-    private final SelezionaLuogoView selezionaLuogoView;
-
-    private final Button selezionaLuogoButton;
-    private final Button associaGiorniButton;
-    private final Button associaVolontariButton;
-    private final Button fineButton;
-
+    private static final int YES_INDEX = 0;
+    private Window window;
     private final Label luogoLabel;
-    private final Label errorLabel;
-    private final Label volontariSelezionatiLabel;
-    private final Label giorniSelezionatiLabel;
-    private final Label visiteLabel;
-
     private final TextBox titoloField;
     private final TextBox descrizioneField;
+    private final TextBox indirizzoField;
+    private final TextBox comuneField;
+    private final TextBox provinciaField;
     private final TextBox dataInizioField;
     private final TextBox dataFineField;
     private final TextBox oraInizioField;
     private final TextBox durataField;
-    private final TextBox indirizzoField;
-    private final TextBox comuneField;
-    private final TextBox provinciaField;
     private final TextBox numeroMinPartecipantiField;
     private final TextBox numeroMaxPartecipantiField;
-
     private final RadioBoxList<String> entrataLibera;
+    private final Label volontariSelezionatiLabel;
+    private final Label giorniSelezionatiLabel;
+    private final Label errorLabel;
+    private final Label visiteLabel;
+
+    private final Button aggiungiButton;
+    private final Button fineButton;
+    private final Button selezionaLuogoButton;
+    private final Button associaGiorniButton;
+    private final Button associaVolontariButton;
 
     private final Panel bottomPanel;
     private final Panel errorPanel;
 
-    private final List<String> volontariSelezionati = new ArrayList<>();
-    private final List<String> giorniSelezionati = new ArrayList<>();
+    public Button getFineButton() {
+        return fineButton;
+    }
 
-    public AggiungiTipoVisitaView(TipoVisitaController tipoVisitaController) {
-        this.tipoVisitaController = tipoVisitaController;
-        LuogoController luogoController = tipoVisitaController.getLuogoController();
-        this.volontariController = tipoVisitaController.getVolontariController();
-        this.selezionaLuogoView = new SelezionaLuogoView(luogoController);
+    public Button getSelezionaLuogoButton() {
+        return selezionaLuogoButton;
+    }
 
+    public Button getAssociaGiorniButton() {
+        return associaGiorniButton;
+    }
+
+    public Button getAssociaVolontariButton() {
+        return associaVolontariButton;
+    }
+
+    public Button getAggiungiButton() {
+        return aggiungiButton;
+    }
+
+    public AggiungiTipoVisitaView() {
         TerminalSize defaultSize = new TerminalSize(16, 1);
 
         luogoLabel = new Label("Seleziona un luogo");
@@ -75,24 +82,25 @@ public class AggiungiTipoVisitaView {
         entrataLibera = new RadioBoxList<>();
         entrataLibera.addItem("Sì");
         entrataLibera.addItem("No");
-        entrataLibera.setCheckedItemIndex(0);
+        entrataLibera.setCheckedItemIndex(YES_INDEX);
 
         volontariSelezionatiLabel = new Label("Nessun volontario selezionato");
         giorniSelezionatiLabel = new Label("Nessun giorno selezionato");
         errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         visiteLabel = new Label("Ancora nessuna visita aggiunta");
 
-        fineButton = new Button("Fine", tipoVisitaController::chiudiFinestraAggiungiTipoVisita);
-        selezionaLuogoButton = new Button("Nessun luogo selezionato", this::apriPopupSelezioneLuogo);
-        associaGiorniButton = new Button("Seleziona giorni", this::apriPopupSelezioneGiorni);
-        associaVolontariButton = new Button("Associa volontari", this::apriPopupSelezioneVolontari);
+        aggiungiButton = new Button("Aggiungi"); // NESSUNA azione
+        fineButton = new Button("Fine"); // NESSUNA azione
+        selezionaLuogoButton = new Button("Nessun luogo selezionato"); // NESSUNA azione
+        associaGiorniButton = new Button("Seleziona giorni"); // NESSUNA azione
+        associaVolontariButton = new Button("Associa volontari"); // NESSUNA azione
 
         bottomPanel = new Panel(new LinearLayout(Direction.VERTICAL));
         errorPanel = new Panel(new LinearLayout(Direction.VERTICAL));
     }
 
-    public Window creaFinestra() {
-        Window window = new BasicWindow("INIZIALIZZAZIONE CORPO DATI - Aggiungi tipo visita");
+    private void creaFinestra() {
+        window = new BasicWindow("INIZIALIZZAZIONE CORPO DATI - Aggiungi tipo visita");
         Panel mainPanel = new Panel(new LinearLayout(Direction.VERTICAL));
         Panel topPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
         Panel inputPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
@@ -140,23 +148,7 @@ public class AggiungiTipoVisitaView {
         rightInputPanel.addComponent(associaVolontariButton);
         rightInputPanel.addComponent(volontariSelezionatiLabel);
 
-        buttonPanel.addComponent(new Button("Aggiungi", () -> tipoVisitaController.aggiungiTipoVisita(
-                titoloField.getText(),
-                descrizioneField.getText(),
-                dataInizioField.getText(),
-                dataFineField.getText(),
-                oraInizioField.getText(),
-                durataField.getText(),
-                entrataLibera.getCheckedItem(),
-                numeroMinPartecipantiField.getText(),
-                numeroMaxPartecipantiField.getText(),
-                selezionaLuogoButton.getLabel(),
-                volontariSelezionati.toArray(new String[0]),
-                giorniSelezionati.toArray(new String[0]),
-                indirizzoField.getText(),
-                comuneField.getText(),
-                provinciaField.getText()
-        )));
+        buttonPanel.addComponent(aggiungiButton);
         buttonPanel.addComponent(fineButton);
 
         errorPanel.addComponent(errorLabel);
@@ -178,72 +170,11 @@ public class AggiungiTipoVisitaView {
 
         window.setComponent(mainPanel);
         window.setHints(List.of(Window.Hint.EXPANDED));
-        return window;
     }
 
-    private void apriPopupSelezioneLuogo() {
-        selezionaLuogoView.setOnLuogoSelected((luogoSelezionato) -> {
-            selezionaLuogoButton.setLabel(luogoSelezionato.getNome());
-            selezionaLuogoButton.setEnabled(false);
-        });
-
-        tipoVisitaController.getGui().addWindowAndWait(selezionaLuogoView.creaFinestra());
-        luogoLabel.setText("Luogo selezionato:");
-        titoloField.takeFocus();
-    }
-
-    private void apriPopupSelezioneGiorni() {
-        Window popupWindow = new BasicWindow("Seleziona giorni della settimana");
-        Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
-        List<CheckBox> checkBoxList = new ArrayList<>();
-
-        for (String giorno : tipoVisitaController.getGiorniSettimana()) {
-            CheckBox checkBox = new CheckBox(giorno);
-            if (giorniSelezionati.contains(giorno)) checkBox.setChecked(true);
-            checkBoxList.add(checkBox);
-            panel.addComponent(checkBox);
-        }
-
-        Button confermaButton = new Button("Conferma", () -> {
-            giorniSelezionati.clear();
-            for (CheckBox checkBox : checkBoxList)
-                if (checkBox.isChecked()) giorniSelezionati.add(checkBox.getLabel());
-            giorniSelezionatiLabel.setText(String.join(", ", giorniSelezionati));
-            popupWindow.close();
-        });
-
-        panel.addComponent(new EmptySpace());
-        panel.addComponent(confermaButton);
-        popupWindow.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
-        popupWindow.setComponent(panel);
-        tipoVisitaController.getGui().addWindowAndWait(popupWindow);
-    }
-
-    private void apriPopupSelezioneVolontari() {
-        BasicWindow popupWindow = new BasicWindow("Seleziona volontari");
-        Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
-        List<CheckBox> checkBoxList = new ArrayList<>();
-
-        for (Volontario v : volontariController.getAllVolontari()) {
-            CheckBox checkBox = new CheckBox(v.getUsername());
-            if (volontariSelezionati.contains(v.getUsername())) checkBox.setChecked(true);
-            checkBoxList.add(checkBox);
-            panel.addComponent(checkBox);
-        }
-
-        Button confermaButton = new Button("Conferma", () -> {
-            volontariSelezionati.clear();
-            for (CheckBox checkBox : checkBoxList)
-                if (checkBox.isChecked()) volontariSelezionati.add(checkBox.getLabel());
-            volontariSelezionatiLabel.setText(String.join(", ", volontariSelezionati));
-            popupWindow.close();
-        });
-
-        panel.addComponent(new EmptySpace());
-        panel.addComponent(confermaButton);
-        popupWindow.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
-        popupWindow.setComponent(panel);
-        tipoVisitaController.getGui().addWindowAndWait(popupWindow);
+    public void mostra(WindowBasedTextGUI tui) {
+        creaFinestra();
+        tui.addWindowAndWait(window);
     }
 
     public void mostraErrore(String message) {
@@ -251,7 +182,7 @@ public class AggiungiTipoVisitaView {
         errorLabel.setText(message);
     }
 
-    public void mostraVisite(String message) {
+    public void aggiornaVisite(String message) {
         visiteLabel.setText(message);
     }
 
@@ -268,14 +199,82 @@ public class AggiungiTipoVisitaView {
         durataField.setText("");
         numeroMinPartecipantiField.setText("");
         numeroMaxPartecipantiField.setText("");
-        entrataLibera.setCheckedItemIndex(0);
-        volontariSelezionati.clear();
+        entrataLibera.setCheckedItemIndex(YES_INDEX);
         volontariSelezionatiLabel.setText("Nessun volontario selezionato");
-        giorniSelezionati.clear();
         giorniSelezionatiLabel.setText("Nessun giorno selezionato");
         selezionaLuogoButton.setLabel("Nessun luogo selezionato");
         selezionaLuogoButton.setEnabled(true);
         errorLabel.setText("");
         bottomPanel.removeComponent(errorPanel);
+    }
+
+    public void chiudi() {
+        window.close();
+    }
+
+    public void aggiornaLuogoLabel(String message) {
+        luogoLabel.setText(message);
+    }
+
+    public void aggiornaGiorniSelezionati(List<Giorno> giorniSelezionati) {
+        String testo = giorniSelezionati.stream()
+                .map(Giorno::getPlaceHolder)
+                .collect(Collectors.joining(", "));
+        giorniSelezionatiLabel.setText(testo);
+    }
+
+    public void aggiornaVolontariSelezionati(List<Volontario> volontariSelezionati) {
+        String testo = volontariSelezionati.stream()
+                .map(Volontario::getPlaceHolder)
+                .collect(Collectors.joining(", "));
+        volontariSelezionatiLabel.setText(testo);
+    }
+
+    public String getTitolo() {
+        return titoloField.getText();
+    }
+
+    public String getDescrizione() {
+        return descrizioneField.getText();
+    }
+
+    public String getIndirizzo() {
+        return indirizzoField.getText();
+    }
+
+    public String getComune() {
+        return comuneField.getText();
+    }
+
+    public String getProvincia() {
+        return provinciaField.getText();
+    }
+
+    public String getDataInizio() {
+        return dataInizioField.getText();
+    }
+
+    public String getDataFine() {
+        return dataFineField.getText();
+    }
+
+    public String getOraInizio() {
+        return oraInizioField.getText();
+    }
+
+    public String getDurata() {
+        return durataField.getText();
+    }
+
+    public String getNumeroMinPartecipanti() {
+        return numeroMinPartecipantiField.getText();
+    }
+
+    public String getNumeroMaxPartecipanti() {
+        return numeroMaxPartecipantiField.getText();
+    }
+
+    public boolean getEntrataLibera() {
+        return entrataLibera.isChecked(YES_INDEX);
     }
 }

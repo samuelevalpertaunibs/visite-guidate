@@ -1,12 +1,13 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.models.MenuOption;
-import com.unibs.models.TipoVisita;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
-import com.unibs.views.InserisciDisponibilitaView;
+import com.unibs.services.ConfigService;
 import com.unibs.views.MenuView;
+import com.unibs.views.RegimeNonAttivoView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,34 +15,28 @@ import java.util.List;
 
 public class VolontarioController implements IUserController {
     private final Volontario utente;
-    private final InitController initController;
-    private final DatePrecluseController datePrecluseController;
-    private final ConfigController configController;
-    private final VolontariController volontariController;
-    private final TipoVisitaController tipoVisitaController;
-    private final VisitaController visitaController;
+    private final ConfigService configService;
     private final MenuView menuView;
-    private final LuogoController luogoController;
     private final MultiWindowTextGUI gui;
 
-    public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente) {
+    public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente, ConfigService configService) {
         this.gui = gui;
-        this.configController = new ConfigController(gui);
-        this.luogoController = new LuogoController(gui);
-        this.volontariController = new VolontariController(gui);
-        this.tipoVisitaController = new TipoVisitaController(gui, luogoController, volontariController);
-        this.visitaController = new VisitaController(gui);
-        this.initController = new InitController(configController, tipoVisitaController);
-        this.datePrecluseController = new DatePrecluseController(gui);
+        this.configService = configService;
         this.menuView = new MenuView(gui);
         this.utente = new Volontario(currentUtente);
     }
 
     @Override
     public void start() {
-        if (initController.checkRegime()){
+        if (configService.regimeAttivo()) {
             showMenu();
         }
+        mostraAvvisoNonRegime(gui);
+    }
+
+    @Override
+    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+        new RegimeNonAttivoView().mostra(gui);
     }
 
     @Override
@@ -61,8 +56,9 @@ public class VolontarioController implements IUserController {
         }
     }
 
+
     private void visualizzaVisite() {
-        tipoVisitaController.apriVisualizzaVisiteVolontario(utente);
+        //tipoVisitaController.apriVisualizzaVisiteVolontario(utente);
     }
 
     /*

@@ -1,24 +1,27 @@
 package com.unibs.services;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.unibs.daos.TipoVisitaDao;
-import com.unibs.daos.VolontarioDao;
-import com.unibs.models.TipoVisita;
+import com.unibs.DatabaseException;
+import com.unibs.daos.UtenteDao;
 import com.unibs.models.Volontario;
 
-public class VolontarioService {
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-    public List<Volontario> getAllVolontari() {
-        return VolontarioDao.getAllVolontari();
+public class UtenteService {
+    private static final Logger LOGGER = Logger.getLogger(UtenteService.class.getName());
+    UtenteDao utenteDao = new UtenteDao();
+
+    public List<Volontario> findAllVolontari() throws DatabaseException {
+        try {
+            return utenteDao.getAllVolontari();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta della data preclusa", e);
+            throw new DatabaseException("Errore nel recupero dei volontari");
+        }
     }
 
-    public int getIdByUsername(String volontariNome) {
-        return VolontarioDao.getIdByUsername(volontariNome);
-    }
-
+    /*
     public List<LocalDate> getDateSelezionabiliPerVolontario (int volontarioId) {
         // 1. seleziono tutti i tipi di visita che hanno almeno un giorno compreso nel mese prossimo legati al volontario
         // 2. itero tutte le visite e aggiungo i giorni guardando la tabella NN
@@ -37,4 +40,6 @@ public class VolontarioService {
 
         return dateSelezionabili;
     }
+    */
+
 }
