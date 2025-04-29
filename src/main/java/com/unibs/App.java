@@ -5,6 +5,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.VirtualScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.unibs.controllers.LoginController;
+import com.unibs.services.ServiceFactory;
 import com.unibs.utils.LoggerConfig;
 
 import java.io.IOException;
@@ -25,7 +26,9 @@ public class App {
             AppContext.SCREEN_WIDTH = screen.getTerminalSize().getColumns();
             AppContext.SCREEN_HEIGHT = screen.getTerminalSize().getRows();
 
-            LoginController loginController = new LoginController(gui);
+            ServiceFactory serviceFactory = new ServiceFactory();
+
+            LoginController loginController = new LoginController(gui, serviceFactory);
             loginController.apriLogin(gui);
 
         } catch (IOException e) {

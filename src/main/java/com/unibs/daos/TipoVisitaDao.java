@@ -137,7 +137,7 @@ public class TipoVisitaDao {
         return false;
     }
 
-    public List<String> getTitoliByVolontarioId(int volontarioId) {
+    public List<String> getTitoliByVolontarioId(int volontarioId) throws SQLException {
         List<String> titoliTipiVisita = new ArrayList<>();
         String sql = "SELECT titolo FROM tipi_visita JOIN tipi_visita_volontari ON tipi_visita.id = tipi_visita_volontari.tipo_visita_id WHERE volontario_id = ?";
 
@@ -151,8 +151,6 @@ public class TipoVisitaDao {
                 titoliTipiVisita.add(rs.getString("titolo"));
             }
 
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore nel recupero dei tipi di visita associati al volontario: " + e.getMessage());
         }
         return titoliTipiVisita;
     }
@@ -270,7 +268,7 @@ public class TipoVisitaDao {
         return tipiVisita;
     }
 
-    public TipoVisita getVisitaByTitolo(String titolo) {
+    public TipoVisita getByTitolo(String titolo) throws SQLException {
         String sql = """
         SELECT tv.id, tv.titolo, tv.descrizione, tv.data_inizio, tv.data_fine, tv.ora_inizio,
                tv.durata_minuti, tv.entrata_libera, tv.num_min_partecipanti, tv.num_max_partecipanti,
@@ -330,11 +328,9 @@ public class TipoVisitaDao {
             } else {
                 return null;
             }
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore nel recupero del tipo visita con titolo: " + titolo + " - " + e.getMessage());
         }
     }
+
 
 //    public static ArrayList<TipoVisita> getByVolontarioIdAndMese(int volontarioId, int mese) {
 //        ArrayList<TipoVisita> ids = new ArrayList<>();

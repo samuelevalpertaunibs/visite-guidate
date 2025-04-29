@@ -86,4 +86,7 @@ public class AggiungiLuogoView {
         window.close();
     }
 
+    public void focusAggiungiLuogoButton() {
+        aggiungiButton.takeFocus();
+    }
 }

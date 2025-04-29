@@ -2,7 +2,7 @@ package com.unibs.models;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
+import java.util.Set;
 
 public class TipoVisita {
     private final int id;
@@ -17,10 +17,10 @@ public class TipoVisita {
     private final int numMaxPartecipanti;
     private Luogo luogo;
     private PuntoIncontro puntoIncontro;
-    private List<Giorno> giorni;
-    private List<Volontario> volontari;
+    private Set<Giorno> giorni;
+    private Set<Volontario> volontari;
 
-    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro, List<Giorno> giorni, List<Volontario> volontari) {
+    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera,int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro, Set<Giorno> giorni, Set<Volontario> volontari) {
         this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;
@@ -87,6 +87,10 @@ public class TipoVisita {
         return puntoIncontro;
     }
 
+    public Set<Giorno> getGiorniSettimana() {
+        return giorni;
+    }
+
     @Override
     public String toString() {
         return "Titolo: " + titolo + "\n" +
@@ -102,4 +106,19 @@ public class TipoVisita {
                 "Punto incontro: " + (puntoIncontro != null ? puntoIncontro.toString() : "N/D");
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public boolean getEntrataLibera() {
+        return entrataLibera;
+    }
+
+    public int getNumMinPartecipanti() {
+        return numMinPartecipanti;
+    }
+
+    public int getNumMaxPartecipanti() {
+        return numMaxPartecipanti;
+    }
 }

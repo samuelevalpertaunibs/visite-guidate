@@ -1,12 +1,11 @@
 package com.unibs.daos;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.unibs.DatabaseException;
 import com.unibs.DatabaseManager;
@@ -112,9 +111,62 @@ public class UtenteDao {
         }
     }
 
-//    public static List<LocalDate> getDateSelezionabiliPerVolontario(int volontarioId) {
-//        ArrayList<LocalDate> date = new ArrayList<>();
-//        String query = "SELECT * FROM utenti WHERE ruolo_id = 2";
-//    }
+    public Set<Volontario> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
+        Set<Volontario> volontari = new HashSet<>();
+        String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
 
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, tipoVisitaId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String username = rs.getString("username");
+
+                volontari.add(new Volontario(id, username, null, null, null));
+            }
+        }
+
+        return volontari;
+    }
+
+    public void sovrascriviDisponibilita(Volontario volontario, List<LocalDate> selezionate) throws SQLException {
+        if (selezionate == null || selezionate.isEmpty()) {
+            return;
+        }
+
+        LocalDate primaData = selezionate.get(0);
+        int mese = primaData.getMonthValue();
+        int anno = primaData.getYear();
+
+        String deleteQuery = "DELETE FROM disponibilita WHERE volontario_id = ? AND EXTRACT(MONTH FROM data_disponibile) = ? AND EXTRACT(YEAR FROM data_disponibile) = ?";
+        String insertQuery = "INSERT INTO disponibilita (volontario_id, data_disponibile) VALUES (?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery);
+                 PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
+                deleteStmt.setInt(1, volontario.getId());
+                deleteStmt.setInt(2, mese);
+                deleteStmt.setInt(3, anno);
+                deleteStmt.executeUpdate();
+
+                // Inserisce le nuove date
+                for (LocalDate data : selezionate) {
+                    insertStmt.setInt(1, volontario.getId());
+                    insertStmt.setDate(2, Date.valueOf(data));
+                    insertStmt.addBatch();
+                }
+
+                insertStmt.executeBatch();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        }
+    }
 }

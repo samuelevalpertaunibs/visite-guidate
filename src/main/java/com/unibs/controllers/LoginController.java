@@ -8,14 +8,16 @@ import com.unibs.views.LoginView;
 
 public class LoginController {
 
+    private final ServiceFactory serviceFactory;
     private final LoginService loginService;
     private LoginView view;
     private final MultiWindowTextGUI gui;
     private CambioPasswordView cambioPasswordView;
     private Utente utente;
 
-    public LoginController(MultiWindowTextGUI gui) {
-        this.loginService = new LoginService();
+    public LoginController(MultiWindowTextGUI gui, ServiceFactory serviceFactory) {
+        this.serviceFactory = serviceFactory;
+        this.loginService = serviceFactory.getLoginService();
         this.gui = gui;
     }
 
@@ -31,20 +33,12 @@ public class LoginController {
     }
 
     private void inizializzaConfiguratore() {
-        LuogoService luogoService = new  LuogoService ();
-        ConfigService configService = new  ConfigService ();
-        GiornoService giornoService = new  GiornoService ();
-        UtenteService utenteService = new UtenteService();
-        TipoVisitaService tipoVisitaService = new  TipoVisitaService();
-        VisitaService visitaService = new  VisitaService ();
-        DatePrecluseService datePrecluseService = new  DatePrecluseService();
-        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, luogoService, configService, giornoService, utenteService, tipoVisitaService, visitaService, datePrecluseService);
+        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, serviceFactory);
         configuratoreController.start();
     }
 
     private void inizializzaVolontario() {
-        ConfigService configService = new  ConfigService();
-        VolontarioController volontarioController = new VolontarioController(gui, utente, configService);
+        VolontarioController volontarioController = new VolontarioController(gui, utente, serviceFactory);
         volontarioController.start();
     }
 

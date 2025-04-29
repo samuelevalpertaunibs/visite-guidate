@@ -41,15 +41,14 @@ public class LoggerConfig {
         };
 
         try {
-            FileHandler fileHandler = new FileHandler("app.log", true); // append = true
-            fileHandler.setLevel(Level.SEVERE);
+            FileHandler fileHandler = new FileHandler("app.log", false);
+            fileHandler.setLevel(Level.CONFIG);
             fileHandler.setFormatter(formatter);
             rootLogger.addHandler(fileHandler);
         } catch (IOException e) {
             System.err.println("Errore durante la configurazione del logger: " + e.getMessage());
         }
 
-        // Imposta il livello minimo globale
         rootLogger.setLevel(Level.ALL);
     }
 }

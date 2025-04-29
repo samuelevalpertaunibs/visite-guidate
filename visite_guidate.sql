@@ -105,14 +105,22 @@ CREATE TABLE date_precluse
     data_preclusa DATE PRIMARY KEY
 );
 
+CREATE TABLE disponibilita
+(
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    volontario_id INT UNSIGNED NOT NULL,
+    data_disponibile DATE NOT NULL,
+    FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
+);
+
 INSERT INTO giorni_settimana (`id`, `nome`)
-VALUES (1, 'Domenica'),
-       (2, 'Lunedì'),
-       (3, 'Martedì'),
-       (4, 'Mercoledì'),
-       (5, 'Giovedì'),
-       (6, 'Venerdì'),
-       (7, 'Sabato');
+VALUES (1, 'Lunedì'),
+       (2, 'Martedì'),
+       (3, 'Mercoledì'),
+       (4, 'Giovedì'),
+       (5, 'Venerdì'),
+       (6, 'Sabato'),
+       (7, 'Domenica');
 
 INSERT INTO ruoli (`id`, `nome`)
 VALUES (1, 'CONF'),

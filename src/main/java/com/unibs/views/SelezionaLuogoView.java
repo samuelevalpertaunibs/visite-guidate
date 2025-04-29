@@ -43,4 +43,11 @@ public class SelezionaLuogoView {
         return luogoSelezionato.get();
     }
 
+    public void setLuogo(Luogo luogo) {
+        luogoSelezionato.set(luogo);
+    }
+
+    public void chiudi() {
+        window.close();
+    }
 }
