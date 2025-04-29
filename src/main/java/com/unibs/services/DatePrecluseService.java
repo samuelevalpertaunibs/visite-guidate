@@ -5,7 +5,9 @@ import com.unibs.daos.DatePrecluseDao;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -59,6 +61,15 @@ public class DatePrecluseService {
             return now.plusMonths(2).withDayOfMonth(1);
         } else {
             return now.plusMonths(3).withDayOfMonth(1);
+        }
+    }
+
+    public Set<LocalDate> findByMonth(YearMonth mese) {
+        try {
+            return datePrecluseDao.findByMonth(mese);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la ricerca delle date precluse", e);
+            throw new DatabaseException("Impossibile recuperare le date precluse.");
         }
     }
 }

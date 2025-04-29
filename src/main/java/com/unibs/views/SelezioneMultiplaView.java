@@ -16,7 +16,7 @@ public class SelezioneMultiplaView<T extends SelezionabileConCheckbox> {
         this.elementi = elementi;
     }
 
-    private Window creaFinestra(AtomicReference<List<T>> selezionatiRef, Set<T> preSelezionati, String titolo) {
+    private Window creaFinestra(AtomicReference<Set<T>> selezionatiRef, Set<T> preSelezionati, String titolo) {
         window = new BasicWindow(titolo);
         Panel panel = new Panel();
         panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
@@ -33,7 +33,7 @@ public class SelezioneMultiplaView<T extends SelezionabileConCheckbox> {
 
         // Bottone conferma
         panel.addComponent(new Button("Conferma", () -> {
-            List<T> selezionati = new ArrayList<>();
+            Set<T> selezionati = new HashSet<>();
             for (Map.Entry<T, CheckBox> entry : checkBoxMap.entrySet()) {
                 if (entry.getValue().isChecked()) {
                     selezionati.add(entry.getKey());
@@ -48,8 +48,8 @@ public class SelezioneMultiplaView<T extends SelezionabileConCheckbox> {
         return window;
     }
 
-    public List<T> mostra(WindowBasedTextGUI gui, Set<T> preSelezionati, String titolo) {
-        AtomicReference<List<T>> selezionatiReference = new AtomicReference<>(List.of());
+    public Set<T> mostra(WindowBasedTextGUI gui, Set<T> preSelezionati, String titolo) {
+        AtomicReference<Set<T>> selezionatiReference = new AtomicReference<>(Set.of());
         window = creaFinestra(selezionatiReference, preSelezionati, titolo);
         gui.addWindowAndWait(window);
         return selezionatiReference.get();

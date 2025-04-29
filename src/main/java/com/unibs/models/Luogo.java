@@ -7,7 +7,7 @@ public class Luogo {
     private Comune comune;
 
     public Luogo(Integer id, String nome, String descrizione, Comune comune) {
-        this.id = id;
+        this.id = id == null ? -1 : id;
         this.nome = nome;
         this.descrizione = descrizione;
         this.comune = comune;

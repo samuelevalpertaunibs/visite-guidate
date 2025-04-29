@@ -12,29 +12,45 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class ConfiguratoreController implements IUserController {
+
+    // Generic
+    private final MultiWindowTextGUI gui;
     private final Utente utente;
-    private final DatePrecluseController datePrecluseController;
-    private final ConfigController configController;
+
+    // Controller
+    private final LuogoController luogoController;
     private final TipoVisitaController tipoVisitaController;
     private final VisitaController visitaController;
-    private final MenuView menuView;
-    private final LuogoController luogoController;
-    private final ConfigService configService;
-    private final WindowBasedTextGUI gui;
+    private final DatePrecluseController datePrecluseController;
+    private final ConfigController configController;
 
-    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, LuogoService luogoService, ConfigService configService, GiornoService giornoService, UtenteService utenteService, TipoVisitaService tipoVisitaService, VisitaService visitaService, DatePrecluseService datePrecluseService) {
-        this.configController = new ConfigController(gui, configService);
+    // Services
+    private final ConfigService configService;
+
+    // Views
+    private final MenuView menuView;
+
+    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
         this.gui = gui;
-        this.luogoController = new LuogoController(gui);
-        this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, utenteService);
-        this.visitaController = new VisitaController(gui, visitaService);
-        this.configService = configService;
-        this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
-        this.menuView = new MenuView(gui);
         this.utente = currentUtente;
+
+        LuogoService luogoService = serviceFactory.getLuogoService();
+        configService = serviceFactory.getConfigService();
+        GiornoService giornoService = serviceFactory.getGiornoService();
+        VolontarioService volontarioService = serviceFactory.getVolontarioService();
+        VisitaService visitaService = serviceFactory.getVisitaService();
+        DatePrecluseService datePrecluseService = serviceFactory.getDatePrecluseService();
+        TipoVisitaService tipoVisitaService = serviceFactory.getTipoVisitaService();
+
+        this.luogoController = new LuogoController(gui);
+        this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
+        this.visitaController = new VisitaController(gui, visitaService);
+        this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
+        this.configController = new ConfigController(gui, configService);
+        this.menuView = new MenuView(gui);
     }
+
 
     @Override
     public void start() {

@@ -1,6 +1,8 @@
 package com.unibs.views;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.googlecode.lanterna.TerminalSize;
@@ -212,19 +214,26 @@ public class AggiungiTipoVisitaView {
         window.close();
     }
 
-    public void aggiornaLuogoLabel(String message) {
-        luogoLabel.setText(message);
-    }
+    public void aggiornaGiorniSelezionati(Set<Giorno> giorniSelezionati) {
+        if (giorniSelezionati == null || giorniSelezionati.isEmpty()) {
+            giorniSelezionatiLabel.setText("Nessun giorno selezionato");
+            return;
+        }
 
-    public void aggiornaGiorniSelezionati(List<Giorno> giorniSelezionati) {
         String testo = giorniSelezionati.stream()
+                .sorted(Comparator.comparing(Giorno::getId))
                 .map(Giorno::getPlaceHolder)
                 .collect(Collectors.joining(", "));
         giorniSelezionatiLabel.setText(testo);
     }
 
-    public void aggiornaVolontariSelezionati(List<Volontario> volontariSelezionati) {
+    public void aggiornaVolontariSelezionati(Set<Volontario> volontariSelezionati) {
+        if (volontariSelezionati == null || volontariSelezionati.isEmpty()) {
+            volontariSelezionatiLabel.setText("Nessun volontario selezionato");
+            return;
+        }
         String testo = volontariSelezionati.stream()
+                .sorted(Comparator.comparing(Volontario::getId))
                 .map(Volontario::getPlaceHolder)
                 .collect(Collectors.joining(", "));
         volontariSelezionatiLabel.setText(testo);
@@ -276,5 +285,14 @@ public class AggiungiTipoVisitaView {
 
     public boolean getEntrataLibera() {
         return entrataLibera.isChecked(YES_INDEX);
+    }
+
+    public void focusTitolo() {
+        titoloField.takeFocus();
+    }
+
+    public void aggiornaLuogo(String testo) {
+        luogoLabel.setText("Luogo selezionato");
+        selezionaLuogoButton.setLabel(testo);
     }
 }

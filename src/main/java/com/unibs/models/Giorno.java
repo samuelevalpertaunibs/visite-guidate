@@ -8,4 +8,8 @@ public record Giorno(int id, String nome) implements SelezionabileConCheckbox {
     public String getPlaceHolder() {
         return nome();
     }
+
+    public int getId() {
+        return id;
+    }
 }
