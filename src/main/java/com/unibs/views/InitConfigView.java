@@ -3,7 +3,7 @@ package com.unibs.views;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.AppContext;
+
 import java.util.List;
 
 public class InitConfigView {
@@ -66,7 +66,6 @@ public class InitConfigView {
 
         String string = "Inserisci il numero massimo di persone che un fruitore può iscrivere ad una iniziativa mediante singola iscrizione";
         Label numeroMaxLabel = new Label(string);
-        numeroMaxLabel.setPreferredSize(new TerminalSize(AppContext.SCREEN_WIDTH - 4, 2));
         numeroMaxPanel.addComponent(numeroMaxLabel);
         numeroMaxPanel.addComponent(numeroMaxField);
         numeroMaxPanel.addComponent(new EmptySpace());

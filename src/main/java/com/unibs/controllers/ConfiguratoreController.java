@@ -69,7 +69,13 @@ public class ConfiguratoreController implements IUserController {
         configService.initDefault();
         configController.apriConfigurazione();
         tipoVisitaController.apriAggiungiTipoVisita();
-        configService.setInitializedOn(LocalDate.now());
+
+        // Imposto la data di inizio regime di funzionamento
+        LocalDate oggi = LocalDate.now();
+        LocalDate prossimoSedici = oggi.getDayOfMonth() < 16
+                ? oggi.withDayOfMonth(16)
+                : oggi.plusMonths(1).withDayOfMonth(16);
+        configService.setPeriodoCorrente(prossimoSedici);
     }
 
     @Override

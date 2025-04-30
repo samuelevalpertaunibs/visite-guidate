@@ -1,4 +1,4 @@
-package com.unibs;
+package com.unibs.utils;
 
 /**
  * DatabaseException

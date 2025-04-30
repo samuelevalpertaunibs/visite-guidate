@@ -6,8 +6,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.unibs.DatabaseException;
-import com.unibs.DatabaseManager;
+import com.unibs.utils.DatabaseException;
+import com.unibs.utils.DatabaseManager;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
 import com.unibs.models.PuntoIncontro;

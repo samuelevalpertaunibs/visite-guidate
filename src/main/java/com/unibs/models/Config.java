@@ -6,13 +6,13 @@ import java.util.List;
 public class Config {
 
     private List<Comune> ambitoTerritoriale;
-    private int numeroMassimoIscrizioniPrenotazione;
-    private final LocalDate initializedOn;
+    private final int numeroMassimoIscrizioniPrenotazione;
+    private final LocalDate periodoCorrente;
 
-    public Config(List<Comune> ambitoTerritoriale, int numeroMassimoIscrizioniPrenotazione, LocalDate initializedOn) {
+    public Config(List<Comune> ambitoTerritoriale, int numeroMassimoIscrizioniPrenotazione, LocalDate periodoCorrente) {
         this.ambitoTerritoriale = ambitoTerritoriale;
         this.numeroMassimoIscrizioniPrenotazione = numeroMassimoIscrizioniPrenotazione;
-        this.initializedOn = initializedOn;
+        this.periodoCorrente = periodoCorrente;
     }
 
     public List<Comune> getAmbitoTerritoriale() {
@@ -23,26 +23,17 @@ public class Config {
         return numeroMassimoIscrizioniPrenotazione;
     }
 
-    public void setNumeroMassimoIscrizioniPrenotazione(int numeroMassimoIscrizioniPrenotazione) {
-        this.numeroMassimoIscrizioniPrenotazione = numeroMassimoIscrizioniPrenotazione;
-    }
-
     public boolean doesInclude(Comune comuneDaControllare) {
-        for (Comune comune : this.ambitoTerritoriale) {
+        for (Comune comune : ambitoTerritoriale) {
             if (comune.equals(comuneDaControllare))
                 return true;
         }
         return false;
     }
 
-    public boolean isAmbitoTerritorialeVuoto() {
-        return ambitoTerritoriale.isEmpty();
+    public LocalDate getPeriodoCorrente() {
+        return periodoCorrente;
     }
-
-    public LocalDate getInitializedOn() {
-        return initializedOn;
-    }
-
 
     public void setAmbitoTerritoriale(List<Comune> ambitoTerritoriale) {
         this.ambitoTerritoriale = ambitoTerritoriale;

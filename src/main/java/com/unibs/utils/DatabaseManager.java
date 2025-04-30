@@ -1,4 +1,4 @@
-package com.unibs;
+package com.unibs.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

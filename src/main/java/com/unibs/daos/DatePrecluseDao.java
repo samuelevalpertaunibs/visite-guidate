@@ -1,6 +1,6 @@
 package com.unibs.daos;
 
-import com.unibs.DatabaseManager;
+import com.unibs.utils.DatabaseManager;
 
 import java.sql.*;
 import java.time.LocalDate;

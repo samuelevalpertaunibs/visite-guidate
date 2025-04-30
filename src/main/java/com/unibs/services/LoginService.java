@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import com.unibs.DatabaseException;
+import com.unibs.utils.DatabaseException;
 import com.unibs.daos.UtenteDao;
 import com.unibs.models.Utente;
 

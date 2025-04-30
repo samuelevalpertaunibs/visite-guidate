@@ -6,11 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import com.unibs.DatabaseManager;
+import com.unibs.utils.DatabaseManager;
 import com.unibs.models.Giorno;
 
 
-public class GiorniSettimanaDao {
+public class GiorniDao {
 
     public List<Giorno> findAll() throws SQLException {
         List<Giorno> giorni = new ArrayList<>();

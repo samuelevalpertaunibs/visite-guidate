@@ -14,6 +14,7 @@ public class App {
     public static void main(String[] args) {
         try {
             LoggerConfig.setupLogger();
+
             Screen screen = new DefaultTerminalFactory().createScreen();
             screen.startScreen();
 
@@ -22,9 +23,6 @@ public class App {
 
             // Ora usa il VirtualScreen per creare il MultiWindowTextGUI
             MultiWindowTextGUI gui = new MultiWindowTextGUI(virtualScreen);
-
-            AppContext.SCREEN_WIDTH = screen.getTerminalSize().getColumns();
-            AppContext.SCREEN_HEIGHT = screen.getTerminalSize().getRows();
 
             ServiceFactory serviceFactory = new ServiceFactory();
 
