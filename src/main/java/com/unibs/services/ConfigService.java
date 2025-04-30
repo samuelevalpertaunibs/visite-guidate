@@ -1,6 +1,6 @@
 package com.unibs.services;
 
-import com.unibs.DatabaseException;
+import com.unibs.utils.DatabaseException;
 import com.unibs.daos.ConfigDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
@@ -69,7 +69,7 @@ public class ConfigService {
     public boolean isInitialized() {
         try {
             Config config = getConfig();
-            return config.getInitializedOn() != null;
+            return config.getPeriodoCorrente() != null;
         } catch (DatabaseException e) {
             return false;
         }
@@ -100,9 +100,9 @@ public class ConfigService {
         }
     }
 
-    public void setInitializedOn(LocalDate initializedOn) throws DatabaseException {
+    public void setPeriodoCorrente(LocalDate periodoCorrente) throws DatabaseException {
         try {
-            configDao.setInitializedOn(initializedOn);
+            configDao.setPeriodoCorrente(periodoCorrente);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la modifica della configurazione", e);
             throw new DatabaseException("Errore durante la modifica della configurazione.");
@@ -111,18 +111,12 @@ public class ConfigService {
 
     public boolean regimeAttivo() {
         try {
-            Config config = getConfig();
-            if (config.getInitializedOn() == null)
+            LocalDate periodoCorrente = getConfig().getPeriodoCorrente();
+            if (periodoCorrente == null)
                 return false;
 
-            LocalDate initializedOn = config.getInitializedOn();
-            LocalDate attivazioneRegime = initializedOn.withDayOfMonth(16);
-
-            if (initializedOn.getDayOfMonth() > 16)
-                attivazioneRegime = attivazioneRegime.plusMonths(1);
-
-            return !LocalDate.now().isBefore(attivazioneRegime);
-
+            // true -> oggi >= inizioPeriodoCorrente
+            return !LocalDate.now().isBefore(periodoCorrente);
         } catch (DatabaseException e) {
             return false;
         }

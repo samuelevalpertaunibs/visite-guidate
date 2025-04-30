@@ -1,13 +1,14 @@
 package com.unibs.daos;
 
+import com.unibs.models.Comune;
+import com.unibs.models.Config;
+import com.unibs.utils.DatabaseManager;
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import com.unibs.DatabaseManager;
-import com.unibs.models.Config;
-import com.unibs.models.Comune;
 
 public class ConfigDao {
 
@@ -21,7 +22,7 @@ public class ConfigDao {
 
             if (rs.next()) {
                 int numeroMaxIscrizioni = rs.getInt("numero_max_iscrizioni");
-                Date sqlDate = rs.getDate("initialized_on");
+                Date sqlDate = rs.getDate("periodo_corrente");
                 LocalDate initializedOn = (sqlDate != null) ? sqlDate.toLocalDate() : null;
 
                 return Optional.of(new Config(null, numeroMaxIscrizioni, initializedOn));
@@ -75,7 +76,7 @@ public class ConfigDao {
                 deleteStmt.executeUpdate();
             }
             // Inserisci i dati di default nel database
-            String insertConfigSql = "INSERT INTO `config` (`id`, `numero_max_iscrizioni`, `initialized_on`) VALUES (?, NULL, NULL)";
+            String insertConfigSql = "INSERT INTO config (id, numero_max_iscrizioni, periodo_corrente) VALUES (?, NULL, NULL)";
             try (PreparedStatement stmt = conn.prepareStatement(insertConfigSql)) {
                 stmt.setInt(1, DEFAULT_CONFIG_ID);
                 stmt.executeUpdate();
@@ -89,17 +90,16 @@ public class ConfigDao {
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
                 updateStmt.setInt(1, numeroMassimoIscrizioniPrenotazione);
                 updateStmt.setInt(2, DEFAULT_CONFIG_ID);
-
                 updateStmt.executeUpdate();
             }
         }
     }
 
-    public void setInitializedOn(LocalDate initializedOn) throws SQLException {
+    public void setPeriodoCorrente(LocalDate periodoCorrente) throws SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            String sql = "UPDATE config SET initialized_on = ?  WHERE id = ?";
+            String sql = "UPDATE config SET periodo_corrente = ?  WHERE id = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(sql)) {
-                updateStmt.setDate(1, Date.valueOf(initializedOn));
+                updateStmt.setDate(1, Date.valueOf(periodoCorrente));
                 updateStmt.setInt(2, DEFAULT_CONFIG_ID);
                 updateStmt.executeUpdate();
             }

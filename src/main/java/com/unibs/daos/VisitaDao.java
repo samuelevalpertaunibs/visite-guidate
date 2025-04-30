@@ -1,6 +1,6 @@
 package com.unibs.daos;
 
-import com.unibs.DatabaseManager;
+import com.unibs.utils.DatabaseManager;
 import com.unibs.models.PuntoIncontro;
 import com.unibs.models.TipoVisita;
 import com.unibs.models.Visita;

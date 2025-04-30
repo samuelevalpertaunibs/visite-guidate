@@ -57,7 +57,7 @@ public class ServiceFactory {
 
     public DatePrecluseService getDatePrecluseService() {
         if (datePrecluseService == null) {
-            datePrecluseService = new DatePrecluseService();
+            datePrecluseService = new DatePrecluseService(getConfigService());
         }
         return datePrecluseService;
     }

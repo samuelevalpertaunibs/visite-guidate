@@ -2,7 +2,7 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.DatabaseException;
+import com.unibs.utils.DatabaseException;
 import com.unibs.models.*;
 import com.unibs.services.*;
 import com.unibs.views.*;

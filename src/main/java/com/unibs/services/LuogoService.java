@@ -1,6 +1,6 @@
 package com.unibs.services;
 
-import com.unibs.DatabaseException;
+import com.unibs.utils.DatabaseException;
 import com.unibs.daos.LuogoDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;

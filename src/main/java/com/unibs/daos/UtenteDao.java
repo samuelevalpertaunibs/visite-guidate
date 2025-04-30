@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.unibs.DatabaseException;
-import com.unibs.DatabaseManager;
+import com.unibs.utils.DatabaseException;
+import com.unibs.utils.DatabaseManager;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 

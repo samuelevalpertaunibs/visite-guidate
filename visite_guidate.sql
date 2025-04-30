@@ -8,7 +8,7 @@ CREATE TABLE config
 (
     id                    TINYINT(1) UNSIGNED PRIMARY KEY DEFAULT '1',
     numero_max_iscrizioni INT UNSIGNED                    DEFAULT NULL,
-    initialized_on        DATE                            DEFAULT NULL
+    periodo_corrente      DATE                            DEFAULT NULL
 );
 
 CREATE TABLE comuni
@@ -107,9 +107,9 @@ CREATE TABLE date_precluse
 
 CREATE TABLE disponibilita
 (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    volontario_id INT UNSIGNED NOT NULL,
-    data_disponibile DATE NOT NULL,
+    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    volontario_id    INT UNSIGNED NOT NULL,
+    data_disponibile DATE         NOT NULL,
     FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
 );
 

@@ -1,7 +1,7 @@
 package com.unibs.services;
 
-import com.unibs.DatabaseException;
-import com.unibs.daos.GiorniSettimanaDao;
+import com.unibs.utils.DatabaseException;
+import com.unibs.daos.GiorniDao;
 import com.unibs.models.Giorno;
 
 import java.sql.SQLException;
@@ -15,16 +15,16 @@ public class GiornoService {
     private static final Logger LOGGER = Logger.getLogger(GiornoService.class.getName());
 
     private List<Giorno> giorni;
-    private final GiorniSettimanaDao giorniSettimanaDao;
+    private final GiorniDao giorniDao;
 
     public GiornoService() {
-        giorniSettimanaDao = new GiorniSettimanaDao();
+        giorniDao = new GiorniDao();
     }
 
     public List<Giorno> getGiorni() throws DatabaseException {
         try {
             if (giorni == null) {
-                giorni = giorniSettimanaDao.findAll();
+                giorni = giorniDao.findAll();
             }
             return giorni;
         } catch (SQLException e) {
@@ -47,7 +47,7 @@ public class GiornoService {
 
     public Set<Giorno> getByTipoVisitaId(int tipoVisitaId) throws DatabaseException {
         try {
-            return giorniSettimanaDao.findByTipoVisitaId(tipoVisitaId);
+            return giorniDao.findByTipoVisitaId(tipoVisitaId);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei giorni", e);
             throw new DatabaseException("Impossibile recuperare i giorni");

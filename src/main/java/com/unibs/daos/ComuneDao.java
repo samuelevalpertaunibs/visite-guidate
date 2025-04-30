@@ -1,6 +1,6 @@
 package com.unibs.daos;
 
-import com.unibs.DatabaseManager;
+import com.unibs.utils.DatabaseManager;
 import com.unibs.models.Comune;
 
 import java.sql.Connection;

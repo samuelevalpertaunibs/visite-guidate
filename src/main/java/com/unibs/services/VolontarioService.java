@@ -1,6 +1,6 @@
 package com.unibs.services;
 
-import com.unibs.DatabaseException;
+import com.unibs.utils.DatabaseException;
 import com.unibs.daos.UtenteDao;
 import com.unibs.models.Giorno;
 import com.unibs.models.TipoVisita;
