@@ -1,17 +1,17 @@
 package com.unibs.daos;
 
+import com.unibs.models.Comune;
+import com.unibs.models.Luogo;
+import com.unibs.models.PuntoIncontro;
+import com.unibs.models.TipoVisita;
+import com.unibs.utils.DatabaseException;
+import com.unibs.utils.DatabaseManager;
+
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.unibs.utils.DatabaseException;
-import com.unibs.utils.DatabaseManager;
-import com.unibs.models.Comune;
-import com.unibs.models.Luogo;
-import com.unibs.models.PuntoIncontro;
-import com.unibs.models.TipoVisita;
 
 public class TipoVisitaDao {
 
@@ -188,14 +188,14 @@ public class TipoVisitaDao {
                 JOIN giorni_settimana ON giorni_settimana_tipi_visita.giorno_settimana_id = giorni_settimana.id
                 WHERE luoghi.id = ?
                 AND (
-                    (tipi_visita.data_inizio < ? AND ? < tipi_visita.data_fine)
+                    (tipi_visita.data_inizio <= ? AND ? <= tipi_visita.data_fine)
                     OR
-                    (tipi_visita.data_inizio < ? AND ? < tipi_visita.data_fine)
+                    (tipi_visita.data_inizio <= ? AND ? <= tipi_visita.data_fine)
                 )
                 AND (
-                    (tipi_visita.ora_inizio < ? AND ? < DATE_ADD(ora_inizio, INTERVAL durata_minuti MINUTE))
+                    (tipi_visita.ora_inizio <= ? AND ? <= DATE_ADD(ora_inizio, INTERVAL durata_minuti MINUTE))
                     OR
-                    (tipi_visita.ora_inizio < ? AND ? < DATE_ADD(ora_inizio, INTERVAL durata_minuti MINUTE))
+                    (tipi_visita.ora_inizio <= ? AND ? <= DATE_ADD(ora_inizio, INTERVAL durata_minuti MINUTE))
                 )
                 AND giorni_settimana.id IN (%s)
                 """, giorniIdsPlaceholders);
@@ -330,35 +330,4 @@ public class TipoVisitaDao {
             }
         }
     }
-
-
-//    public static ArrayList<TipoVisita> getByVolontarioIdAndMese(int volontarioId, int mese) {
-//        ArrayList<TipoVisita> ids = new ArrayList<>();
-//        String query = """
-//                SELECT tv.id FROM tipi_visita tv
-//                JOIN tipi_visita_volontari nn  ON tv.id = nn.tipo_visita_id
-//                WHERE nn.volontario_id = ?
-//                AND MONTH(tv.data_inizio) <= ?
-//                AND MONTH(tv.data_fine) >= ?
-//               """;
-//
-//        try (Connection conn = DatabaseManager.getConnection();
-//             PreparedStatement stmt = conn.prepareStatement(query)) {
-//
-//            stmt.setInt(1, volontarioId);
-//            stmt.setInt(2, mese);
-//            stmt.setInt(3, mese);
-//            ResultSet rs = stmt.executeQuery();
-//
-//            while (rs.next()) {
-//                int id = rs.getInt("id");
-//                ids.add(id);
-//            }
-//
-//            return ids.toArray(new Integer[0]);
-//
-//        } catch (SQLException e) {
-//            throw new DatabaseException("Errore nel recupero dei tipi visita associati al volontario: " + volontarioId + " - " + e.getMessage());
-//        }
-//    }
 }
