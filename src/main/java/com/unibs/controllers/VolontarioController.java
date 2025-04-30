@@ -2,16 +2,19 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.utils.DatabaseException;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 import com.unibs.services.*;
+import com.unibs.utils.DatabaseException;
 import com.unibs.views.InserisciDisponibilitaView;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -59,8 +62,8 @@ public class VolontarioController implements IUserController {
     @Override
     public void showMenu() {
         List<MenuOption> menuOptions = Arrays.asList(
-                new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::visualizzaTipiVisiteAssociateAlVolontario)),
-                new MenuOption("Inserisci disponibilità", (v) -> handleMenuAction(this::inserisciDisponibilita))
+                new MenuOption("Inserisci disponibilità", (v) -> handleMenuAction(this::apriInserisciDisponibilita)),
+                new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::apriVisualizzaTipiVisiteAssociate))
         );
         menuView.mostraMenu(menuOptions, " Menù principale - " + volontario.getUsername() + " ");
     }
@@ -74,39 +77,52 @@ public class VolontarioController implements IUserController {
     }
 
 
-    private void visualizzaTipiVisiteAssociateAlVolontario() {
+    private void apriVisualizzaTipiVisiteAssociate() {
         tipoVisitaController.apriVisualizzaTipiVisiteAssociateAlVolontario(volontario);
     }
 
-    /*
-    Il volontario puo inserire le disponibilità per il mese i+1 entro il 15/i.
-    Il volontario puo sempre modificare le sue disponibilita in quanto il piano del mese i+1 verrà generato non prima del 16/i,
-    di conseguenza nel giorno in cui verra generato il piano del mese i+1 il volontario potrà modificare solo le disponibilita del mese i+2, senza creare conflitti.
-     */
-    public void inserisciDisponibilita() {
+    public void apriInserisciDisponibilita() {
         InserisciDisponibilitaView view = new InserisciDisponibilitaView();
+        try {
+            YearMonth mese = configService.getMesePeriodoCorrente().plusMonths(2);
 
-        // Recupera date disponibili e le imposta nella view
-        Set<LocalDate> dateDisponibiliSet = volontarioService.getDateDisponibiliPerVolontario(volontario);
-        List<LocalDate> dateDisponibili = dateDisponibiliSet.stream()
-                .sorted(Comparator.comparing(LocalDate::toString))
-                .toList();
-        view.setDateDisponibili(dateDisponibili);
+            // Recupero date disponibili e le imposto nella view
+            Set<LocalDate> dateSet = volontarioService.calcolaDateDiCuiRichiedereDisponibilitaPerVolontario(volontario, mese);
+            List<LocalDate> dateDisponibili = dateSet.stream()
+                    .sorted(Comparator.comparing(LocalDate::toString))
+                    .toList();
+            view.setDateDisponibili(dateDisponibili);
 
-        // Imposta azione del bottone Salva
-        view.getSalvaButton().addListener((button) -> {
-            List<LocalDate> selezionate = view.getDateSelezionate();
-            sovrascriviDisponibilita(selezionate, view);
-        });
-        view.mostra(gui);
+            List<LocalDate> dateAttualmenteDisponibili = volontarioService.getDateDisponibiliByMese(volontario, mese);
+            view.setDateSelezionate(dateAttualmenteDisponibili);
+
+            // Imposto azione del bottone Salva
+            view.getSalvaButton().addListener((button) -> {
+                List<LocalDate> selezionate = view.getDateSelezionate();
+                sovrascriviDisponibilita(selezionate);
+            });
+            view.mostra(gui);
+        } catch (Exception e) {
+            mostraPopup("Errore", e.getMessage());
+        }
     }
 
-    private void sovrascriviDisponibilita(List<LocalDate> selezionate, InserisciDisponibilitaView view) {
+    private void sovrascriviDisponibilita(List<LocalDate> selezionate) {
         try {
             volontarioService.sovrascriviDisponibilita(volontario, selezionate);
+            mostraPopup("", "Aggiornamento avvenuto con successo.");
         } catch (DatabaseException e) {
-            view.mostraErrore(e.getMessage());
+            mostraPopup("Errore", e.getMessage());
         }
+    }
+
+    private void mostraPopup(String titolo, String messaggio) {
+        new MessageDialogBuilder()
+                .setTitle(titolo)
+                .setText(messaggio)
+                .addButton(MessageDialogButton.Close)
+                .build()
+                .showDialog(gui);
     }
 
 }

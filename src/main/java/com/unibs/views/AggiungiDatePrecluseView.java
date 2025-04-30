@@ -5,6 +5,7 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
@@ -26,20 +27,16 @@ public class AggiungiDatePrecluseView {
         Window window = new BasicWindow("Aggiungi date precluse");
         Panel panel = new Panel();
 
-        dataLabel.setText(dataSelezionata.toString());
+        aggiornaData(dataSelezionata);
 
         String mese = dataSelezionata.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN);
         int anno = dataSelezionata.getYear();
         panel.addComponent(new Label("Seleziona una data da precludere per " + mese + " " + anno));
 
         Panel dataInpuPanel = new Panel(new LinearLayout(Direction.HORIZONTAL));
-        dataInpuPanel.addComponent(new Button("-", () -> {
-            decrementData();
-        }));
+        dataInpuPanel.addComponent(new Button("-", this::decrementData).setPreferredSize(new TerminalSize(5, 1)));
         dataInpuPanel.addComponent(dataLabel);
-        dataInpuPanel.addComponent(new Button("+", () -> {
-            incrementaData();
-        }));
+        dataInpuPanel.addComponent(new Button("+", this::incrementaData).setPreferredSize(new TerminalSize(5, 1)));
 
         panel.addComponent(dataInpuPanel);
         panel.addComponent(feedbackLabel);
@@ -55,17 +52,17 @@ public class AggiungiDatePrecluseView {
     private void decrementData() {
         try {
             aggiornaData(dataSelezionata.withDayOfMonth(dataSelezionata.getDayOfMonth() - 1));
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
     }
     private void incrementaData() {
         try {
             aggiornaData(dataSelezionata.withDayOfMonth(dataSelezionata.getDayOfMonth() + 1));
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
     }
 
     private void aggiornaData(LocalDate date) {
         dataSelezionata = date;
-        dataLabel.setText(dataSelezionata.toString());
+        dataLabel.setText(dataSelezionata.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 
     public void mostraErrore(String message) {
@@ -88,8 +85,8 @@ public class AggiungiDatePrecluseView {
         return precludiButton;
     }
 
-    public String getData() {
-        return dataLabel.getText();
+    public LocalDate getData() {
+        return dataSelezionata;
     }
 
 }

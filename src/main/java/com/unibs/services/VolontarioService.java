@@ -1,10 +1,10 @@
 package com.unibs.services;
 
-import com.unibs.utils.DatabaseException;
 import com.unibs.daos.UtenteDao;
 import com.unibs.models.Giorno;
 import com.unibs.models.TipoVisita;
 import com.unibs.models.Volontario;
+import com.unibs.utils.DatabaseException;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -37,9 +37,7 @@ public class VolontarioService {
         }
     }
 
-    public Set<LocalDate> getDateDisponibiliPerVolontario(Volontario volontario) throws DatabaseException {
-
-        YearMonth mese = calcolaMeseEntrante();
+    public Set<LocalDate> calcolaDateDiCuiRichiedereDisponibilitaPerVolontario(Volontario volontario, YearMonth mese) throws DatabaseException {
         Set<LocalDate> risultati = new HashSet<>();
         int volontarioId = volontario.getId();
 
@@ -68,20 +66,10 @@ public class VolontarioService {
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle date selezionabili", e);
-            throw new DatabaseException("Errore nel recupero delle date selezionabili");
+            throw new DatabaseException("Errore nel recupero delle date selezionabili.");
         }
 
         return risultati;
-    }
-
-    private YearMonth calcolaMeseEntrante() {
-        LocalDate oggi = LocalDate.now();
-
-        if (oggi.getDayOfMonth() <= 15) {
-            return YearMonth.from(oggi.plusMonths(1));
-        } else {
-            return YearMonth.from(oggi.plusMonths(2));
-        }
     }
 
     public void sovrascriviDisponibilita(Volontario volontario, List<LocalDate> selezionate) throws DatabaseException {
@@ -98,6 +86,16 @@ public class VolontarioService {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei volontari", e);
             throw new DatabaseException("Impossibile recuperare i volontari");
+
+        }
+    }
+
+    public List<LocalDate> getDateDisponibiliByMese(Volontario volontario, YearMonth mese) throws DatabaseException {
+        try {
+            return utenteDao.getDateDisponibiliByMese(volontario.getId(), mese);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle date disponibili", e);
+            throw new DatabaseException("Impossibile recuperare le date disponibili selezionate.");
 
         }
     }

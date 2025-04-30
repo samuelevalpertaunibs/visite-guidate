@@ -32,7 +32,7 @@ public class DatePrecluseController {
     private void aggiungiDataPreclusa(Button button) {
         try {
             aggiungiDatePrecluseView.mostraErrore(""); // Pulisce eventuali errori precedenti
-            String dataDaPrecludere = aggiungiDatePrecluseView.getData();
+            LocalDate dataDaPrecludere = aggiungiDatePrecluseView.getData();
             precluseService.aggiungiDataPreclusa(dataDaPrecludere);
             aggiungiDatePrecluseView.mostraSuccesso("Data preclusa con successo!"); // Mostra il messaggio di successo
         } catch (Exception e) {

@@ -3,15 +3,15 @@ package com.unibs.views;
 import com.googlecode.lanterna.gui2.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InserisciDisponibilitaView {
 
-    private BasicWindow window;
-    private final CheckBoxList<LocalDate> listaDate;
+    private final CheckBoxList<WrappedDate> listaDate;
     private final Button salvaButton;
-    private Label erroreLabel;
-
+    private BasicWindow window;
     public InserisciDisponibilitaView() {
         listaDate = new CheckBoxList<>();
         salvaButton = new Button("Salva");
@@ -30,13 +30,9 @@ public class InserisciDisponibilitaView {
         panel.addComponent(new Label("Seleziona le tue disponibilità:"));
         panel.addComponent(listaDate);
 
-        erroreLabel = new Label("");
-        panel.addComponent(erroreLabel);
-
         panel.addComponent(salvaButton);
-        panel.addComponent(new Label("Attenzione: premendo <Salva> verranno sovrascritte le scelte precedenti."));
 
-        Button annullaButton = new Button("Annulla", window::close);
+        Button annullaButton = new Button("Chiudi", window::close);
         panel.addComponent(annullaButton);
 
         window.setComponent(panel);
@@ -47,23 +43,36 @@ public class InserisciDisponibilitaView {
     public void setDateDisponibili(List<LocalDate> dateDisponibili) {
         listaDate.clearItems();
         for (LocalDate data : dateDisponibili) {
-            listaDate.addItem(data);
+            listaDate.addItem(new WrappedDate(data));
         }
     }
 
     public List<LocalDate> getDateSelezionate() {
-        return listaDate.getCheckedItems();
+        return listaDate.getCheckedItems().stream().map(WrappedDate::date).collect(Collectors.toList());
+    }
+
+    public void setDateSelezionate(List<LocalDate> dateSelezionate) {
+        for (int i = 0; i < listaDate.getItemCount(); i++) {
+            WrappedDate item = listaDate.getItemAt(i);
+            boolean shouldCheck = dateSelezionate.contains(item.getDate());
+            listaDate.setChecked(listaDate.getItemAt(i), shouldCheck);
+        }
     }
 
     public Button getSalvaButton() {
         return salvaButton;
     }
 
-    public void chiudi() {
-        window.close();
+    private record WrappedDate(LocalDate date) {
+
+        @Override
+        public String toString() {
+            return date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        }
+
+        public LocalDate getDate() {
+            return date;
+        }
     }
 
-    public void mostraErrore(String message) {
-        erroreLabel.setText(message);
-    }
 }

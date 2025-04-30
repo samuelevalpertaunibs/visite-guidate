@@ -1,16 +1,17 @@
 package com.unibs.daos;
 
+import com.unibs.models.Utente;
+import com.unibs.models.Volontario;
+import com.unibs.utils.DatabaseException;
+import com.unibs.utils.DatabaseManager;
+
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import com.unibs.utils.DatabaseException;
-import com.unibs.utils.DatabaseManager;
-import com.unibs.models.Utente;
-import com.unibs.models.Volontario;
 
 public class UtenteDao {
 
@@ -91,26 +92,6 @@ public class UtenteDao {
         return volontari;
     }
 
-    public static int getIdByUsername(String username) {
-        String sql = "SELECT id FROM utenti WHERE username = ? AND ruolo_id = 2";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, username);
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-
-            return -1;
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore durante la ricerca del volontario per nome: " + e.getMessage());
-        }
-    }
-
     public Set<Volontario> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
         Set<Volontario> volontari = new HashSet<>();
         String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
@@ -128,6 +109,29 @@ public class UtenteDao {
         }
 
         return volontari;
+    }
+
+    public List<LocalDate> getDateDisponibiliByMese(int volontarioID, YearMonth mese) throws SQLException {
+        String sql = "SELECT data_disponibile FROM disponibilita " +
+                "WHERE volontario_id = ? AND YEAR(data_disponibile) = ? AND MONTH(data_disponibile) = ?";
+
+        List<LocalDate> dateDisponibili = new ArrayList<>();
+
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, volontarioID);
+            statement.setInt(2, mese.getYear());
+            statement.setInt(3, mese.getMonthValue());
+
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    dateDisponibili.add(rs.getDate("data_disponibile").toLocalDate());
+                }
+            }
+        }
+
+        return dateDisponibili;
     }
 
     public void sovrascriviDisponibilita(Volontario volontario, List<LocalDate> selezionate) throws SQLException {

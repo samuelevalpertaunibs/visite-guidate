@@ -7,6 +7,7 @@ import com.unibs.models.Config;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -128,5 +129,9 @@ public class ConfigService {
 
     public int getNumeroMax() {
         return getConfig().getNumeroMassimoIscrizioniPrenotazione();
+    }
+
+    public YearMonth getMesePeriodoCorrente() throws DatabaseException {
+        return YearMonth.from(getConfig().getPeriodoCorrente());
     }
 }
