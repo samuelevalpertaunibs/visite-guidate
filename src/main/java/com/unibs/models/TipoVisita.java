@@ -2,6 +2,7 @@ package com.unibs.models;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 public class TipoVisita {
@@ -93,10 +94,13 @@ public class TipoVisita {
 
     @Override
     public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String dataInizioString = dataInizio.format(formatter);
+        String dataFineString = dataFine.format(formatter);
         return "Titolo: " + titolo + "\n" +
                 "Descrizione: " + descrizione + "\n" +
-                "Data inizio: " + dataInizio + "\n" +
-                "Data fine: " + dataFine + "\n" +
+                "Data inizio: " + dataInizioString + "\n" +
+                "Data fine: " + dataFineString + "\n" +
                 "Ora inizio: " + oraInizio + "\n" +
                 "Durata (minuti): " + durataMinuti + "\n" +
                 "Entrata libera: " + (entrataLibera ? "Sì" : "No") + "\n" +
