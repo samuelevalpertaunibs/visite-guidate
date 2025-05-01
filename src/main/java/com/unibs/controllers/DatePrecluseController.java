@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.DatePrecluseService;
 import com.unibs.views.AggiungiDatePrecluseView;
+import com.unibs.views.components.PopupChiudi;
 
 import java.time.LocalDate;
 
@@ -31,10 +32,10 @@ public class DatePrecluseController {
 
     private void aggiungiDataPreclusa(Button button) {
         try {
-            aggiungiDatePrecluseView.mostraErrore(""); // Pulisce eventuali errori precedenti
             LocalDate dataDaPrecludere = aggiungiDatePrecluseView.getData();
             precluseService.aggiungiDataPreclusa(dataDaPrecludere);
-            aggiungiDatePrecluseView.mostraSuccesso("Data preclusa con successo!"); // Mostra il messaggio di successo
+            new PopupChiudi(gui).mostra("", "Data preclusa con successo."); // Mostra il messaggio di successo
+            aggiungiDatePrecluseView.mostraErrore("");
         } catch (Exception e) {
             aggiungiDatePrecluseView.mostraErrore(e.getMessage());
         }

@@ -13,13 +13,13 @@ import java.util.Locale;
 public class AggiungiDatePrecluseView {
     private final Button precludiButton;
     private final Label dataLabel;
-    private final Label feedbackLabel;
+    private final Label erroreLabel;
     private LocalDate dataSelezionata;
 
 
     public AggiungiDatePrecluseView() {
         this.dataLabel = new Label("").setPreferredSize(new TerminalSize(10, 1));
-        this.feedbackLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
+        this.erroreLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         this.precludiButton = new Button("Precludi");
     }
 
@@ -39,7 +39,7 @@ public class AggiungiDatePrecluseView {
         dataInpuPanel.addComponent(new Button("+", this::incrementaData).setPreferredSize(new TerminalSize(5, 1)));
 
         panel.addComponent(dataInpuPanel);
-        panel.addComponent(feedbackLabel);
+        panel.addComponent(erroreLabel);
         panel.addComponent(precludiButton);
         Button esciButton = new Button("Esci", window::close);
         panel.addComponent(esciButton);
@@ -66,13 +66,8 @@ public class AggiungiDatePrecluseView {
     }
 
     public void mostraErrore(String message) {
-        feedbackLabel.setText(message);
-        feedbackLabel.setForegroundColor(TextColor.ANSI.RED);
-    }
+        erroreLabel.setText(message);
 
-    public void mostraSuccesso(String message) {
-        feedbackLabel.setText(message);
-        feedbackLabel.setForegroundColor(TextColor.ANSI.BLACK);
     }
 
     public void mostra(WindowBasedTextGUI gui, LocalDate data) {

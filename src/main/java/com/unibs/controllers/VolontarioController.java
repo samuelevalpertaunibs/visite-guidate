@@ -2,8 +2,6 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
@@ -12,6 +10,7 @@ import com.unibs.utils.DatabaseException;
 import com.unibs.views.InserisciDisponibilitaView;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
+import com.unibs.views.components.PopupChiudi;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -103,26 +102,17 @@ public class VolontarioController implements IUserController {
             });
             view.mostra(gui);
         } catch (Exception e) {
-            mostraPopup("Errore", e.getMessage());
+            new PopupChiudi(gui).mostra("Errore", e.getMessage());
         }
     }
 
     private void sovrascriviDisponibilita(List<LocalDate> selezionate) {
         try {
             volontarioService.sovrascriviDisponibilita(volontario, selezionate);
-            mostraPopup("", "Aggiornamento avvenuto con successo.");
+            new PopupChiudi(gui).mostra("", "Aggiornamento avvenuto con successo.");
         } catch (DatabaseException e) {
-            mostraPopup("Errore", e.getMessage());
+            new PopupChiudi(gui).mostra("Errore", e.getMessage());
         }
-    }
-
-    private void mostraPopup(String titolo, String messaggio) {
-        new MessageDialogBuilder()
-                .setTitle(titolo)
-                .setText(messaggio)
-                .addButton(MessageDialogButton.Close)
-                .build()
-                .showDialog(gui);
     }
 
 }

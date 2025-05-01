@@ -1,8 +1,6 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.gui2.BasicWindow;
-import com.googlecode.lanterna.gui2.Window;
 import com.googlecode.lanterna.gui2.*;
 
 import java.util.List;
@@ -10,14 +8,14 @@ import java.util.List;
 public class ModificaNumeroMaxView {
     private final TextBox numeroMassimoTextBox;
     private final Label numeroMaxAttualeLabel;
-    private final Label feedbackLabel;
+    private final Label errorLabel;
     private final Button confermaButton;
 
     public ModificaNumeroMaxView() {
         confermaButton = new Button("Conferma");
         numeroMassimoTextBox = new TextBox();
         numeroMaxAttualeLabel = new Label("");
-        feedbackLabel = new Label("");
+        errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
     }
 
     private Window creaFinestra() {
@@ -26,7 +24,7 @@ public class ModificaNumeroMaxView {
         panel.addComponent(numeroMaxAttualeLabel);
         panel.addComponent(new Label("Inserisci il nuovo numero massimo di persone:"));
         panel.addComponent(numeroMassimoTextBox);
-        panel.addComponent(feedbackLabel);
+        panel.addComponent(errorLabel);
         panel.addComponent(confermaButton);
 
         Button esciButton = new Button("Esci", window::close);
@@ -43,14 +41,8 @@ public class ModificaNumeroMaxView {
     }
 
     public void mostraErrore(String messaggio) {
-        feedbackLabel.setText(messaggio);
-        feedbackLabel.setForegroundColor(TextColor.ANSI.RED);
+        errorLabel.setText(messaggio);
         numeroMassimoTextBox.takeFocus();
-    }
-
-    public void mostraSuccesso(String messaggio) {
-        feedbackLabel.setText(messaggio);
-        feedbackLabel.setForegroundColor(TextColor.ANSI.BLACK);
     }
 
     public void aggiornaNumeroAttuale(int numeroMax) {

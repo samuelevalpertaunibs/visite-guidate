@@ -7,6 +7,7 @@ import com.unibs.models.Config;
 import com.unibs.services.ConfigService;
 import com.unibs.views.InitConfigView;
 import com.unibs.views.ModificaNumeroMaxView;
+import com.unibs.views.components.PopupChiudi;
 
 public class ConfigController {
     private final ConfigService configService;
@@ -74,19 +75,24 @@ public class ConfigController {
     }
 
     public void apriModificaNumeroMax() {
-        modificaNumeroMaxView = new ModificaNumeroMaxView();
-        int numeroMaxAttuale = configService.getNumeroMax();
-        modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAttuale);
-        modificaNumeroMaxView.getConfermaButton().addListener(this::setNumeroMaxPersone);
-        modificaNumeroMaxView.mostra(gui);
+        try {
+            modificaNumeroMaxView = new ModificaNumeroMaxView();
+            int numeroMaxAttuale = configService.getNumeroMax();
+            modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAttuale);
+            modificaNumeroMaxView.getConfermaButton().addListener(this::setNumeroMaxPersone);
+            modificaNumeroMaxView.mostra(gui);
+        } catch (Exception e) {
+            new PopupChiudi(gui).mostra("Errore", e.getMessage());
+        }
     }
 
     private void setNumeroMaxPersone(Button button) {
         try {
             String numeroMaxPersone = modificaNumeroMaxView.getNumeroMaxInserito();
             int numeroMaxAggiornato = configService.setNumeroMaxPersone(numeroMaxPersone);
-            modificaNumeroMaxView.mostraSuccesso("Numero massimo aggiornato con successo.");
             modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAggiornato);
+            new PopupChiudi(gui).mostra("", "Numero massimo aggiornato con successo.");
+            modificaNumeroMaxView.mostraErrore("");
         } catch (Exception e) {
             modificaNumeroMaxView.mostraErrore(e.getMessage());
         } finally {
