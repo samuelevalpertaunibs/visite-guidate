@@ -92,14 +92,14 @@ public class ConfiguratoreController implements IUserController {
         menuOptions.add(new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite)));
 
         if (configService.isCreazioneNuovoPianoPossibile()) {
-            creaPianoOption = new MenuOption("Creazione nuovo piano", (v) -> handleMenuAction(this::incrementePeriodoCorrente));
+            creaPianoOption = new MenuOption("Creazione nuovo piano", (v) -> handleMenuAction(this::incrementaPeriodoCorrente));
             menuOptions.add(creaPianoOption);
         }
 
         menuView.mostraMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);
     }
 
-    private void incrementePeriodoCorrente() {
+    private void incrementaPeriodoCorrente() {
         Boolean isPianoCreato = visitaController.apriCreazionePiano();
 
         // Se il piano era gia stato creato
@@ -110,7 +110,7 @@ public class ConfiguratoreController implements IUserController {
             // Il piano è appena stato creato
             if (isPianoCreato) {
                 List<MenuOption> subMenuOptions = new ArrayList<>();
-                subMenuOptions.add(new MenuOption("Inserisci un nuovo luogo", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Inserisci un nuovo luogo", (v) -> handleMenuAction(this::inserisciNuovoLuogo) ));
                 subMenuOptions.add(new MenuOption("Inserisci un nuovo tipo di visita", (v) -> {throw new UnsupportedOperationException();} ));
                 subMenuOptions.add(new MenuOption("Associa dei volontari a tipi di visita gia esistenti", (v) -> {throw new UnsupportedOperationException();} ));
                 subMenuOptions.add(new MenuOption("Rimuovi un luogo", (v) -> {throw new UnsupportedOperationException();} ));
@@ -122,6 +122,10 @@ public class ConfiguratoreController implements IUserController {
                 operazioniSupplementariMenu.mostraMenu(subMenuOptions, "Operazioni supplementari", false);
             }
         }
+    }
+
+    private void inserisciNuovoLuogo() {
+        tipoVisitaController.apriInserisciNuovoLuogo();
     }
 
     private void handleMenuAction(Runnable action) {

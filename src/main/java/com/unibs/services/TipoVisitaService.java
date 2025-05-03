@@ -1,8 +1,8 @@
 package com.unibs.services;
 
-import com.unibs.utils.DatabaseException;
 import com.unibs.daos.TipoVisitaDao;
 import com.unibs.models.*;
+import com.unibs.utils.DatabaseException;
 import com.unibs.utils.DateService;
 
 import java.sql.SQLException;
@@ -23,8 +23,8 @@ public class TipoVisitaService {
 
     private final TipoVisitaDao tipoVisitaDao;
     private final LuogoService luogoService;
-    private VolontarioService volontarioService;
     private final GiornoService giornoService;
+    private VolontarioService volontarioService;
 
     public TipoVisitaService(LuogoService luogoService, GiornoService giornoService) {
         this.tipoVisitaDao = new TipoVisitaDao();
@@ -136,8 +136,8 @@ public class TipoVisitaService {
             PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
             return new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numeroMin, numeroMax, luogoSelezionato, puntoIncontro, giorni, volontari);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del comune", e);
-            if ("23000".equals(e.getSQLState()) && e.getErrorCode() == 1062) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del tipo di visita", e);
+            if ("23000" .equals(e.getSQLState()) && e.getErrorCode() == 1062) {
                 throw new DatabaseException("Assicurati che il punto di incontro sia univoco.");
             }
             throw new DatabaseException("Errore nell'inserimento del tipo di visita.");
@@ -165,8 +165,22 @@ public class TipoVisitaService {
         return tipoVisitaDao.getTitoliByLuogoId(luogoId);
     }
 
-    public List<String> getPreviewTipiVisita() {
-        return tipoVisitaDao.getPreviewTipiVisita();
+    public List<String> getPreviewTipiVisita() throws DatabaseException {
+        try {
+            return tipoVisitaDao.getPreviewTipiVisita();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita: ", e);
+            throw new DatabaseException("Errore durante il recupero dei tipi di visita.");
+        }
+    }
+
+    public List<String> getPreviewTipiVisita(String luogoNome) throws DatabaseException {
+        try {
+            return tipoVisitaDao.getPreviewTipiVisita(luogoNome);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita associati al luogo: " + luogoNome, e);
+            throw new DatabaseException("Errore durante il recupero dei tipi di visita associati al luogo.");
+        }
     }
 
     public ArrayList<TipoVisita> findByVolontario(int id) throws DatabaseException {

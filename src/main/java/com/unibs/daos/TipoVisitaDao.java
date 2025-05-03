@@ -250,20 +250,22 @@ public class TipoVisitaDao {
         return false;
     }
 
-    public ArrayList<String> getPreviewTipiVisita() {
-        String sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id";
+    public ArrayList<String> getPreviewTipiVisita() throws SQLException {
+        return getPreviewTipiVisita("*");
+    }
+
+    public ArrayList<String> getPreviewTipiVisita(String luogoDaCercare) throws SQLException {
+        String sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id WHERE luoghi.nome = ?";
         ArrayList<String> tipiVisita = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, luogoDaCercare);
             ResultSet rs = stmt.executeQuery();
-
             while (rs.next()) {
                 tipiVisita.add(rs.getString(1) + " presso " + rs.getString(2));
             }
 
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore durante il controllo della tabella tipo_visita: " + e.getMessage());
         }
 
         return tipiVisita;
