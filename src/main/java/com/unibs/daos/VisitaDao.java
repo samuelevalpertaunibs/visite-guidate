@@ -1,14 +1,11 @@
 package com.unibs.daos;
 
-import com.unibs.utils.DatabaseManager;
 import com.unibs.models.PuntoIncontro;
 import com.unibs.models.TipoVisita;
 import com.unibs.models.Visita;
+import com.unibs.utils.DatabaseManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -83,10 +80,39 @@ public class VisitaDao {
                     tipoVisitaCache.put(tipoVisitaId, tipoVisita);
                 }
 
-                visite.add(new Visita(tipoVisita, dataSvolgimento, statoVisita));
+                visite.add(new Visita(tipoVisita, dataSvolgimento, null, statoVisita));
             }
         }
         return visite;
     }
 
+    public void inserisciVisite(List<Visita> tutteLeVisite) throws SQLException {
+        String sql = "INSERT INTO visite (tipo_visita_id, volontario_id, data_svolgimento, stato) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            for (Visita visita : tutteLeVisite) {
+                stmt.setInt(1, visita.getTipoVisita().getId());
+                stmt.setInt(2, visita.getVolontario().getId());
+                stmt.setDate(3, Date.valueOf(visita.getDataSvolgimento()));
+                stmt.setString(4, visita.getStato().name());
+                stmt.addBatch();
+            }
+
+            // Eseguo tutte le insert una sola volta assieme
+            stmt.executeBatch();
+        }
+    }
+
+    @SuppressWarnings("SqlWithoutWhere")
+    public void rimuoviDisponibilita() throws SQLException {
+        String sql = "DELETE FROM disponibilita";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.executeUpdate(); // Esegue direttamente la DELETE
+        }
+    }
 }

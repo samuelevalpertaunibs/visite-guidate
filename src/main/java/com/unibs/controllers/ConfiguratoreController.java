@@ -5,11 +5,12 @@ import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.services.*;
+import com.unibs.utils.DateService;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConfiguratoreController implements IUserController {
@@ -24,6 +25,9 @@ public class ConfiguratoreController implements IUserController {
     private final VisitaController visitaController;
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
+    List<MenuOption> menuOptions = new ArrayList<>();
+    MenuOption creaPianoOption;
+    MenuView operazioniSupplementariMenu;
 
     // Services
     private final ConfigService configService;
@@ -45,7 +49,7 @@ public class ConfiguratoreController implements IUserController {
 
         this.luogoController = new LuogoController(gui);
         this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
-        this.visitaController = new VisitaController(gui, visitaService);
+        this.visitaController = new VisitaController(gui, visitaService, configService);
         this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
         this.configController = new ConfigController(gui, configService);
         this.menuView = new MenuView(gui);
@@ -71,7 +75,7 @@ public class ConfiguratoreController implements IUserController {
         tipoVisitaController.apriAggiungiTipoVisita();
 
         // Imposto la data di inizio regime di funzionamento
-        LocalDate oggi = LocalDate.now();
+        LocalDate oggi = DateService.today();
         LocalDate prossimoSedici = oggi.getDayOfMonth() < 16
                 ? oggi.withDayOfMonth(16)
                 : oggi.plusMonths(1).withDayOfMonth(16);
@@ -80,15 +84,44 @@ public class ConfiguratoreController implements IUserController {
 
     @Override
     public void showMenu() {
-        List<MenuOption> menuOptions = Arrays.asList(
-                new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)),
-                new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)),
-                new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)),
-                new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi)),
-                new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)),
-                new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite))
-        );
-        menuView.mostraMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ");
+        menuOptions.add(new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)));
+        menuOptions.add(new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)));
+        menuOptions.add(new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)));
+        menuOptions.add(new MenuOption("Visualizza l’elenco dei luoghi visitabili", (v) -> handleMenuAction(this::visualizzaElencoLuoghi)));
+        menuOptions.add(new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)));
+        menuOptions.add(new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite)));
+
+        if (configService.isCreazioneNuovoPianoPossibile()) {
+            creaPianoOption = new MenuOption("Creazione nuovo piano", (v) -> handleMenuAction(this::incrementePeriodoCorrente));
+            menuOptions.add(creaPianoOption);
+        }
+
+        menuView.mostraMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);
+    }
+
+    private void incrementePeriodoCorrente() {
+        Boolean isPianoCreato = visitaController.apriCreazionePiano();
+
+        // Se il piano era gia stato creato
+        if (isPianoCreato == null) {
+            menuOptions.remove(creaPianoOption);
+            menuView.aggiornaMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);
+        } else {
+            // Il piano è appena stato creato
+            if (isPianoCreato) {
+                List<MenuOption> subMenuOptions = new ArrayList<>();
+                subMenuOptions.add(new MenuOption("Inserisci un nuovo luogo", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Inserisci un nuovo tipo di visita", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Associa dei volontari a tipi di visita gia esistenti", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Rimuovi un luogo", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> {throw new UnsupportedOperationException();} ));
+
+                operazioniSupplementariMenu = new MenuView(gui);
+                operazioniSupplementariMenu.mostraMenu(subMenuOptions, "Operazioni supplementari", false);
+            }
+        }
     }
 
     private void handleMenuAction(Runnable action) {

@@ -10,6 +10,7 @@ import com.unibs.utils.DatabaseManager;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -329,5 +330,29 @@ public class TipoVisitaDao {
                 return null;
             }
         }
+    }
+
+    public List<String> getTitoliByMese(YearMonth mese) throws SQLException {
+        List<String> titoliTipiVisita = new ArrayList<>();
+
+        LocalDate startOfMonth = mese.atDay(1);
+        LocalDate endOfMonth = mese.atEndOfMonth();
+
+        String sql = "SELECT titolo FROM tipi_visita WHERE data_inizio <= ? AND data_fine >= ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, Date.valueOf(endOfMonth));
+            stmt.setDate(2, Date.valueOf(startOfMonth));
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                titoliTipiVisita.add(rs.getString("titolo"));
+            }
+        }
+
+        return titoliTipiVisita;
     }
 }

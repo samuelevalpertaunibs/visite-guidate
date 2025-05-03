@@ -50,7 +50,7 @@ public class ServiceFactory {
 
     public VisitaService getVisitaService() {
         if (visitaService == null) {
-            visitaService = new VisitaService();
+            visitaService = new VisitaService(getTipoVisitaService(), getConfigService(), getVolontarioService(), getGiornoService());
         }
         return visitaService;
     }

@@ -60,9 +60,12 @@ CREATE TABLE visite
 (
     id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tipo_visita_id   INT UNSIGNED                                                            NOT NULL,
+    volontario_id    INT UNSIGNED                                                            NOT NULL,
     data_svolgimento DATE                                                                    NOT NULL,
     stato            ENUM ('PROPOSTA', 'COMPLETA', 'CONFERMATA', 'CANCELLATA', 'EFFETTUATA') NOT NULL DEFAULT 'PROPOSTA',
-    FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita (id) ON DELETE CASCADE
+    FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita (id) ON DELETE CASCADE,
+    FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
+
 );
 
 CREATE TABLE ruoli

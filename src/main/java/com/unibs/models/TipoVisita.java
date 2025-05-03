@@ -64,6 +64,14 @@ public class TipoVisita {
         return oraInizio;
     }
 
+    public Set<Giorno> getGiorni() {
+        return giorni;
+    }
+
+    public Set<Volontario> getVolontari() {
+        return volontari;
+    }
+
     public LocalDate getDataInizio() {
         return dataInizio;
     }

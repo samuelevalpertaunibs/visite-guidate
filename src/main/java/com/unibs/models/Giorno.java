@@ -6,8 +6,9 @@ public record Giorno(int id, String nome) implements SelezionabileConCheckbox {
 
     @Override
     public String getPlaceHolder() {
-        return nome();
+        return nome;
     }
+
 
     public int getId() {
         return id;

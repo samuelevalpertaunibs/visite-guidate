@@ -21,7 +21,7 @@ public class LoginView {
     public LoginView () {
         usernameField = new TextBox(new TerminalSize(18, 1));
         passwordField = new TextBox(new TerminalSize(18, 1)).setMask('*'); // Maschera la password
-        errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED).setPreferredSize(new TerminalSize(18, 1));
+        errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         loginButton = new Button("Accedi");
         window = new BasicWindow("Login");
     }

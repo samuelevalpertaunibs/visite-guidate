@@ -1,13 +1,14 @@
 package com.unibs.services;
 
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import com.unibs.utils.DatabaseException;
 import com.unibs.daos.UtenteDao;
 import com.unibs.models.Utente;
+import com.unibs.utils.DatabaseException;
+import com.unibs.utils.DateService;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 
 public class LoginService {
     UtenteDao utenteDao = new UtenteDao();
@@ -54,7 +55,7 @@ public class LoginService {
         }
 
         utente.setPasswordHash(hashedNewPassword);
-        utente.setLastLogin(LocalDate.now());
+        utente.setLastLogin(DateService.today());
 
         try {
             utenteDao.updatePassword(utente);

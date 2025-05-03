@@ -4,6 +4,7 @@ import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
 import com.unibs.utils.DatabaseManager;
+import com.unibs.utils.DateService;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -55,7 +56,7 @@ public class UtenteDao {
 
     public LocalDate updateLastLogin(String username) throws SQLException {
         String sql = "UPDATE utenti SET last_login = ? WHERE username = ?";
-        LocalDate now = LocalDate.now();
+        LocalDate now = DateService.today();
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

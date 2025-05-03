@@ -8,6 +8,7 @@ import java.util.List;
 public class MenuView {
     private final WindowBasedTextGUI tui;
     private final Label errorLabel;
+    private Window window;
 
     // Costruttore della view che riceve le opzioni del menu
     public MenuView(WindowBasedTextGUI tui) {
@@ -16,8 +17,8 @@ public class MenuView {
     }
 
     // Mostra il menu con le opzioni dinamiche
-    public void mostraMenu(List<MenuOption> options, String title) {
-        Window window = new BasicWindow(title);
+    public void mostraMenu(List<MenuOption> options, String title, boolean exitButtonEnabled) {
+        window = new BasicWindow(title);
 
         Panel menuPanel = new Panel();
         menuPanel.addComponent(new EmptySpace());
@@ -28,8 +29,10 @@ public class MenuView {
             menuPanel.addComponent(createMenuButton(option));
         }
 
-        menuPanel.addComponent(new Button("Esci", window::close));
-        menuPanel.addComponent(errorLabel);
+        if (exitButtonEnabled) {
+            menuPanel.addComponent(new Button("Esci", window::close));
+            menuPanel.addComponent(errorLabel);
+        }
 
         window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(menuPanel);
@@ -47,5 +50,10 @@ public class MenuView {
 
     public void mostraErrore(String e) {
         errorLabel.setText(e);
+    }
+
+    public void aggiornaMenu(List<MenuOption> menuOptions, String s, boolean exitButtonEnabled) {
+        window.close();
+        mostraMenu(menuOptions, s, exitButtonEnabled);
     }
 }

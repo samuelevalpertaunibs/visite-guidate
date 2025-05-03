@@ -3,10 +3,12 @@ package com.unibs.services;
 import com.unibs.utils.DatabaseException;
 import com.unibs.daos.TipoVisitaDao;
 import com.unibs.models.*;
+import com.unibs.utils.DateService;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +66,12 @@ public class TipoVisitaService {
         LocalDate dataInizio;
         LocalDate dataFine;
         try {
-            dataInizio = LocalDate.parse(dataInizioString + "/" + LocalDate.now().getYear(), dateFormatter);
+            dataInizio = LocalDate.parse(dataInizioString + "/" + DateService.today().getYear(), dateFormatter);
         } catch (Exception e) {
             throw new IllegalArgumentException("Il formato della data di inizio non è corretto");
         }
         try {
-            dataFine = LocalDate.parse(dataFineString + "/" + LocalDate.now().getYear(), dateFormatter);
+            dataFine = LocalDate.parse(dataFineString + "/" + DateService.today().getYear(), dateFormatter);
         } catch (Exception e) {
             throw new IllegalArgumentException("Il formato della data di fine non è corretto");
         }
@@ -119,7 +121,7 @@ public class TipoVisitaService {
                 .mapToInt(Volontario::getId)
                 .toArray();
 
-        int[] giorniIds = giorni.stream().mapToInt(Giorno::id).toArray();
+        int[] giorniIds = giorni.stream().mapToInt(Giorno::getId).toArray();
 
         // Controllo overlap
         if (tipoVisitaDao.siSovrappone(luogoSelezionato.getId(), giorniIds, oraInizio, durataMinuti, dataInizio, dataFine)) {
@@ -154,7 +156,8 @@ public class TipoVisitaService {
         try {
             return tipoVisitaDao.getTitoliByVolontarioId(volontarioId);
         } catch (SQLException e) {
-            throw new DatabaseException("Errore nel recupero dei tipi di visita associati al volontario: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita associati al volontario: ", e);
+            throw new DatabaseException("Errore nel recupero dei tipi di visita associati al volontario");
         }
     }
 
@@ -169,7 +172,7 @@ public class TipoVisitaService {
     public ArrayList<TipoVisita> findByVolontario(int id) throws DatabaseException {
         ArrayList<TipoVisita> visite = new ArrayList<>();
 
-        for (String titolo : this.getTitoliByVolontarioId(id)) {
+        for (String titolo : getTitoliByVolontarioId(id)) {
             Optional<TipoVisita> tipoVisita = getByTitolo(titolo);
             if (tipoVisita.isEmpty()) {
                 throw new DatabaseException("Errore durante il recupero di un tipo di visita");
@@ -178,6 +181,29 @@ public class TipoVisitaService {
         }
         return visite;
 
+    }
+
+    public ArrayList<TipoVisita> findByMese(YearMonth mese) throws DatabaseException {
+        ArrayList<TipoVisita> visite = new ArrayList<>();
+
+        for (String titolo : getTitoliByMese(mese)) {
+            Optional<TipoVisita> tipoVisita = getByTitolo(titolo);
+            if (tipoVisita.isEmpty()) {
+                throw new DatabaseException("Errore durante il recupero di un tipo di visita.");
+            }
+            visite.add(tipoVisita.get());
+        }
+        return visite;
+
+    }
+
+    public List<String> getTitoliByMese(YearMonth mese) throws DatabaseException {
+        try {
+            return tipoVisitaDao.getTitoliByMese(mese);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita ricorrenti nel mese " + mese + ": ", e);
+            throw new DatabaseException("Errore nel recupero dei tipi di visita ricorrenti nel mese.");
+        }
     }
 
     public Optional<TipoVisita> getByTitolo(String titolo) throws DatabaseException {

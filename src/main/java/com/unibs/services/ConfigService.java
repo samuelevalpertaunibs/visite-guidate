@@ -1,9 +1,10 @@
 package com.unibs.services;
 
-import com.unibs.utils.DatabaseException;
 import com.unibs.daos.ConfigDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
+import com.unibs.utils.DatabaseException;
+import com.unibs.utils.DateService;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -117,7 +118,7 @@ public class ConfigService {
                 return false;
 
             // true -> oggi >= inizioPeriodoCorrente
-            return !LocalDate.now().isBefore(periodoCorrente);
+            return !DateService.today().isBefore(periodoCorrente);
         } catch (DatabaseException e) {
             return false;
         }
@@ -133,5 +134,46 @@ public class ConfigService {
 
     public YearMonth getMesePeriodoCorrente() throws DatabaseException {
         return YearMonth.from(getConfig().getPeriodoCorrente());
+    }
+
+    // Nel database utilizzo la dataPeriodoCorrente per indicare oltre che il periodo corrente anche la momentanea apertura
+    // alla raccolta delle disponibilità dei volontari
+    // Imposto il giorno della dataPeriodoCorrente al 28 mentre la raccolta delle disponibilità è chiusa, altrimenti
+    // sarà il 16 del mese del periodo di attività.
+    public boolean isRaccoltaDisponibilitaChiusa() {
+        try {
+            return getConfig().getPeriodoCorrente().getDayOfMonth() == 28;
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
+    // Se oggi è almeno il 16 del mese successivo a quello attivo la creazione è possibile
+    public boolean isCreazioneNuovoPianoPossibile() {
+        YearMonth periodoCorrente = getMesePeriodoCorrente();
+        return DateService.today().isAfter(periodoCorrente.plusMonths(1).atDay(15));
+    }
+
+    // Utilizzo la dataPeriodoCorrente per distinguere un periodo di raccolta disponibilita attiva da uno non
+    // RACCOLTA ATTIVA -> dataPeriodoCorrente ha giorno del mese 16
+    // RACCOLTA DISATTIVA -> dataPeriodoCorrente ha giorno del mese 28
+    public void chiudiRaccoltaDisponibilita() throws DatabaseException {
+        try {
+            LocalDate dataInizioPeriodoCorrente = getConfig().getPeriodoCorrente();
+            configDao.setPeriodoCorrente(dataInizioPeriodoCorrente.withDayOfMonth(28));
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiusura della raccolta disponibilità", e);
+            throw new DatabaseException("Impossibile chiudere la raccolta delle disponibilità.");
+        }
+    }
+
+    public void riapriRaccoltaDisponibilita() throws DatabaseException {
+        try {
+            LocalDate dataInizioPeriodoCorrente = getConfig().getPeriodoCorrente();
+            configDao.setPeriodoCorrente(dataInizioPeriodoCorrente.withDayOfMonth(16).plusMonths(1));
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la riapertura della raccolta disponibilità", e);
+            throw new DatabaseException("Impossibile riaprire la raccolta delle disponibilità.");
+        }
     }
 }

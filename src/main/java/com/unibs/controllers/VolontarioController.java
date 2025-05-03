@@ -64,7 +64,7 @@ public class VolontarioController implements IUserController {
                 new MenuOption("Inserisci disponibilità", (v) -> handleMenuAction(this::apriInserisciDisponibilita)),
                 new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::apriVisualizzaTipiVisiteAssociate))
         );
-        menuView.mostraMenu(menuOptions, " Menù principale - " + volontario.getUsername() + " ");
+        menuView.mostraMenu(menuOptions, " Menù principale - " + volontario.getUsername() + " ", true);
     }
 
     private void handleMenuAction(Runnable action) {
@@ -83,6 +83,13 @@ public class VolontarioController implements IUserController {
     public void apriInserisciDisponibilita() {
         InserisciDisponibilitaView view = new InserisciDisponibilitaView();
         try {
+
+            // Se il configuratore sta creando il piano visite in questo momento la raccolta disponbilita è chiusa
+            if (configService.isRaccoltaDisponibilitaChiusa()) {
+                new PopupChiudi(gui).mostra("Attenzione", "La raccolta delle disponibilità dei volontari è momentaneamente chiusa.");
+                return;
+            }
+
             YearMonth mese = configService.getMesePeriodoCorrente().plusMonths(2);
 
             // Recupero date disponibili e le imposto nella view
