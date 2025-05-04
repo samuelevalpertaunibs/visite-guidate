@@ -47,7 +47,7 @@ public class ConfiguratoreController implements IUserController {
         DatePrecluseService datePrecluseService = serviceFactory.getDatePrecluseService();
         TipoVisitaService tipoVisitaService = serviceFactory.getTipoVisitaService();
 
-        this.luogoController = new LuogoController(gui);
+        this.luogoController = new LuogoController(gui, luogoService, volontarioService);
         this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
         this.visitaController = new VisitaController(gui, visitaService, configService);
         this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
@@ -113,8 +113,8 @@ public class ConfiguratoreController implements IUserController {
                 subMenuOptions.add(new MenuOption("Inserisci un nuovo luogo", (v) -> handleMenuAction(this::inserisciNuovoLuogo) ));
                 subMenuOptions.add(new MenuOption("Inserisci un nuovo tipo di visita", (v) -> {throw new UnsupportedOperationException();} ));
                 subMenuOptions.add(new MenuOption("Associa dei volontari a tipi di visita gia esistenti", (v) -> {throw new UnsupportedOperationException();} ));
-                subMenuOptions.add(new MenuOption("Rimuovi un luogo", (v) -> {throw new UnsupportedOperationException();} ));
-                subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Rimuovi un luogo", (v) -> handleMenuAction(this::rimuoviLuogo) ));
+                subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> handleMenuAction(this::rimuoviTipoVisita) ));
                 subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> {throw new UnsupportedOperationException();} ));
                 subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> {throw new UnsupportedOperationException();} ));
 
@@ -122,6 +122,14 @@ public class ConfiguratoreController implements IUserController {
                 operazioniSupplementariMenu.mostraMenu(subMenuOptions, "Operazioni supplementari", false);
             }
         }
+    }
+
+    private void rimuoviTipoVisita() {
+        tipoVisitaController.apriRimuoviTipoVisita();
+    }
+
+    private void rimuoviLuogo() {
+        luogoController.apriRimuoviLuogo();
     }
 
     private void inserisciNuovoLuogo() {

@@ -65,7 +65,6 @@ CREATE TABLE visite
     stato            ENUM ('PROPOSTA', 'COMPLETA', 'CONFERMATA', 'CANCELLATA', 'EFFETTUATA') NOT NULL DEFAULT 'PROPOSTA',
     FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita (id) ON DELETE CASCADE,
     FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
-
 );
 
 CREATE TABLE ruoli

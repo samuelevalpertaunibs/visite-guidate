@@ -161,8 +161,13 @@ public class TipoVisitaService {
         }
     }
 
-    public List<String> getTitoliByLuogoId(int luogoId) {
-        return tipoVisitaDao.getTitoliByLuogoId(luogoId);
+    public List<String> getTitoliByLuogoId(int luogoId) throws DatabaseException {
+        try {
+            return tipoVisitaDao.getTitoliByLuogoId(luogoId);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita: ", e);
+            throw new DatabaseException("Errore nel recupero dei tipi di visita.");
+        }
     }
 
     public List<String> getPreviewTipiVisita() throws DatabaseException {
@@ -256,5 +261,23 @@ public class TipoVisitaService {
 
     public void setVolontarioService(VolontarioService volontarioService) {
         this.volontarioService = volontarioService;
+    }
+
+    public List<String> getAllTitoli() throws DatabaseException {
+        try {
+            return tipoVisitaDao.getAllTitoli();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita", e);
+            throw new DatabaseException("Errore nel recupero dei tipi di visita.");
+        }
+    }
+
+    public void rimuoviByTitolo(String titolo) {
+        try {
+            tipoVisitaDao.rimuovi(titolo);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante la rimozione del tipo di visita con titolo: " + titolo, e);
+            throw new DatabaseException("Errore durante la rimozione del tipo di visita.");
+        }
     }
 }

@@ -102,4 +102,25 @@ public class LuogoService {
             throw new DatabaseException("Errore durante il recupero del luogo.");
         }
     }
+
+    public void rimuoviById(Integer id) {
+        try {
+            luogoDao.rimuovi(id);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante la rimozione del luogo per id: " + id, e);
+            throw new DatabaseException("Errore durante la rimozione del luogo.");
+        }
+    }
+
+    public void rimuoviNonAssociati() {
+        try {
+            List<Integer> luoghiNonAssociati = luogoDao.getIdNonAssociati();
+            for (Integer id : luoghiNonAssociati) {
+                luogoDao.rimuovi(id);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei volontari non associati", e);
+            throw new DatabaseException("Impossibile rimuovere i volontari non associati ad alcuna visita.");
+        }
+    }
 }

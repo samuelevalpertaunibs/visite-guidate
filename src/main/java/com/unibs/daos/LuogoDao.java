@@ -1,8 +1,8 @@
 package com.unibs.daos;
 
-import com.unibs.utils.DatabaseManager;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
+import com.unibs.utils.DatabaseManager;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -101,6 +101,33 @@ public class LuogoDao {
         }
 
         return Optional.empty();
+    }
+
+    public void rimuovi(int id) throws SQLException {
+        String sql = "DELETE FROM luoghi WHERE id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
+    }
+
+    public List<Integer> getIdNonAssociati() throws SQLException {
+        String sql = "SELECT id FROM luoghi WHERE id NOT IN (SELECT luogo_id FROM tipi_visita)";
+        List<Integer> idLuoghi = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                idLuoghi.add(rs.getInt("id"));
+            }
+        }
+
+        return idLuoghi;
     }
 }
 

@@ -23,31 +23,31 @@ public class VisitaDao {
         Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
 
         String sql = """
-                    SELECT
-                        v.tipo_visita_id,
-                        t.indirizzo_incontro,
-                        t.comune_incontro,
-                        t.provincia_incontro,
-                        t.titolo,
-                        t.descrizione,
-                        t.data_inizio,
-                        t.data_fine,
-                        t.ora_inizio,
-                        t.durata_minuti,
-                        t.entrata_libera,
-                        t.num_min_partecipanti,
-                        t.num_max_partecipanti,
-                        v.data_svolgimento,
-                        v.stato
-                    FROM
-                        visite v
-                    JOIN
-                        tipi_visita t
-                    ON
-                        v.tipo_visita_id = t.id
-                    WHERE
-                        v.stato = ?
-                
+                                    SELECT
+                                        v.tipo_visita_id,
+                                        t.indirizzo_incontro,
+                                        t.comune_incontro,
+                                        t.provincia_incontro,
+                                        t.titolo,
+                                        t.descrizione,
+                                        t.data_inizio,
+                                        t.data_fine,
+                                        t.ora_inizio,
+                                        t.durata_minuti,
+                                        t.entrata_libera,
+                                        t.num_min_partecipanti,
+                                        t.num_max_partecipanti,
+                                        v.data_svolgimento,
+                                        v.stato
+                                    FROM
+                                        visite v
+                                    JOIN
+                                        tipi_visita t
+                                    ON
+                                        v.tipo_visita_id = t.id
+                                    WHERE
+                                        v.stato = ?
+                ORDER BY v.data_svolgimento
                 """;
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {

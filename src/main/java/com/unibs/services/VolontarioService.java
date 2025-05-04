@@ -96,7 +96,18 @@ public class VolontarioService {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle date disponibili", e);
             throw new DatabaseException("Impossibile recuperare le date disponibili selezionate.");
+        }
+    }
 
+    public void rimuoviNonAssociati() {
+        try {
+            List<Integer> volontariNonAssociati = utenteDao.getIdVolontariNonAssociati();
+            for (Integer id : volontariNonAssociati) {
+                utenteDao.rimuovi(id);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei volontari non associati", e);
+            throw new DatabaseException("Impossibile rimuovere i volontari non associati ad alcuna visita.");
         }
     }
 }

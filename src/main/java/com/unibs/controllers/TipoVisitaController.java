@@ -6,6 +6,7 @@ import com.unibs.models.*;
 import com.unibs.services.*;
 import com.unibs.utils.DatabaseException;
 import com.unibs.views.*;
+import com.unibs.views.components.PopupChiudi;
 import com.unibs.views.components.PopupConferma;
 
 import java.util.HashSet;
@@ -280,5 +281,23 @@ public class TipoVisitaController {
         if (new PopupConferma(gui).mostra("Attenzione", "I dati non salvati andranno persi.\nSei sicuro di voler uscire?")) {
             aggiungiTipoVisitaView.chiudi();
         }
+    }
+
+    public void apriRimuoviTipoVisita() {
+        RimuoviTipoVisitaView view = new RimuoviTipoVisitaView();
+        view.setTitoliTipiVisita(tipoVisitaService.getAllTitoli());
+        view.setOnTipoVisitaSelected(titolo -> {
+            try {
+                tipoVisitaService.rimuoviByTitolo(titolo);
+                luogoService.rimuoviNonAssociati();
+                volontarioService.rimuoviNonAssociati();
+                new PopupChiudi(gui).mostra("", "Il tipo di visita è stato rimosso con successo");
+            } catch (Exception e) {
+                new PopupChiudi(gui).mostra("Errore", e.getMessage());
+            } finally {
+                view.chiudi();
+            }
+        });
+        view.mostra(gui);
     }
 }

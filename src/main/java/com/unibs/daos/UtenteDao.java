@@ -174,4 +174,31 @@ public class UtenteDao {
             }
         }
     }
+
+    public void rimuovi(int id) throws SQLException {
+        String sql = "DELETE FROM utenti WHERE id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
+    }
+
+    public List<Integer> getIdVolontariNonAssociati() throws SQLException {
+        String sql = "SELECT id FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT volontario_id FROM tipi_visita_volontari)";
+        List<Integer> idVolontari = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                idVolontari.add(rs.getInt("id"));
+            }
+        }
+
+        return idVolontari;
+    }
 }
