@@ -22,13 +22,11 @@ public class TipoVisitaService {
     private static final int MINUTES_PER_DAY = 24 * 60;
 
     private final TipoVisitaDao tipoVisitaDao;
-    private final LuogoService luogoService;
     private final GiornoService giornoService;
     private VolontarioService volontarioService;
 
     public TipoVisitaService(LuogoService luogoService, GiornoService giornoService) {
         this.tipoVisitaDao = new TipoVisitaDao();
-        this.luogoService = luogoService;
         this.giornoService = giornoService;
     }
 
@@ -172,7 +170,7 @@ public class TipoVisitaService {
 
     public List<String> getPreviewTipiVisita() throws DatabaseException {
         try {
-            return tipoVisitaDao.getPreviewTipiVisita();
+            return tipoVisitaDao.getPreviewTipiVisita(null);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita: ", e);
             throw new DatabaseException("Errore durante il recupero dei tipi di visita.");
@@ -278,6 +276,27 @@ public class TipoVisitaService {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore durante la rimozione del tipo di visita con titolo: " + titolo, e);
             throw new DatabaseException("Errore durante la rimozione del tipo di visita.");
+        }
+    }
+
+    public void rimuoviNonAssociati() {
+        try {
+            List<String> tvNonAssociati = tipoVisitaDao.getTitoliNonAssociati();
+            for (String tv : tvNonAssociati) {
+                tipoVisitaDao.rimuovi(tv);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei tipi di visita non associati", e);
+            throw new DatabaseException("Impossibile rimuovere i tipi di visita non associati ad alcun volontario.");
+        }
+    }
+
+    public Optional<Integer> getIdByNome(String tv) throws DatabaseException {
+        try {
+            return tipoVisitaDao.getIdByNome(tv);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero del tipo di visita con nome" + tv, e);
+            throw new DatabaseException("Impossibile recuperare il tipo di visita.");
         }
     }
 }

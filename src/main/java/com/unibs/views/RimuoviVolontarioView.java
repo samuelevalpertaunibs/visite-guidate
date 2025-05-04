@@ -5,14 +5,14 @@ import com.googlecode.lanterna.gui2.*;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class RimuoviTipoVisitaView {
+public class RimuoviVolontarioView {
 
     private final Window window;
     private final Panel panel;
-    private Consumer<String> onTipoVisitaSelected;
+    private Consumer<String> onVolontarioSelected;
 
-    public RimuoviTipoVisitaView() {
-        this.window = new BasicWindow("Rimuovi Luogo");
+    public RimuoviVolontarioView() {
+        this.window = new BasicWindow("Rimuovi volontario");
         this.panel = new Panel();
         panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
         window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
@@ -23,13 +23,13 @@ public class RimuoviTipoVisitaView {
         gui.addWindowAndWait(window);
     }
 
-    public void setTitoliTipiVisita(List<String> tvs) {
+    public void setVolontari(List<String> volontari) {
         panel.removeAllComponents();
 
-        for (String tv : tvs) {
-            Button btn = new Button(tv, () -> {
-                if (onTipoVisitaSelected != null) {
-                    onTipoVisitaSelected.accept(tv);
+        for (String volontario : volontari) {
+            Button btn = new Button(volontario, () -> {
+                if (onVolontarioSelected != null) {
+                    onVolontarioSelected.accept(volontario);
                 }
             });
             panel.addComponent(btn);
@@ -41,8 +41,8 @@ public class RimuoviTipoVisitaView {
         panel.invalidate();
     }
 
-    public void setOnTipoVisitaSelected(Consumer<String> listener) {
-        this.onTipoVisitaSelected = listener;
+    public void setOnVolontarioSelected(Consumer<String> listener) {
+        this.onVolontarioSelected = listener;
     }
 
     public void chiudi() {

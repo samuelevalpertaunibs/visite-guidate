@@ -110,4 +110,33 @@ public class VolontarioService {
             throw new DatabaseException("Impossibile rimuovere i volontari non associati ad alcuna visita.");
         }
     }
+
+    public void rimuoviByNome(String nome) {
+        try {
+            utenteDao.rimuovi(nome);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante la rimozione del volontario per nome: " + nome, e);
+            throw new DatabaseException("Errore durante la rimozione del volontario.");
+        }
+    }
+
+    public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
+        try {
+            return utenteDao.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore durante il recupero dei volontari", e);
+            throw new DatabaseException("Errore durante il recupero dei volontari.");
+        }
+    }
+
+    public void associaATipoVisita(Set<Volontario> volontariSelezionati, int tipoVisitaId) {
+        try {
+            for (Volontario volontario : volontariSelezionati) {
+                utenteDao.associaATipoVisitaById(volontario.getId(), tipoVisitaId);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore durante l'associazione dei volontari", e);
+            throw new DatabaseException("Errore durante l'associazione dei volontari.");
+        }
+    }
 }

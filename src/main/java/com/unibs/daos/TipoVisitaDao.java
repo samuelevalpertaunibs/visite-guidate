@@ -13,6 +13,7 @@ import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TipoVisitaDao {
 
@@ -250,17 +251,21 @@ public class TipoVisitaDao {
         return false;
     }
 
-    public ArrayList<String> getPreviewTipiVisita() throws SQLException {
-        return getPreviewTipiVisita("*");
-    }
-
     public ArrayList<String> getPreviewTipiVisita(String luogoDaCercare) throws SQLException {
-        String sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id WHERE luoghi.nome = ?";
+        String sql;
+        if (luogoDaCercare == null) {
+            sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id";
+        } else {
+            sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id WHERE luoghi.nome = ?";
+        }
         ArrayList<String> tipiVisita = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, luogoDaCercare);
+
+            if (luogoDaCercare != null) {
+                stmt.setString(1, luogoDaCercare);
+            }
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 tipiVisita.add(rs.getString(1) + " presso " + rs.getString(2));
@@ -384,5 +389,38 @@ public class TipoVisitaDao {
             stmt.setString(1, titolo);
             stmt.executeUpdate();
         }
+    }
+
+    public List<String> getTitoliNonAssociati() throws SQLException {
+        String sql = "SELECT titolo FROM tipi_visita WHERE id NOT IN (SELECT tipo_visita_id FROM tipi_visita_volontari)";
+        List<String> titoliTv = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                titoliTv.add(rs.getString("titolo"));
+            }
+        }
+
+        return titoliTv;
+    }
+
+
+    public Optional<Integer> getIdByNome(String tv) throws SQLException {
+        String sql = "SELECT id FROM tipi_visita WHERE titolo = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, tv);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next())
+                return Optional.of(rs.getInt("id"));
+
+        }
+        return Optional.empty();
     }
 }

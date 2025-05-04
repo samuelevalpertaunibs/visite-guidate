@@ -201,4 +201,49 @@ public class UtenteDao {
 
         return idVolontari;
     }
+
+    public void rimuovi(String nome) throws SQLException {
+        String sql = "DELETE FROM utenti WHERE username = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nome);
+            stmt.executeUpdate();
+        }
+    }
+
+    public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
+        String sql = "SELECT id, username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
+        Set<Volontario> volontari = new HashSet<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, tipoVisitaId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String username = rs.getString("username");
+
+                volontari.add(new Volontario(id, username, null, null, null));
+            }
+        }
+
+        return volontari;
+    }
+
+    public void associaATipoVisitaById(int id, int tipoVisitaId) throws SQLException {
+        String sql = "INSERT INTO tipi_visita_volontari (volontario_id, tipo_visita_id) VALUES (?, ?)";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.setInt(2, tipoVisitaId);
+
+            stmt.executeUpdate();
+        }
+    }
+
 }

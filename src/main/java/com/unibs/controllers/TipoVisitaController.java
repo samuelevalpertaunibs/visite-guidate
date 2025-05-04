@@ -11,7 +11,9 @@ import com.unibs.views.components.PopupConferma;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TipoVisitaController {
     private final TipoVisitaService tipoVisitaService;
@@ -56,7 +58,7 @@ public class TipoVisitaController {
 
     private void aggiungiTipoVisitaPoiAggiornaFinestra(Button button) {
         try {
-            aggiuntiTipoVisita();
+            aggiungiTipoVisita();
 
             // Aggiorno il pannello del recap dei TipoVisita aggiunti
             StringBuilder sb = new StringBuilder();
@@ -91,7 +93,7 @@ public class TipoVisitaController {
             List<Volontario> volontari = volontarioService.findAllVolontari();
             SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontari);
             Set<Volontario> setSelezionati = new HashSet<>(volontariSelezionati);
-            volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, setSelezionati, "Seleziona i volontari associabili alla visita");
+            volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
             aggiungiTipoVisitaView.aggiornaVolontariSelezionati(volontariSelezionati);
         } catch (DatabaseException e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
@@ -239,7 +241,7 @@ public class TipoVisitaController {
 
     private void aggiungiTipoVisitaLuogoFissato(Button button) {
         try {
-            aggiuntiTipoVisita();
+            aggiungiTipoVisita();
             // Reimposto il luogo fissato
             aggiungiTipoVisitaView.aggiornaLuogo(luogoSelezionato.getNome());
             aggiungiTipoVisitaView.getSelezionaLuogoButton().setEnabled(false);
@@ -260,7 +262,7 @@ public class TipoVisitaController {
         }
     }
 
-    private void aggiuntiTipoVisita() {
+    private void aggiungiTipoVisita() {
         String titolo = aggiungiTipoVisitaView.getTitolo();
         String descrizione = aggiungiTipoVisitaView.getDescrizione();
         String dataInizio = aggiungiTipoVisitaView.getDataInizio();
@@ -284,7 +286,7 @@ public class TipoVisitaController {
     }
 
     public void apriRimuoviTipoVisita() {
-        RimuoviTipoVisitaView view = new RimuoviTipoVisitaView();
+        SelezionaTipoVisitaView view = new SelezionaTipoVisitaView("Rimuovi tipo visita");
         view.setTitoliTipiVisita(tipoVisitaService.getAllTitoli());
         view.setOnTipoVisitaSelected(titolo -> {
             try {
@@ -299,5 +301,80 @@ public class TipoVisitaController {
             }
         });
         view.mostra(gui);
+    }
+
+    public void apriRimuoviVolontario() {
+        RimuoviVolontarioView view = new RimuoviVolontarioView();
+        List<String> nomi = volontarioService.findAllVolontari().stream().map(Volontario::getUsername).collect(Collectors.toList());
+        view.setVolontari(nomi);
+        view.setOnVolontarioSelected(nome -> {
+            try {
+                volontarioService.rimuoviByNome(nome);
+                tipoVisitaService.rimuoviNonAssociati();
+                luogoService.rimuoviNonAssociati();
+                new PopupChiudi(gui).mostra("", "Il volontario è stato rimosso con successo");
+            } catch (Exception e) {
+                new PopupChiudi(gui).mostra("Errore", e.getMessage());
+            } finally {
+                view.chiudi();
+            }
+        });
+        view.mostra(gui);
+    }
+
+    public void apriInserisciNuovoTipoVisita() {
+        selezionaLuogoView = new SelezionaLuogoView();
+        selezionaLuogoView.getAggiungiLuogoButton().setVisible(false);
+        try {
+            List<Luogo> luoghi = luogoService.findAll();
+            luogoSelezionato = selezionaLuogoView.mostra(gui, luoghi);
+            // Dopo che l'utente ha selezionato il luogo mostro la view per creare delle visite
+            aggiungiTipoVisitaView = new AggiungiTipoVisitaView();
+            initListenerAggiungiTipoVisitaLuogoFissatoView();
+            // Fisso il luogo
+            aggiungiTipoVisitaView.aggiornaLuogo(luogoSelezionato.getNome());
+            aggiungiTipoVisitaView.getSelezionaLuogoButton().setEnabled(false);
+            aggiungiTipoVisitaView.focusTitolo();
+            aggiungiTipoVisitaView.mostra(gui);
+        } catch (DatabaseException e) {
+            new PopupChiudi(gui).mostra("Errore", e.getMessage());
+        }
+
+
+    }
+
+    public void associaNuoviVolontari() {
+        SelezionaTipoVisitaView view = new SelezionaTipoVisitaView("Seleziona tipo visita a cui assciare nuovi volontari");
+        view.setTitoliTipiVisita(tipoVisitaService.getAllTitoli());
+        view.setOnTipoVisitaSelected(titolo -> {
+            try {
+                apriAggiungiVolontari(titolo);
+            } catch (Exception e) {
+                new PopupChiudi(gui).mostra("Errore", e.getMessage());
+            } finally {
+                view.chiudi();
+            }
+        });
+        view.mostra(gui);
+    }
+
+    private void apriAggiungiVolontari(String tv) {
+        try {
+            Optional<Integer> tipoVisitaIdOptional = tipoVisitaService.getIdByNome(tv);
+            if (tipoVisitaIdOptional.isEmpty()) {
+                throw new DatabaseException("Tipo visita non trovato");
+            }
+            int tipoVisitaId = tipoVisitaIdOptional.get();
+            Set<Volontario> volontariAssociabili = volontarioService.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
+            if (volontariAssociabili.isEmpty()) {
+                throw new IllegalArgumentException("Tutti i volontari esistenti sono già associati a questo tipo di visita");
+            }
+            SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList());
+            volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, new HashSet<>(), "Seleziona i volontari da associare al tipo di visita");
+            volontarioService.associaATipoVisita(volontariSelezionati, tipoVisitaId);
+            new PopupChiudi(gui).mostra("", "I volontari sono stati associati correttamente.");
+        } catch (Exception e) {
+            new PopupChiudi(gui).mostra("Errore", e.getMessage());
+        }
     }
 }

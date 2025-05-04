@@ -51,7 +51,7 @@ public class VisitaController {
                 return null;
             }
 
-            String messaggioConferma = "Verrà chiusa la raccolta disponibilità dei volontari e verrà\navviata la produzione del piano delle visite per il mese a venire.\nInoltre non potrà più modificare le date precluse per il mese attualmente relativo.";
+            String messaggioConferma = "Verrà chiusa la raccolta disponibilità dei volontari e verrà\navviata la produzione del piano delle visite per il mese a venire.\nInoltre non sarà più possibile modificare le date precluse per il mese attuale.";
             if (new PopupConferma(gui).mostra("Attenzione!", messaggioConferma)) {
                 visitaService.creaPiano();
                 return true;

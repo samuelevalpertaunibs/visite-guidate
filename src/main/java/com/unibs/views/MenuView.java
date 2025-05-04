@@ -56,4 +56,8 @@ public class MenuView {
         window.close();
         mostraMenu(menuOptions, s, exitButtonEnabled);
     }
+
+    public void close() {
+        window.close();
+    }
 }

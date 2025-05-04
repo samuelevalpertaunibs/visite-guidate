@@ -111,17 +111,32 @@ public class ConfiguratoreController implements IUserController {
             if (isPianoCreato) {
                 List<MenuOption> subMenuOptions = new ArrayList<>();
                 subMenuOptions.add(new MenuOption("Inserisci un nuovo luogo", (v) -> handleMenuAction(this::inserisciNuovoLuogo) ));
-                subMenuOptions.add(new MenuOption("Inserisci un nuovo tipo di visita", (v) -> {throw new UnsupportedOperationException();} ));
-                subMenuOptions.add(new MenuOption("Associa dei volontari a tipi di visita gia esistenti", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Inserisci un nuovo tipo di visita", (v) -> handleMenuAction(this::inserisciNuovoTipoVisita) ));
+                subMenuOptions.add(new MenuOption("Associa dei volontari a tipi di visita gia esistenti", (v) -> handleMenuAction(this::associaAltriVolontari) ));
                 subMenuOptions.add(new MenuOption("Rimuovi un luogo", (v) -> handleMenuAction(this::rimuoviLuogo) ));
                 subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> handleMenuAction(this::rimuoviTipoVisita) ));
-                subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> {throw new UnsupportedOperationException();} ));
-                subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> {throw new UnsupportedOperationException();} ));
+                subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> handleMenuAction(this::rimuoviVolontario)));
+                subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> handleMenuAction(() -> {
+                    configService.riapriRaccoltaDisponibilita();
+                    operazioniSupplementariMenu.close();
+                })));
 
                 operazioniSupplementariMenu = new MenuView(gui);
                 operazioniSupplementariMenu.mostraMenu(subMenuOptions, "Operazioni supplementari", false);
             }
         }
+    }
+
+    private void associaAltriVolontari() {
+        tipoVisitaController.associaNuoviVolontari();
+    }
+
+    private void inserisciNuovoTipoVisita() {
+        tipoVisitaController.apriInserisciNuovoTipoVisita();
+    }
+
+    private void rimuoviVolontario() {
+        tipoVisitaController.apriRimuoviVolontario();
     }
 
     private void rimuoviTipoVisita() {
