@@ -32,7 +32,7 @@ public class VisitaController {
         try {
             elencoVisiteView.setStati(List.of(Visita.StatoVisita.values()), stato -> {
                 List<Visita> visite = visitaService.getVisitePreview(stato);
-                elencoVisiteView.aggiornaVisiteTable(visite, stato);
+                elencoVisiteView.aggiornaVisite(visite, stato);
             });
         } catch (Exception e) {
             elencoVisiteView.mostraErrore(e.getMessage());

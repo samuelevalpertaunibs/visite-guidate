@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class Volontario extends Utente implements SelezionabileConCheckbox {
     private static final int ruolo = 2;
 
-    public Volontario(int id, String username, String passwordHash, byte[] salt, LocalDate lastLogin) {
+    public Volontario(Integer id, String username, String passwordHash, byte[] salt, LocalDate lastLogin) {
         super(id, username, passwordHash, salt, ruolo, lastLogin);
     }
 

@@ -3,14 +3,14 @@ package com.unibs.models;
 import java.time.LocalDate;
 
 public class Utente {
-    private int id;
+    private Integer id;
     private final String username;
     private String passwordHash;
     private final int role;
     private LocalDate lastLogin;
     private final byte[] salt;
 
-    public Utente(int id, String username, String passwordHash, byte[] salt, int role, LocalDate lastLogin) {
+    public Utente(Integer id, String username, String passwordHash, byte[] salt, int role, LocalDate lastLogin) {
         this.id = id;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -19,11 +19,11 @@ public class Utente {
         this.lastLogin = lastLogin;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

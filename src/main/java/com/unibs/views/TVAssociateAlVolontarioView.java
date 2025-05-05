@@ -38,11 +38,11 @@ public class TVAssociateAlVolontarioView {
         panel.addComponent(new Button("Chiudi", () -> window.close()));
     }
 
-    public void impostaVisite(List<TipoVisita> visite) {
-        this.tipiVisita = visite;
+    public void impostaVisite(List<TipoVisita> tvPassati) {
+        this.tipiVisita = tvPassati;
         currentIndex.set(0);
 
-        if (visite == null || visite.isEmpty()) {
+        if (tipiVisita == null || tipiVisita.isEmpty()) {
             visitaLabel.setText("");
             counterLabel.setText("Nessuna visita disponibile.");
             nextButton.setEnabled(false);

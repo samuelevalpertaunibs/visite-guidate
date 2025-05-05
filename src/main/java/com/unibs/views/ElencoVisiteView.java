@@ -1,26 +1,32 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.table.Table;
-import com.googlecode.lanterna.gui2.table.TableModel;
+import com.unibs.models.TipoVisita;
 import com.unibs.models.Visita;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ElencoVisiteView {
 
     private final Window window;
     private final ActionListBox statoList;
-    private final Table<String> visiteTable;
+    private final Label visitaLabel;
     private final Label errorLabel;
     private final Panel statoPanel;
     private final Panel visitePanel;
+    private final Label counterLabel = new Label("");
+    private final Button nextButton = new Button("Successivo");
+    private final AtomicInteger currentIndex = new AtomicInteger(0);
+    private List<Visita> visite;
+    private Visita.StatoVisita statoAttuale;
 
     public ElencoVisiteView() {
         window = new BasicWindow("Visualizza elenco visite per stato");
+        counterLabel.setText("Nessuna visita caricata.");
         statoList = new ActionListBox();
-        visiteTable = new Table<>("Titolo", "Descrizione", "Punto di incontro", "Data di svolgimento", "Ora inizio", "Entrata libera");
+        visitaLabel = new Label("");
         errorLabel = new Label("");
         statoPanel = new Panel(new LinearLayout(Direction.VERTICAL));
         visitePanel = new Panel(new LinearLayout(Direction.VERTICAL));
@@ -34,7 +40,13 @@ public class ElencoVisiteView {
         statoPanel.addComponent(new EmptySpace());
         statoPanel.addComponent(new Button("Chiudi", window::close));
 
-        visitePanel.addComponent(visiteTable);
+        visitePanel.addComponent(visitaLabel);
+        visitePanel.addComponent(new EmptySpace());
+        visitePanel.addComponent(counterLabel);
+
+        nextButton.setEnabled(false);  // inizialmente disabilitato
+        nextButton.addListener(button -> mostraProssimaVisita());
+        visitePanel.addComponent(nextButton);
 
         mainPanel.addComponent(statoPanel.withBorder(Borders.singleLine("Filtra")));
         mainPanel.addComponent(visitePanel.withBorder(Borders.singleLine("Visite")));
@@ -51,29 +63,61 @@ public class ElencoVisiteView {
         statoList.runSelectedItem();
     }
 
-    public void aggiornaVisiteTable(List<Visita> visite, Visita.StatoVisita stato) {
-        if (stato == Visita.StatoVisita.CANCELLATA) {
-            visiteTable.setTableModel(new TableModel<>("Titolo", "Data di (mancato) svolgimento"));
-            for (Visita v : visite) {
-                visiteTable.getTableModel().addRow(
-                        v.getTipoVisita().getTitolo(),
-                        v.getDataSvolgimento().toString()
-                );
-            }
+    public void aggiornaVisite(List<Visita> visitePassate, Visita.StatoVisita stato) {
+        this.visite = visitePassate;
+        this.statoAttuale = stato;
+
+        currentIndex.set(0);
+
+        if (visite == null || visite.isEmpty()) {
+            visitaLabel.setText("");
+            visitaLabel.setText("Nessuna visita disponibile.");
+            counterLabel.setVisible(false);
+            nextButton.setEnabled(false);
+            nextButton.setVisible(false);
         } else {
-            visiteTable.setTableModel(new TableModel<>("Titolo", "Descrizione", "Punto di incontro", "Data di svolgimento", "Ora inizio", "Entrata libera"));
-            for (Visita v : visite) {
-                visiteTable.getTableModel().addRow(
-                        v.getTipoVisita().getTitolo(),
-                        v.getTipoVisita().getDescrizione(),
-                        v.getTipoVisita().getPuntoIncontro().toString(),
-                        v.getDataSvolgimento().toString(),
-                        v.getTipoVisita().getOraInizio().toString(),
-                        v.getTipoVisita().isEntrataLibera() ? "Si" : "No"
-                );
-            }
+            counterLabel.setVisible(true);
+            nextButton.setEnabled(true);
+            nextButton.setVisible(true);
+            aggiornaVisita(0);
         }
     }
+
+    private void mostraProssimaVisita() {
+        int next = currentIndex.incrementAndGet();
+        if (next >= visite.size()) {
+            currentIndex.set(0);
+            next = 0;
+        }
+        aggiornaVisita(next);
+    }
+
+    private void aggiornaVisita(int index) {
+        StringBuilder sb = new StringBuilder();
+        Visita v = visite.get(index);
+        TipoVisita tipoVisita = v.getTipoVisita();
+        if (statoAttuale == Visita.StatoVisita.CANCELLATA) {
+            sb.append("Titolo: ").append(tipoVisita.getTitolo());
+            sb.append("\nLuogo: ").append(tipoVisita.getLuogo().getNome());
+            sb.append("\nData di mancato svolgimento: ").append(v.getDataSvolgimento());
+            sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
+            sb.append("\nStato: ").append(statoAttuale);
+        } else {
+            sb.append("Titolo: ").append(tipoVisita.getTitolo());
+            sb.append("\nLuogo: ").append(tipoVisita.getLuogo().getNome());
+            sb.append("\nDescrizione: ").append(tipoVisita.getDescrizione());
+            sb.append("\nPunto di incontro: ").append(tipoVisita.getPuntoIncontro());
+            sb.append("\nData di svolgimento: ").append(v.getDataSvolgimento());
+            sb.append("\nOra d'inzio: ").append(tipoVisita.getOraInizio());
+            sb.append("\nEntrata libera: ").append(tipoVisita.getEntrataLibera() ? "Sì" : "No");
+            sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
+            sb.append("\nStato: ").append(statoAttuale);
+        }
+
+        visitaLabel.setText(sb.toString());
+        counterLabel.setText("Visita " + (index + 1) + " di " + visite.size());
+    }
+
 
     public void mostra(WindowBasedTextGUI gui) {
         statoList.takeFocus();

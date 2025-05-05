@@ -38,20 +38,6 @@ public class TipoVisita {
         this.volontari = volontari;
     }
 
-    public TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti, int numMaxPartecipanti, PuntoIncontro puntoIncontro) {
-        this.id = id;
-        this.titolo = titolo;
-        this.descrizione = descrizione;
-        this.dataInizio = dataInizio;
-        this.dataFine = dataFine;
-        this.oraInizio = oraInizio;
-        this.durataMinuti = durataMinuti;
-        this.entrataLibera = entrataLibera;
-        this.numMinPartecipanti = numMinPartecipanti;
-        this.numMaxPartecipanti = numMaxPartecipanti;
-        this.puntoIncontro = puntoIncontro;
-    }
-
     public String getTitolo() {
         return titolo;
     }

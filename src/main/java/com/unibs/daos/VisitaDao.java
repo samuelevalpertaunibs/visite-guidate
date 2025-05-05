@@ -1,8 +1,6 @@
 package com.unibs.daos;
 
-import com.unibs.models.PuntoIncontro;
-import com.unibs.models.TipoVisita;
-import com.unibs.models.Visita;
+import com.unibs.models.*;
 import com.unibs.utils.DatabaseManager;
 
 import java.sql.*;
@@ -38,13 +36,14 @@ public class VisitaDao {
                                         t.num_min_partecipanti,
                                         t.num_max_partecipanti,
                                         v.data_svolgimento,
-                                        v.stato
+                                        v.stato,
+                                        u.username,
+                                        l.nome
                                     FROM
                                         visite v
-                                    JOIN
-                                        tipi_visita t
-                                    ON
-                                        v.tipo_visita_id = t.id
+                                    JOIN tipi_visita t ON v.tipo_visita_id = t.id
+                                    JOIN utenti u ON volontario_id = u.id
+                                    JOIN luoghi l ON t.luogo_id = l.id
                                     WHERE
                                         v.stato = ?
                 ORDER BY v.data_svolgimento
@@ -71,16 +70,19 @@ public class VisitaDao {
                 int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
                 LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
                 Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
+                String nomeVolontario = rs.getString("username");
+                String luogoNome = rs.getString("nome");
 
                 // Utilizzo una cache per evitare di creare un nuovo tipo visita per ogni istanza di visita
                 TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
                 if (tipoVisita == null) {
                     PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
-                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, puntoIncontro);
+                    Luogo luogo = new Luogo(null, luogoNome, null, null);
+                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
                     tipoVisitaCache.put(tipoVisitaId, tipoVisita);
                 }
 
-                visite.add(new Visita(tipoVisita, dataSvolgimento, null, statoVisita));
+                visite.add(new Visita(tipoVisita, dataSvolgimento, new Volontario(null, nomeVolontario, null, null, null), statoVisita));
             }
         }
         return visite;
