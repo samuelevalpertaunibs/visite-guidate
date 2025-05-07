@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
+import com.unibs.models.Visita;
 import com.unibs.services.*;
 import com.unibs.utils.DateService;
 import com.unibs.views.MenuView;
@@ -25,7 +26,7 @@ public class ConfiguratoreController implements IUserController {
     private final VisitaController visitaController;
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
-    List<MenuOption> menuOptions = new ArrayList<>();
+    final List<MenuOption> menuOptions = new ArrayList<>();
     MenuOption creaPianoOption;
     MenuView operazioniSupplementariMenu;
 
@@ -56,7 +57,6 @@ public class ConfiguratoreController implements IUserController {
     }
 
 
-    @Override
     public void start() {
         if (configService.isInitialized()) {
             if (configService.regimeAttivo()) {
@@ -82,8 +82,7 @@ public class ConfiguratoreController implements IUserController {
         configService.setPeriodoCorrente(prossimoSedici);
     }
 
-    @Override
-    public void showMenu() {
+    private void showMenu() {
         menuOptions.add(new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)));
         menuOptions.add(new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)));
         menuOptions.add(new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)));
@@ -119,6 +118,8 @@ public class ConfiguratoreController implements IUserController {
                 subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> handleMenuAction(() -> {
                     configService.riapriRaccoltaDisponibilita();
                     operazioniSupplementariMenu.close();
+                    menuOptions.remove(creaPianoOption);
+                    menuView.aggiornaMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);
                 })));
 
                 operazioniSupplementariMenu = new MenuView(gui);
@@ -163,7 +164,7 @@ public class ConfiguratoreController implements IUserController {
         tipoVisitaController.apriVisualizzaVisitePerVolontari();
     }
 
-    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+    private void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
         new RegimeNonAttivoView().mostra(gui);
     }
 
@@ -184,7 +185,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     private void visualizzaVisite() {
-        visitaController.apriVisualizzaVisitePerTipologia();
+        visitaController.apriVisualizzaVisitePerTipologia(List.of(Visita.StatoVisita.values()));
     }
 
 }

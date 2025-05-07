@@ -4,9 +4,11 @@ import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
+import com.unibs.models.Visita;
 import com.unibs.models.Volontario;
 import com.unibs.services.*;
 import com.unibs.utils.DatabaseException;
+import com.unibs.views.ElencoVisiteView;
 import com.unibs.views.InserisciDisponibilitaView;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
@@ -14,10 +16,7 @@ import com.unibs.views.components.PopupChiudi;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 public class VolontarioController implements IUserController {
@@ -27,7 +26,8 @@ public class VolontarioController implements IUserController {
     private final MultiWindowTextGUI gui;
     private final TipoVisitaController tipoVisitaController;
     private final VolontarioService volontarioService;
-    private final TipoVisitaService tipoVisitaService;
+    private ElencoVisiteView elencoVisiteView;
+    private final VisitaService visitaService;
 
     public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
         this.gui = gui;
@@ -36,15 +36,15 @@ public class VolontarioController implements IUserController {
         this.menuView = new MenuView(gui);
         this.volontario = new Volontario(currentUtente);
 
+        visitaService = serviceFactory.getVisitaService();
         LuogoService luogoService = serviceFactory.getLuogoService();
         ConfigService configService = serviceFactory.getConfigService();
         GiornoService giornoService = serviceFactory.getGiornoService();
-        tipoVisitaService = serviceFactory.getTipoVisitaService();
+        TipoVisitaService tipoVisitaService = serviceFactory.getTipoVisitaService();
 
         this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
     }
 
-    @Override
     public void start() {
         if (configService.regimeAttivo()) {
             showMenu();
@@ -53,18 +53,39 @@ public class VolontarioController implements IUserController {
         }
     }
 
-    @Override
-    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+    private void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
         new RegimeNonAttivoView().mostra(gui);
     }
 
-    @Override
-    public void showMenu() {
+    private void showMenu() {
         List<MenuOption> menuOptions = Arrays.asList(
                 new MenuOption("Inserisci disponibilità", (v) -> handleMenuAction(this::apriInserisciDisponibilita)),
-                new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::apriVisualizzaTipiVisiteAssociate))
+                new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::apriVisualizzaTipiVisiteAssociate)),
+                new MenuOption("Visualizza le tue visite", (v) -> handleMenuAction(this::apriVisualizzaVisite))
         );
         menuView.mostraMenu(menuOptions, " Menù principale - " + volontario.getUsername() + " ", true);
+    }
+
+    public void apriVisualizzaVisite() {
+        elencoVisiteView = new ElencoVisiteView("Visualizza elenco visite a cui sei associato", true);
+        List<Visita.StatoVisita> statiDaMostrare = List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.CANCELLATA);
+        initElencoVisiteConIscrizioneViewListener(statiDaMostrare);
+        elencoVisiteView.mostra(gui);
+    }
+
+    private void initElencoVisiteConIscrizioneViewListener(List<Visita.StatoVisita> stati) {
+        try {
+            elencoVisiteView.setStati(stati, stato -> {
+                List<Visita> visite = visitaService.getVisitePreviewByVolontario(stato, volontario);
+                List<List<String>> codiciPrenotazione = new ArrayList<>();
+                for (Visita visita : visite) {
+                    codiciPrenotazione.add(visitaService.getCodiciPrenotazionePerVista(volontario, visita.getId()));
+                }
+                elencoVisiteView.aggiornaVisite(visite, stato, codiciPrenotazione);
+            });
+        } catch (Exception e) {
+            elencoVisiteView.mostraErrore(e.getMessage());
+        }
     }
 
     private void handleMenuAction(Runnable action) {

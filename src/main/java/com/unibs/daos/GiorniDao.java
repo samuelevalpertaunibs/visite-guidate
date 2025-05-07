@@ -1,13 +1,16 @@
 package com.unibs.daos;
 
+import com.unibs.models.Giorno;
+import com.unibs.utils.DatabaseManager;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-
-import com.unibs.utils.DatabaseManager;
-import com.unibs.models.Giorno;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class GiorniDao {
@@ -29,7 +32,7 @@ public class GiorniDao {
         return giorni;
     }
 
-    public Set<Giorno> findByTipoVisitaId(int tipoVisitaId) {
+    public Set<Giorno> findByTipoVisitaId(int tipoVisitaId) throws SQLException {
         Set<Giorno> giorni = new HashSet<>();
         String query = "SELECT g.id, g.nome FROM giorni_settimana g JOIN giorni_settimana_tipi_visita tvg ON g.id = tvg.giorno_settimana_id WHERE tvg.tipo_visita_id = ?";
 
@@ -45,8 +48,6 @@ public class GiorniDao {
                 giorni.add(new Giorno(id, nome));
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace(); // oppure loggalo in modo più formale
         }
 
         return giorni;

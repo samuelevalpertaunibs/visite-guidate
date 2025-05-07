@@ -3,7 +3,7 @@ package com.unibs.models;
 import java.time.LocalDate;
 
 public class Utente {
-    private Integer id;
+    private final Integer id;
     private final String username;
     private String passwordHash;
     private final int role;
@@ -21,10 +21,6 @@ public class Utente {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getUsername() {

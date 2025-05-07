@@ -1,5 +1,5 @@
 package com.unibs.utils;
 
-public interface SelezionabileConCheckbox {
+public interface ElementoSelezionabile {
     String getPlaceHolder();
 }

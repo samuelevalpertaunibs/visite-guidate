@@ -246,4 +246,19 @@ public class UtenteDao {
         }
     }
 
+    public void inserisciUtente(Utente nuovoUtente) throws SQLException {
+        String sql = "INSERT INTO utenti VALUES (DEFAULT, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, nuovoUtente.getUsername());
+            stmt.setString(2, nuovoUtente.getPasswordHash());
+            stmt.setBytes(3, nuovoUtente.getSalt());
+            stmt.setInt(4, nuovoUtente.getRole());
+            stmt.setDate(5, Date.valueOf(nuovoUtente.getLastLogin()));
+
+            stmt.executeUpdate();
+        }
+    }
 }

@@ -1,13 +1,10 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.TerminalSize;
-import com.unibs.models.Luogo;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.gui2.*;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.TextColor;
 
 public class AggiungiLuogoView {
     private Window window;
@@ -32,7 +29,7 @@ public class AggiungiLuogoView {
         selezionaComuneButton = new Button("Nessun comune selezionato");
     }
 
-    public Window creaFinestra() {
+    public void creaFinestra() {
         window = new BasicWindow("Aggiungi un luogo");
 
         nomeField.setPreferredSize(new TerminalSize(40, 1));
@@ -50,14 +47,11 @@ public class AggiungiLuogoView {
 
         window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
-        return window;
     }
 
-    public Luogo mostra(WindowBasedTextGUI gui) {
-        AtomicReference<Luogo> luogoAggiunto = new AtomicReference<>();
+    public void mostra(WindowBasedTextGUI gui) {
         creaFinestra();
         gui.addWindowAndWait(window);
-        return luogoAggiunto.get();
     }
 
     public void mostraErrore(String message) {

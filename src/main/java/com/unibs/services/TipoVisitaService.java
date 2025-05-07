@@ -104,16 +104,7 @@ public class TipoVisitaService {
             throw new IllegalArgumentException("Il numero massimo di partecipanti non è valido.");
         }
 
-        int numeroMin;
-        try {
-            numeroMin = Integer.parseInt(numeroMinPartecipanti);
-            if (numeroMin < 1 || numeroMin > 100)
-                throw new IllegalArgumentException("Il numero minimo deve essere positivo e minore di 100.");
-            if (numeroMin > numeroMax)
-                throw new IllegalArgumentException("Il numero minimo deve essere minore del numero massimo.");
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Il numero minimo di partecipanti non è valido.");
-        }
+        int numeroMin = getNumeroMin(numeroMinPartecipanti, numeroMax);
 
         int[] volontariIds = volontari.stream()
                 .mapToInt(Volontario::getId)
@@ -140,6 +131,20 @@ public class TipoVisitaService {
             }
             throw new DatabaseException("Errore nell'inserimento del tipo di visita.");
         }
+    }
+
+    private static int getNumeroMin(String numeroMinPartecipanti, int numeroMax) {
+        int numeroMin;
+        try {
+            numeroMin = Integer.parseInt(numeroMinPartecipanti);
+            if (numeroMin < 1 || numeroMin > 100)
+                throw new IllegalArgumentException("Il numero minimo deve essere positivo e minore di 100.");
+            if (numeroMin > numeroMax)
+                throw new IllegalArgumentException("Il numero minimo deve essere minore del numero massimo.");
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Il numero minimo di partecipanti non è valido.");
+        }
+        return numeroMin;
     }
 
     public boolean esisteAlmenoUnaVisita() throws DatabaseException {
@@ -230,24 +235,24 @@ public class TipoVisitaService {
                 return Optional.empty();
             }
 
-            int tipoVisitaId = base.getId();
+            int tipoVisitaId = base.id();
 
             Set<Giorno> giorni = giornoService.getByTipoVisitaId(tipoVisitaId);
             Set<Volontario> volontari = volontarioService.getByTipoVisitaId(tipoVisitaId);
 
             return Optional.of(new TipoVisita(
-                    base.getId(),
-                    base.getTitolo(),
-                    base.getDescrizione(),
-                    base.getDataInizio(),
-                    base.getDataFine(),
-                    base.getOraInizio(),
-                    base.getDurataMinuti(),
-                    base.getEntrataLibera(),
-                    base.getNumMinPartecipanti(),
-                    base.getNumMaxPartecipanti(),
-                    base.getLuogo(),
-                    base.getPuntoIncontro(),
+                    base.id(),
+                    base.titolo(),
+                    base.descrizione(),
+                    base.dataInizio(),
+                    base.dataFine(),
+                    base.oraInizio(),
+                    base.durataMinuti(),
+                    base.entrataLibera(),
+                    base.numMinPartecipanti(),
+                    base.numMaxPartecipanti(),
+                    base.luogo(),
+                    base.puntoIncontro(),
                     giorni,
                     volontari
             ));

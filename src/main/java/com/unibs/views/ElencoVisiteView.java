@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.unibs.models.TipoVisita;
 import com.unibs.models.Visita;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -21,15 +22,18 @@ public class ElencoVisiteView {
     private final AtomicInteger currentIndex = new AtomicInteger(0);
     private List<Visita> visite;
     private Visita.StatoVisita statoAttuale;
+    private final boolean mostraCodiciPrenotazione;
+    private List<List<String>> codiciPrenotazinone;
 
-    public ElencoVisiteView() {
-        window = new BasicWindow("Visualizza elenco visite per stato");
+    public ElencoVisiteView(String titolo, boolean mostraCodiciPrenotazione) {
+        window = new BasicWindow(titolo);
         counterLabel.setText("Nessuna visita caricata.");
         statoList = new ActionListBox();
         visitaLabel = new Label("");
         errorLabel = new Label("");
         statoPanel = new Panel(new LinearLayout(Direction.VERTICAL));
         visitePanel = new Panel(new LinearLayout(Direction.VERTICAL));
+        this.mostraCodiciPrenotazione = mostraCodiciPrenotazione;
         creaFinestra();
     }
 
@@ -83,6 +87,27 @@ public class ElencoVisiteView {
         }
     }
 
+    public void aggiornaVisite(List<Visita> visitePassate, Visita.StatoVisita stato, List<List<String>> codiciPrenotazione) {
+        this.visite = visitePassate;
+        this.statoAttuale = stato;
+        this.codiciPrenotazinone = codiciPrenotazione;
+
+        currentIndex.set(0);
+
+        if (visite == null || visite.isEmpty()) {
+            visitaLabel.setText("");
+            visitaLabel.setText("Nessuna visita disponibile.");
+            counterLabel.setVisible(false);
+            nextButton.setEnabled(false);
+            nextButton.setVisible(false);
+        } else {
+            counterLabel.setVisible(true);
+            nextButton.setEnabled(true);
+            nextButton.setVisible(true);
+            aggiornaVisita(0);
+        }
+    }
+
     private void mostraProssimaVisita() {
         int next = currentIndex.incrementAndGet();
         if (next >= visite.size()) {
@@ -97,21 +122,24 @@ public class ElencoVisiteView {
         Visita v = visite.get(index);
         TipoVisita tipoVisita = v.getTipoVisita();
         if (statoAttuale == Visita.StatoVisita.CANCELLATA) {
-            sb.append("Titolo: ").append(tipoVisita.getTitolo());
-            sb.append("\nLuogo: ").append(tipoVisita.getLuogo().getNome());
-            sb.append("\nData di mancato svolgimento: ").append(v.getDataSvolgimento());
+            sb.append("Titolo: ").append(tipoVisita.titolo());
+            sb.append("\nLuogo: ").append(tipoVisita.luogo().getNome());
+            sb.append("\nData di mancato svolgimento: ").append(v.getDataSvolgimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
         } else {
-            sb.append("Titolo: ").append(tipoVisita.getTitolo());
-            sb.append("\nLuogo: ").append(tipoVisita.getLuogo().getNome());
-            sb.append("\nDescrizione: ").append(tipoVisita.getDescrizione());
-            sb.append("\nPunto di incontro: ").append(tipoVisita.getPuntoIncontro());
-            sb.append("\nData di svolgimento: ").append(v.getDataSvolgimento());
-            sb.append("\nOra d'inzio: ").append(tipoVisita.getOraInizio());
-            sb.append("\nEntrata libera: ").append(tipoVisita.getEntrataLibera() ? "Sì" : "No");
+            sb.append("Titolo: ").append(tipoVisita.titolo());
+            sb.append("\nLuogo: ").append(tipoVisita.luogo().getNome());
+            sb.append("\nDescrizione: ").append(tipoVisita.descrizione());
+            sb.append("\nPunto di incontro: ").append(tipoVisita.puntoIncontro());
+            sb.append("\nData di svolgimento: ").append(v.getDataSvolgimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            sb.append("\nOra d'inzio: ").append(tipoVisita.oraInizio());
+            sb.append("\nEntrata libera: ").append(tipoVisita.entrataLibera() ? "Sì" : "No");
             sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
+            if (mostraCodiciPrenotazione) {
+                sb.append("\nCodici prenotazione: ").append(codiciPrenotazinone.get(index).isEmpty() ? "Nessun iscritto" : codiciPrenotazinone.get(index));
+            }
         }
 
         visitaLabel.setText(sb.toString());

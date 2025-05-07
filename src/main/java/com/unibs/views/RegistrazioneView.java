@@ -8,32 +8,27 @@ import java.util.List;
 
 import static com.googlecode.lanterna.TerminalTextUtils.getWordWrappedText;
 
-public class LoginView {
+public class RegistrazioneView {
     private final TextBox usernameField;
     private final TextBox passwordField;
-    private final Label errorLabel;
-    private final Button loginButton;
-    private final Button registratiButton;
-    private final BasicWindow window;
+    private final TextBox confermaPasswordField;
+    private final com.googlecode.lanterna.gui2.Button registratiButton;
+    private final com.googlecode.lanterna.gui2.Label errorLabel;
     // Le successive due variabili sono equivalenti a window.getSize().get{Rows,Columns}()
     private int defaultWindowRows;
     private int defaultWindowCols;
+    final BasicWindow window;
 
-    public LoginView() {
+    public RegistrazioneView() {
         usernameField = new TextBox(new TerminalSize(18, 1));
         passwordField = new TextBox(new TerminalSize(18, 1)).setMask('*'); // Maschera la password
-        errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
-        loginButton = new Button("Accedi");
-        registratiButton = new Button("Registrati");
-        window = new BasicWindow("Login");
+        confermaPasswordField = new TextBox(new TerminalSize(18, 1)).setMask('*'); // Maschera la password
+        errorLabel = new com.googlecode.lanterna.gui2.Label("").setForegroundColor(TextColor.ANSI.RED);
+        registratiButton = new com.googlecode.lanterna.gui2.Button("Registrati");
+        window = new BasicWindow("Registrazione");
     }
 
-    public Button getRegistratiButton() {
-        return registratiButton;
-    }
-
-    private Window creaFinestra() {
-        resetLogin();
+    private void creaFinestra() {
         Panel panel = new Panel();
 
         panel.addComponent(new EmptySpace());
@@ -42,12 +37,15 @@ public class LoginView {
 
         panel.addComponent(new Label("Password"));
         panel.addComponent(passwordField);
+        panel.addComponent(new Label("Conferma password"));
+        panel.addComponent(confermaPasswordField);
 
         panel.addComponent(new EmptySpace());
-        panel.addComponent(loginButton);
         panel.addComponent(registratiButton);
+        panel.addComponent(new Button("Chiudi", window::close));
         panel.addComponent(new EmptySpace());
         panel.addComponent(errorLabel);
+
 
         TerminalSize defaultSize = panel.calculatePreferredSize().withRelative(4, 0);
         defaultWindowCols = defaultSize.getColumns();
@@ -56,14 +54,27 @@ public class LoginView {
         window.setHints(List.of(Window.Hint.CENTERED));
         window.setFixedSize(defaultSize);
         window.setComponent(panel);
-        return window;
     }
 
-    // Metodo per resettare la schermata di login
-    public void resetLogin() {
-        passwordField.setText("");
-        errorLabel.setText("");
-        usernameField.takeFocus();
+    public void mostra(WindowBasedTextGUI gui) {
+        creaFinestra();
+        gui.addWindowAndWait(window);
+    }
+
+    public Button getRegistratiButton() {
+        return registratiButton;
+    }
+
+    public String getUsername() {
+        return usernameField.getText();
+    }
+
+    public String getPassword() {
+        return passwordField.getText();
+    }
+
+    public String getConfermaPassword() {
+        return confermaPasswordField.getText();
     }
 
     // Questo metodo è diverso dal normale setLabel perche questa finestra ha una dimensione fisse "piccola"
@@ -77,22 +88,4 @@ public class LoginView {
     public void chiudi() {
         window.close();
     }
-
-    public void mostra(WindowBasedTextGUI gui) {
-        Window window = creaFinestra();
-        gui.addWindowAndWait(window);
-    }
-
-    public Button getLoginButton() {
-        return loginButton;
-    }
-
-    public String getUsername() {
-        return usernameField.getText();
-    }
-
-    public String getPassword() {
-        return passwordField.getText();
-    }
-
 }

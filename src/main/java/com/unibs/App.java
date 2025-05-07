@@ -5,10 +5,9 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.VirtualScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.unibs.controllers.LoginController;
+import com.unibs.models.AppService;
 import com.unibs.services.ServiceFactory;
 import com.unibs.utils.LoggerConfig;
-
-import java.io.IOException;
 
 public class App {
     public static void main(String[] args) {
@@ -26,11 +25,15 @@ public class App {
 
             ServiceFactory serviceFactory = new ServiceFactory();
 
+            // Prima di avviare la schermata accessibile all'utente, esegui tutte le operazioni relative alla giornata odierna sulla base di dati
+            AppService appService = new AppService(serviceFactory.getVisitaService());
+            appService.eseguiOperazioniGiornaliere();
+
             LoginController loginController = new LoginController(gui, serviceFactory);
             loginController.apriLogin(gui);
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 

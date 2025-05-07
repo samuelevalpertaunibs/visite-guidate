@@ -115,6 +115,16 @@ CREATE TABLE disponibilita
     FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
 );
 
+CREATE TABLE iscrizioni
+(
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    visita_id INT UNSIGNED NOT NULL,
+    fruitore_id INT UNSIGNED NOT NULL,
+    numero_iscritti INT UNSIGNED NOT NULL,
+    FOREIGN KEY (visita_id) REFERENCES visite (id) ON DELETE CASCADE,
+    FOREIGN KEY (fruitore_id) REFERENCES utenti (id) ON DELETE CASCADE
+);
+
 INSERT INTO giorni_settimana (`id`, `nome`)
 VALUES (1, 'Lunedì'),
        (2, 'Martedì'),

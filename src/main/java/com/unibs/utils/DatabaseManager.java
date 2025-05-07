@@ -39,14 +39,4 @@ public class DatabaseManager {
         return connection;
     }
 
-    public static void closeConnection() {
-        try {
-            if (connection != null) {
-                connection.close();
-                connection = null;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }

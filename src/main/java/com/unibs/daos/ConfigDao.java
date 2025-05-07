@@ -58,9 +58,9 @@ public class ConfigDao {
         String insertSql = "INSERT INTO comuni (nome, provincia, regione, config_id) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-            insertStmt.setString(1, comune.getNome());
-            insertStmt.setString(2, comune.getProvincia());
-            insertStmt.setString(3, comune.getRegione());
+            insertStmt.setString(1, comune.nome());
+            insertStmt.setString(2, comune.provincia());
+            insertStmt.setString(3, comune.regione());
             insertStmt.setInt(4, DEFAULT_CONFIG_ID);
             insertStmt.executeUpdate();
         }

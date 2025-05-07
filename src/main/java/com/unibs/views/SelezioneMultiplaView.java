@@ -1,12 +1,12 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.utils.SelezionabileConCheckbox;
+import com.unibs.utils.ElementoSelezionabile;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class SelezioneMultiplaView<T extends SelezionabileConCheckbox> {
+public class SelezioneMultiplaView<T extends ElementoSelezionabile> {
     // elementi lo tengo come List perche un Set perde l'ordine, e invece potrebbe essere rilevante nella view
     private final List<T> elementi;
     private Window window;

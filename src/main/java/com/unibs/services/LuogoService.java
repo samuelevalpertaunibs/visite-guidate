@@ -84,25 +84,6 @@ public class LuogoService {
         }
     }
 
-    public Optional<Luogo> findById(int id) throws DatabaseException {
-        try {
-            Optional<Luogo> optionalLuogo = luogoDao.findById(id);
-
-            if (optionalLuogo.isPresent()) {
-                Luogo luogo = optionalLuogo.get();
-                Comune comune = comuneService.findById(luogo.getComuneId());
-                luogo.setComune(comune);
-                return Optional.of(luogo);
-            }
-
-            return Optional.empty();
-
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante il recupero del luogo per id: " + id, e);
-            throw new DatabaseException("Errore durante il recupero del luogo.");
-        }
-    }
-
     public void rimuoviById(Integer id) {
         try {
             luogoDao.rimuovi(id);

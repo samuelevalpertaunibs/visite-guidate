@@ -36,16 +36,12 @@ public class Luogo {
                 nome, descrizione, comune.toString());
     }
 
-    public String getNomeComune() {
-        return comune.getNome();
-    }
-
     public void setComune(Comune comune) {
         this.comune = comune;
     }
 
     public int getComuneId() {
-        return comune.getId();
+        return comune.id();
     }
 
     public void setId(int id) {

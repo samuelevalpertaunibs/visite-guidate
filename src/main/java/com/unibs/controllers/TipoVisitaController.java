@@ -158,11 +158,11 @@ public class TipoVisitaController {
     }
 
     private void apriSelezionaComune(Button button) {
-        SelezionaComuneView selezionaComuneView = new SelezionaComuneView();
+        SelezionaElementoView<Comune> selezionaComuneView = new SelezionaElementoView<>();
         try {
             List<Comune> comuni = configService.getAmbitoTerritoriale();
-            comuneSelezionato = selezionaComuneView.mostra(gui, comuni);
-            button.setLabel(comuneSelezionato.getNome());
+            comuneSelezionato = selezionaComuneView.mostra(gui, comuni, "Seleziona un comune");
+            button.setLabel(comuneSelezionato.nome());
             aggiungiLuogoView.focusAggiungiLuogoButton();
         } catch (DatabaseException e) {
             aggiungiLuogoView.mostraErrore(e.getMessage());
@@ -344,7 +344,7 @@ public class TipoVisitaController {
     }
 
     public void associaNuoviVolontari() {
-        SelezionaTipoVisitaView view = new SelezionaTipoVisitaView("Seleziona tipo visita a cui assciare nuovi volontari");
+        SelezionaTipoVisitaView view = new SelezionaTipoVisitaView("Seleziona tipo visita a cui associare nuovi volontari");
         view.setTitoliTipiVisita(tipoVisitaService.getAllTitoli());
         view.setOnTipoVisitaSelected(titolo -> {
             try {
@@ -371,6 +371,10 @@ public class TipoVisitaController {
             }
             SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList());
             volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, new HashSet<>(), "Seleziona i volontari da associare al tipo di visita");
+            if (volontariSelezionati.isEmpty()) {
+                new PopupChiudi(gui).mostra("", "Nessun volontario aggiunto.");
+                return;
+            }
             volontarioService.associaATipoVisita(volontariSelezionati, tipoVisitaId);
             new PopupChiudi(gui).mostra("", "I volontari sono stati associati correttamente.");
         } catch (Exception e) {

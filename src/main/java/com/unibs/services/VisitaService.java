@@ -1,12 +1,10 @@
 package com.unibs.services;
 
 import com.unibs.daos.VisitaDao;
-import com.unibs.models.Giorno;
-import com.unibs.models.TipoVisita;
-import com.unibs.models.Visita;
-import com.unibs.models.Volontario;
+import com.unibs.models.*;
 import com.unibs.utils.DatabaseException;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -14,12 +12,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class VisitaService {
+    private static final Logger LOGGER = Logger.getLogger(VisitaService.class.getName());
     private final VisitaDao visitaDao = new VisitaDao();
     private final TipoVisitaService tipoVisitaService;
     private final ConfigService configService;
     private final VolontarioService volontarioService;
     private final GiornoService giornoService;
-    private static final Logger LOGGER = Logger.getLogger(VisitaService.class.getName());
 
     public VisitaService(TipoVisitaService tipoVisitaService, ConfigService configService, VolontarioService volontarioService, GiornoService giornoService) {
         this.tipoVisitaService = tipoVisitaService;
@@ -28,9 +26,27 @@ public class VisitaService {
         this.giornoService = giornoService;
     }
 
-    public List<Visita> getVisitePreview(Visita.StatoVisita stato) throws DatabaseException {
+    public List<Visita> getVisitePreviewByStato(Visita.StatoVisita stato) throws DatabaseException {
         try {
             return visitaDao.getVisitePreview(stato);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite", e);
+            throw new DatabaseException("Impossibile recuperare le visite.");
+        }
+    }
+
+    public List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, String nomeFruitore) throws DatabaseException {
+        try {
+            return visitaDao.getVisitePreviewByFruitore(stato, nomeFruitore);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite", e);
+            throw new DatabaseException("Impossibile recuperare le visite.");
+        }
+    }
+
+    public List<Visita> getVisitePreviewByVolontario(Visita.StatoVisita stato, Volontario volontario) throws DatabaseException {
+        try {
+            return visitaDao.getVisitePreviewByVolontario(stato, volontario.getUsername());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite", e);
             throw new DatabaseException("Impossibile recuperare le visite.");
@@ -45,7 +61,7 @@ public class VisitaService {
         Map<TipoVisita, Set<LocalDate>> dateOccupateTipoVisita = new HashMap<>();
 
         for (TipoVisita tipoVisita : tipiVisite) {
-            for (Volontario volontario : tipoVisita.getVolontari()) {
+            for (Volontario volontario : tipoVisita.volontari()) {
                 int volontarioId = volontario.getId();
                 List<LocalDate> disponibilita = volontarioService.getDateDisponibiliByMese(volontario, meseTarget);
 
@@ -56,7 +72,7 @@ public class VisitaService {
                     Giorno giornoSettimana = giornoService.fromDayOfWeek(data.getDayOfWeek());
 
                     // Skip se il giorno non è valido per il tipoVisita
-                    if (!tipoVisita.getGiorni().contains(giornoSettimana)) continue;
+                    if (!tipoVisita.giorni().contains(giornoSettimana)) continue;
 
                     Set<LocalDate> occupateTipo = dateOccupateTipoVisita.get(tipoVisita);
                     Set<LocalDate> occupateVolontario = dateOccupateVolontario.get(volontarioId);
@@ -65,7 +81,7 @@ public class VisitaService {
                     if (occupateTipo.contains(data) || occupateVolontario.contains(data)) continue;
 
                     // Assegna la visita
-                    Visita visita = new Visita(tipoVisita, data, volontario);
+                    Visita visita = new Visita(null, tipoVisita, data, volontario);
                     visitePerVolontario.computeIfAbsent(volontarioId, k -> new HashSet<>()).add(visita);
 
                     occupateTipo.add(data);
@@ -94,9 +110,113 @@ public class VisitaService {
         try {
             visitaDao.rimuoviDisponibilita();
         } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione delle vecchie disponibilità: ", e);
-                throw new DatabaseException("Errore durante la rimozione delle disponibilità.");
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione delle vecchie disponibilità: ", e);
+            throw new DatabaseException("Errore durante la rimozione delle disponibilità.");
+        }
+
+    }
+
+    public int getIscrizioniRimanentiById(Integer id) {
+        try {
+            return visitaDao.getIscrizioniRimanentiById(id);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il calcolo dei posti disponibili per visita con id: " + id, e);
+            throw new DatabaseException("Errore durante il calcolo dei posti disponibili.");
+        }
+    }
+
+    public List<String> getCodiciPrenotazioneFruitorePerVista(String nomeFruitore, Integer idVisita) {
+        try {
+            return visitaDao.getCodiciPrenotazioneFruitorePerVista(nomeFruitore, idVisita);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle prenotazioni per: " + nomeFruitore, e);
+            throw new DatabaseException("Errore durante il recupero delle prenotazioni.");
+        }
+    }
+
+    public void disdici(Fruitore fruitore, Integer codiceIscrizione) {
+        try {
+            if (!fruitore.getId().equals(visitaDao.getIdFruitoreByIdIscrizione(codiceIscrizione))) {
+                throw new IllegalArgumentException("Nessuna iscrizione trovata con questo codice per il tuo utente");
             }
 
+            visitaDao.disdiciIscrizione(codiceIscrizione);
+
+            Integer visitaId = visitaDao.getIdVisitaByIdIscrizione(codiceIscrizione);
+
+            // Se la visita era al completo, dopo l'iscrizione torna proposta
+            if (visitaDao.getStatoById(visitaId) == Visita.StatoVisita.COMPLETA) {
+                visitaDao.setStatoById(visitaId, Visita.StatoVisita.PROPOSTA.name());
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero della prenotazione.", e);
+            throw new DatabaseException("Impossibile recuperare l'iscrizione.");
+        }
+    }
+
+    public List<String> getCodiciPrenotazionePerVista(Volontario volontario, Integer id) throws DatabaseException {
+        try {
+            return visitaDao.getCodiciPrenotazionePerVista(volontario.getUsername(), id);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle prenotazioni per: " + volontario.getUsername(), e);
+            throw new DatabaseException("Errore durante il recupero delle prenotazioni.");
+        }
+    }
+
+    public void chiudiIscrizioneVisiteComplete() throws DatabaseException {
+        try {
+            List<Integer> idVisiteComplete = visitaDao.getIdVisiteCompleteDaChiudere();
+            for (Integer idVisita : idVisiteComplete) {
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite complete.", e);
+            throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite complete.");
+        }
+    }
+
+    public void chiudiIscrizioneVisiteDaFare() throws DatabaseException {
+        try {
+            List<Integer> idVisiteDaFare = visitaDao.getIdVisiteDaFare();
+            for (Integer idVisita : idVisiteDaFare) {
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti raggiunto.", e);
+            throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite proposte.");
+        }
+    }
+
+    public void chiudiIscrizioneVisitaDaCancellare() throws DatabaseException {
+        try {
+            List<Integer> idVisiteDaCancellare = visitaDao.getIdVisiteDaCancellare();
+            for (Integer idVisita : idVisiteDaCancellare) {
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CANCELLATA.name());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti non raggiunto.", e);
+            throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite proposte.");
+        }
+    }
+
+    public void generaVisiteEffettuate() {
+        try {
+            List<Integer> idVisiteDaRendereEffettuate = visitaDao.getIdVisiteDaRendereEffettuate();
+            for (Integer idVisita : idVisiteDaRendereEffettuate) {
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.EFFETTUATA.name());
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante  la generazione delle visite effettuate.", e);
+            throw new DatabaseException("Errore durante la generazione delle visite effettuate.");
+        }
+    }
+
+    public void rimuoviVisiteCancellate() {
+        try {
+            visitaDao.rimuoviVisiteCancellate();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione delle visite cancellate.", e);
+            throw new DatabaseException("Errore durante la rimozione delle visite cancellate.");
+        }
     }
 }

@@ -5,7 +5,6 @@ import com.unibs.daos.ComuneDao;
 import com.unibs.models.Comune;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,15 +24,6 @@ public class ComuneService {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero del comune con ID " + id, e);
             throw new DatabaseException("Errore durante il recupero del comune dal database.", e);
-        }
-    }
-
-    public ArrayList<Comune> findAll() {
-        try {
-            return comuneDao.findAll();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero di tutti i comuni", e);
-            throw new DatabaseException("Errore durante il recupero dei comuni dal database.");
         }
     }
 

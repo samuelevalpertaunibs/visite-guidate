@@ -20,7 +20,7 @@ public class VolontarioService {
     private final TipoVisitaService tipoVisitaService;
     private final GiornoService giornoService;
     private final DatePrecluseService datePrecluseService;
-    UtenteDao utenteDao = new UtenteDao();
+    final UtenteDao utenteDao = new UtenteDao();
 
     public VolontarioService(TipoVisitaService tipoVisitaService, GiornoService giornoService, DatePrecluseService datePrecluseService) {
         this.tipoVisitaService = tipoVisitaService;
@@ -45,8 +45,8 @@ public class VolontarioService {
             Set<LocalDate> datePrecluse = datePrecluseService.findByMonth(mese);
             for (TipoVisita visita : tipoVisitaService.findByVolontario(volontarioId)) {
 
-                LocalDate start = visita.getDataInizio();
-                LocalDate end = visita.getDataFine();
+                LocalDate start = visita.dataInizio();
+                LocalDate end = visita.dataFine();
 
                 Set<Giorno> giorni = visita.getGiorniSettimana();
 

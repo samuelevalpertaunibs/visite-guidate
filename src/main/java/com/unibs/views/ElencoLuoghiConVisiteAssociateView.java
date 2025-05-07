@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ElencoLuoghiConVisiteAssociateView {
     Panel panel;
-    ArrayList<Component> components = new ArrayList<>();
+    final ArrayList<Component> components = new ArrayList<>();
 
     private Window creaFinestra() {
         Window window = new BasicWindow("Visualizza Elenco Volontari");

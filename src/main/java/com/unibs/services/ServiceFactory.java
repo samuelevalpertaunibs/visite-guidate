@@ -9,6 +9,7 @@ public class ServiceFactory {
     private VisitaService visitaService;
     private DatePrecluseService datePrecluseService;
     private LoginService loginService;
+    private FruitoreService fruitoreService;
 
     public LuogoService getLuogoService() {
         if (luogoService == null) {
@@ -71,5 +72,12 @@ public class ServiceFactory {
             tipoVisitaService.setVolontarioService(volontarioService);
         }
         return volontarioService;
+    }
+
+    public FruitoreService getFruitoreService() {
+        if (fruitoreService == null) {
+            fruitoreService = new FruitoreService(getConfigService(), getVisitaService());
+        }
+        return fruitoreService;
     }
 }
