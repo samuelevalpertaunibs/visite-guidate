@@ -59,7 +59,7 @@ CREATE TABLE tipi_visita
 CREATE TABLE ruoli
 (
     id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nome ENUM ('CONF', 'VOL') NOT NULL UNIQUE
+    nome ENUM ('CONF', 'VOL', 'FRU') NOT NULL UNIQUE
 );
 
 CREATE TABLE utenti
@@ -117,12 +117,53 @@ CREATE TABLE disponibilita
 
 CREATE TABLE iscrizioni
 (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    visita_id INT UNSIGNED NOT NULL,
-    fruitore_id INT UNSIGNED NOT NULL,
+    id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    visita_id       INT UNSIGNED NOT NULL,
+    fruitore_id     INT UNSIGNED NOT NULL,
     numero_iscritti INT UNSIGNED NOT NULL,
     FOREIGN KEY (visita_id) REFERENCES visite (id) ON DELETE CASCADE,
     FOREIGN KEY (fruitore_id) REFERENCES utenti (id) ON DELETE CASCADE
+);
+
+CREATE TABLE rimozioni_luoghi
+(
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    luogo_id       INT UNSIGNED NOT NULL,
+    mese_rimozione INT          NOT NULL,
+    FOREIGN KEY (luogo_id) REFERENCES luoghi (id) ON DELETE CASCADE
+);
+
+CREATE TABLE rimozioni_tv
+(
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tv_id          INT UNSIGNED NOT NULL,
+    mese_rimozione INT          NOT NULL,
+    FOREIGN KEY (tv_id) REFERENCES tipi_visita (id) ON DELETE CASCADE
+);
+
+CREATE TABLE rimozioni_volontari
+(
+    id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    volontario_id  INT UNSIGNED NOT NULL,
+    mese_rimozione INT          NOT NULL,
+    FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
+);
+
+CREATE TABLE archivio
+(
+    id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    titolo              VARCHAR(64)         NOT NULL,
+    descrizione         VARCHAR(512)        NOT NULL,
+    indirizzo_incontro  VARCHAR(64)         NOT NULL,
+    comune_incontro     VARCHAR(64)         NOT NULL,
+    provincia_incontro  VARCHAR(64)         NOT NULL,
+    ora_inizio          TIME                NOT NULL,
+    durata_minuti       INT                 NOT NULL,
+    entrata_libera      TINYINT(1)          NOT NULL,
+    luogo_nome          VARCHAR(64)         NOT NULL,
+    data_svolgimento    DATE                NOT NULL,
+    stato               ENUM ('EFFETTUATA') NOT NULL,
+    username_volontario VARCHAR(32)         NOT NULL
 );
 
 INSERT INTO giorni_settimana (`id`, `nome`)
@@ -137,7 +178,7 @@ VALUES (1, 'Lunedì'),
 INSERT INTO ruoli (`id`, `nome`)
 VALUES (1, 'CONF'),
        (2, 'VOL'),
-       (3,'FRUITORE');
+       (3, 'FRU');
 
 INSERT INTO `utenti` (`username`, `password_hash`, `salt`, `ruolo_id`, `last_login`)
 VALUES ('conf', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e', 0xb58f6b3d21a3058fd90df2e8f8f1afc0,

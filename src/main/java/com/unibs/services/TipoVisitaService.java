@@ -25,14 +25,14 @@ public class TipoVisitaService {
     private final GiornoService giornoService;
     private VolontarioService volontarioService;
 
-    public TipoVisitaService(LuogoService luogoService, GiornoService giornoService) {
+    public TipoVisitaService(GiornoService giornoService) {
         this.tipoVisitaDao = new TipoVisitaDao();
         this.giornoService = giornoService;
     }
 
-    public TipoVisita aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
-                                         String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti,
-                                         String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
+    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
+                                   String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti,
+                                   String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
         if (titolo == null || titolo.isEmpty())
             throw new IllegalStateException("Il campo Titolo non può essere vuoto");
         if (tipoVisitaDao.esisteConTitolo(titolo))
@@ -119,11 +119,9 @@ public class TipoVisitaService {
 
         // Controlli fatti, aggiungere al DB
         try {
-            int tipoVisitaId = tipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
+            tipoVisitaDao.aggiungiVisita(titolo, descrizione, dataInizio, dataFine,
                     oraInizio, durataMinuti, entrataLibera, numeroMin,
                     numeroMax, luogoSelezionato, volontariIds, giorniIds, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
-            PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
-            return new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numeroMin, numeroMax, luogoSelezionato, puntoIncontro, giorni, volontari);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del tipo di visita", e);
             if ("23000" .equals(e.getSQLState()) && e.getErrorCode() == 1062) {
@@ -275,33 +273,44 @@ public class TipoVisitaService {
         }
     }
 
-    public void rimuoviByTitolo(String titolo) {
-        try {
-            tipoVisitaDao.rimuovi(titolo);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la rimozione del tipo di visita con titolo: " + titolo, e);
-            throw new DatabaseException("Errore durante la rimozione del tipo di visita.");
-        }
-    }
-
-    public void rimuoviNonAssociati() {
-        try {
-            List<String> tvNonAssociati = tipoVisitaDao.getTitoliNonAssociati();
-            for (String tv : tvNonAssociati) {
-                tipoVisitaDao.rimuovi(tv);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei tipi di visita non associati", e);
-            throw new DatabaseException("Impossibile rimuovere i tipi di visita non associati ad alcun volontario.");
-        }
-    }
-
     public Optional<Integer> getIdByNome(String tv) throws DatabaseException {
         try {
             return tipoVisitaDao.getIdByNome(tv);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero del tipo di visita con nome" + tv, e);
             throw new DatabaseException("Impossibile recuperare il tipo di visita.");
+        }
+    }
+
+    public void applicaRimozioneTipiVisita() throws DatabaseException {
+        try {
+            tipoVisitaDao.applicaRimozioneTipiVisita();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei tipi di visita eliminati", e);
+            throw new DatabaseException("Impossibile rimuovere i tipi di visita eliminati.");
+        }
+    }
+
+    public void inserisciTVDaRimuovere(String titolo) throws DatabaseException {
+        try {
+            int id = tipoVisitaDao.getIdByNome(titolo).orElseThrow(Exception::new);
+            tipoVisitaDao.inserisciTVDaRimuovere(id);
+            tipoVisitaDao.termina(id);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione del tipo di visita.", e);
+            throw new DatabaseException("Impossibile rimuovere il tipo di visita.");
+        }
+    }
+
+    public void rimuoviNonAssociati() throws DatabaseException {
+        try {
+            List<String> titoli = tipoVisitaDao.getTitoliNonAssociati();
+            for (String titolo : titoli) {
+                tipoVisitaDao.rimuovi(titolo);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione del tipo di visita.", e);
+            throw new DatabaseException("Impossibile cancellare un tipo di visita..");
         }
     }
 }

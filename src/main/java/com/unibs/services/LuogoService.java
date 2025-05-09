@@ -84,15 +84,6 @@ public class LuogoService {
         }
     }
 
-    public void rimuoviById(Integer id) {
-        try {
-            luogoDao.rimuovi(id);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la rimozione del luogo per id: " + id, e);
-            throw new DatabaseException("Errore durante la rimozione del luogo.");
-        }
-    }
-
     public void rimuoviNonAssociati() {
         try {
             List<Integer> luoghiNonAssociati = luogoDao.getIdNonAssociati();
@@ -104,4 +95,24 @@ public class LuogoService {
             throw new DatabaseException("Impossibile rimuovere i volontari non associati ad alcuna visita.");
         }
     }
+
+    public void applicaRimozioneLuoghi() {
+        try {
+            luogoDao.applicaRimozioneLuoghi();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei luoghi eliminati", e);
+            throw new DatabaseException("Impossibile rimuovere i luoghi eliminati.");
+        }
+    }
+
+    public void inserisciLuogoDaRimuovere(Integer idLuogo) {
+        try {
+            luogoDao.inserisciLuogoDaRimuovere(idLuogo);
+            luogoDao.terminaTVAssociatiAlLuogo(idLuogo);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei luoghi eliminati", e);
+            throw new DatabaseException("Impossibile rimuovere il luogo selezionato.");
+        }
+    }
+
 }

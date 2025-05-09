@@ -27,6 +27,9 @@ public class ConfiguratoreController implements IUserController {
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
     final List<MenuOption> menuOptions = new ArrayList<>();
+    private final VolontarioService volontarioService;
+    private final LuogoService luogoService;
+    private final TipoVisitaService tipoVisitaService;
     MenuOption creaPianoOption;
     MenuView operazioniSupplementariMenu;
 
@@ -48,12 +51,15 @@ public class ConfiguratoreController implements IUserController {
         DatePrecluseService datePrecluseService = serviceFactory.getDatePrecluseService();
         TipoVisitaService tipoVisitaService = serviceFactory.getTipoVisitaService();
 
-        this.luogoController = new LuogoController(gui, luogoService, volontarioService);
+        this.luogoController = new LuogoController(gui, luogoService);
         this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
         this.visitaController = new VisitaController(gui, visitaService, configService);
         this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
         this.configController = new ConfigController(gui, configService);
         this.menuView = new MenuView(gui);
+        this.volontarioService = volontarioService;
+        this.luogoService = luogoService;
+        this.tipoVisitaService = tipoVisitaService;
     }
 
 
@@ -99,6 +105,8 @@ public class ConfiguratoreController implements IUserController {
     }
 
     private void incrementaPeriodoCorrente() {
+        applicaRimozioni();
+
         Boolean isPianoCreato = visitaController.apriCreazionePiano();
 
         // Se il piano era gia stato creato
@@ -126,6 +134,15 @@ public class ConfiguratoreController implements IUserController {
                 operazioniSupplementariMenu.mostraMenu(subMenuOptions, "Operazioni supplementari", false);
             }
         }
+    }
+
+    public void applicaRimozioni() {
+        luogoService.applicaRimozioneLuoghi();
+        tipoVisitaService.applicaRimozioneTipiVisita();
+        volontarioService.applicaRimozioneVolontari();
+        luogoService.rimuoviNonAssociati();
+        tipoVisitaService.rimuoviNonAssociati();
+        volontarioService.rimuoviNonAssociati();
     }
 
     private void associaAltriVolontari() {

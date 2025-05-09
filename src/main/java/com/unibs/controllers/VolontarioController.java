@@ -68,7 +68,7 @@ public class VolontarioController implements IUserController {
 
     public void apriVisualizzaVisite() {
         elencoVisiteView = new ElencoVisiteView("Visualizza elenco visite a cui sei associato", true);
-        List<Visita.StatoVisita> statiDaMostrare = List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.CANCELLATA);
+        List<Visita.StatoVisita> statiDaMostrare = List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.COMPLETA, Visita.StatoVisita.CANCELLATA);
         initElencoVisiteConIscrizioneViewListener(statiDaMostrare);
         elencoVisiteView.mostra(gui);
     }

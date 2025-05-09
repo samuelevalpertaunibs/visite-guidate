@@ -17,10 +17,10 @@ import java.util.Optional;
 
 public class TipoVisitaDao {
 
-    public int aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
-                              LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
-                              Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro,
-                              String comunePuntoIncontro, String provinciaPuntoIncontro) throws SQLException {
+    public void aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
+                               LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
+                               Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro,
+                               String comunePuntoIncontro, String provinciaPuntoIncontro) throws SQLException {
 
         Connection conn = null;
         try {
@@ -31,7 +31,6 @@ public class TipoVisitaDao {
             inserisciVolontari(conn, tipoVisitaId, volontariIds);
             inserisciGiorni(conn, tipoVisitaId, giorniIds);
             conn.commit();
-            return tipoVisitaId;
         } catch (SQLException e) {
             rollbackSilenzioso(conn);
             throw e;
@@ -422,5 +421,44 @@ public class TipoVisitaDao {
 
         }
         return Optional.empty();
+    }
+
+    public void inserisciTVDaRimuovere(int id) throws SQLException {
+        String sql = "INSERT INTO rimozioni_tv (tv_id, mese_rimozione) VALUES (?, (SELECT MONTH(periodo_corrente) + 2 FROM config))";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void applicaRimozioneTipiVisita() throws SQLException {
+        String sql = "DELETE FROM tipi_visita WHERE id IN (SELECT tv_id FROM rimozioni_tv WHERE mese_rimozione = (SELECT MONTH(periodo_corrente) + 1 FROM config))";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.executeUpdate();
+        }
+    }
+
+    public void termina(int id) throws SQLException {
+        String sql = """
+                    UPDATE tipi_visita
+                    SET data_fine = (
+                        SELECT LAST_DAY(DATE_ADD(periodo_corrente, INTERVAL 1 MONTH))
+                        FROM config
+                    )
+                    WHERE id = ?
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
     }
 }

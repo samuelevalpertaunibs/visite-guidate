@@ -202,7 +202,8 @@ public class VisitaService {
         try {
             List<Integer> idVisiteDaRendereEffettuate = visitaDao.getIdVisiteDaRendereEffettuate();
             for (Integer idVisita : idVisiteDaRendereEffettuate) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.EFFETTUATA.name());
+                visitaDao.archiviaVisita(idVisita);
+                visitaDao.rimuoviById(idVisita);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante  la generazione delle visite effettuate.", e);
@@ -210,12 +211,21 @@ public class VisitaService {
         }
     }
 
-    public void rimuoviVisiteCancellate() {
+    public void rimuoviVisiteCancellate() throws DatabaseException {
         try {
             visitaDao.rimuoviVisiteCancellate();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione delle visite cancellate.", e);
             throw new DatabaseException("Errore durante la rimozione delle visite cancellate.");
+        }
+    }
+
+    public List<Visita> getVisiteFromArchivio() throws DatabaseException {
+        try {
+            return visitaDao.getVisiteFromArchivio();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite nell'archivio.", e);
+            throw new DatabaseException("Errore durante il recupero delle visite nell'archivio.");
         }
     }
 }

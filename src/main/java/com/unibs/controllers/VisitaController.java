@@ -32,7 +32,12 @@ public class VisitaController {
     private void initElencoVisiteViewListener(List<Visita.StatoVisita> stati) {
         try {
             elencoVisiteView.setStati(stati, stato -> {
-                List<Visita> visite = visitaService.getVisitePreviewByStato(stato);
+                List<Visita> visite;
+                if (stato != Visita.StatoVisita.EFFETTUATA) {
+                    visite = visitaService.getVisitePreviewByStato(stato);
+                } else {
+                    visite = visitaService.getVisiteFromArchivio();
+                }
                 elencoVisiteView.aggiornaVisite(visite, stato);
             });
         } catch (Exception e) {

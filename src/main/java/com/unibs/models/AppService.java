@@ -8,6 +8,7 @@ public class AppService {
     public AppService(VisitaService visitaService) {
         this.visitaService = visitaService;
     }
+
     public void eseguiOperazioniGiornaliere() throws Exception {
         try {
             //Alla chiusura delle iscrizioni, cioè

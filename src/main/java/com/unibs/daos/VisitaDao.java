@@ -482,17 +482,17 @@ public class VisitaDao {
     public List<Integer> getIdVisiteDaCancellare() throws SQLException {
         List<Integer> idVisite = new ArrayList<>();
         String sql = """
-                SELECT v.id
-                                           FROM visite v
-                                           JOIN tipi_visita tv ON tv.id = v.tipo_visita_id
-                                           WHERE v.stato = 'PROPOSTA'
-                                             AND v.data_svolgimento <= ?
-                                             AND (
-                                               SELECT COALESCE(SUM(i.numero_iscritti), 0)
-                                               FROM iscrizioni i
-                                               WHERE i.visita_id = v.id
-                                             ) < tv.num_min_partecipanti
-            """;
+                    SELECT v.id
+                                               FROM visite v
+                                               JOIN tipi_visita tv ON tv.id = v.tipo_visita_id
+                                               WHERE v.stato = 'PROPOSTA'
+                                                 AND v.data_svolgimento <= ?
+                                                 AND (
+                                                   SELECT COALESCE(SUM(i.numero_iscritti), 0)
+                                                   FROM iscrizioni i
+                                                   WHERE i.visita_id = v.id
+                                                 ) < tv.num_min_partecipanti
+                """;
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -531,6 +531,45 @@ public class VisitaDao {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(DateService.today()));
 
+            stmt.executeUpdate();
+        }
+    }
+
+    // TODO
+    public List<Visita> getVisiteFromArchivio() {
+        String sql = "SELECT * FROM archivio_storico";
+        return null;
+    }
+
+    public void rimuoviById(Integer idVisita) throws SQLException {
+        String sql = "DELETE FROM visite WHERE id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idVisita);
+
+            stmt.executeUpdate();
+        }
+    }
+
+    public void archiviaVisita(Integer idVisita) throws SQLException {
+        String sql = "INSERT INTO archivio (" +
+                "titolo, descrizione, indirizzo_incontro, comune_incontro, provincia_incontro, " +
+                "ora_inizio, durata_minuti, entrata_libera, luogo_nome, data_svolgimento, stato, username_volontario" +
+                ") " +
+                "SELECT tv.titolo, tv.descrizione, tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro, " +
+                "tv.ora_inizio, tv.durata_minuti, tv.entrata_libera, l.nome, v.data_svolgimento, ?, u.username " +
+                "FROM visite v " +
+                "JOIN tipi_visita tv ON v.tipo_visita_id = tv.id " +
+                "JOIN utenti u ON v.volontario_id = u.id " +
+                "JOIN luoghi l ON tv.luogo_id = l.id " +
+                "WHERE v.id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, Visita.StatoVisita.EFFETTUATA.name());
+            stmt.setInt(2, idVisita);
             stmt.executeUpdate();
         }
     }

@@ -12,6 +12,8 @@ public class InserisciDisponibilitaView {
     private final CheckBoxList<WrappedDate> listaDate;
     private final Button salvaButton;
     private BasicWindow window;
+    private Label titleLabel;
+
     public InserisciDisponibilitaView() {
         listaDate = new CheckBoxList<>();
         salvaButton = new Button("Salva");
@@ -27,7 +29,9 @@ public class InserisciDisponibilitaView {
 
         Panel panel = new Panel(new LinearLayout(Direction.VERTICAL));
 
-        panel.addComponent(new Label("Seleziona le tue disponibilità:"));
+        titleLabel = new Label("Seleziona le tue disponibilità:");
+        panel.addComponent(titleLabel);
+
         panel.addComponent(listaDate);
 
         panel.addComponent(salvaButton);
@@ -42,6 +46,11 @@ public class InserisciDisponibilitaView {
 
     public void setDateDisponibili(List<LocalDate> dateDisponibili) {
         listaDate.clearItems();
+        if (dateDisponibili.isEmpty()) {
+            titleLabel.setText("Nessuna data selezionabile.");
+            salvaButton.setEnabled(false);
+            return;
+        }
         for (LocalDate data : dateDisponibili) {
             listaDate.addItem(new WrappedDate(data));
         }

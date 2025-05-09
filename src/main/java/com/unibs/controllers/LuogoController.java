@@ -2,19 +2,16 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.LuogoService;
-import com.unibs.services.VolontarioService;
 import com.unibs.views.ElencoLuoghiView;
 import com.unibs.views.RimuoviLuogoView;
 import com.unibs.views.components.PopupChiudi;
 
 public class LuogoController {
     private final LuogoService luogoService;
-    private final VolontarioService volontarioService;
     private final WindowBasedTextGUI gui;
 
-    protected LuogoController(WindowBasedTextGUI gui, LuogoService luogoService, VolontarioService volontarioService) {
+    protected LuogoController(WindowBasedTextGUI gui, LuogoService luogoService) {
         this.luogoService = luogoService;
-        this.volontarioService = volontarioService;
         this.gui = gui;
     }
 
@@ -27,9 +24,8 @@ public class LuogoController {
         view.setLuoghi(luogoService.findAll());
         view.setOnLuogoSelected(idLuogo -> {
             try {
-                luogoService.rimuoviById(idLuogo);
-                volontarioService.rimuoviNonAssociati();
-                new PopupChiudi(gui).mostra("", "Il luogo è stato rimosso con successo");
+                luogoService.inserisciLuogoDaRimuovere(idLuogo);
+                new PopupChiudi(gui).mostra("", "Il luogo verrà rimosso con successo");
             } catch (Exception e) {
                 new PopupChiudi(gui).mostra("Errore", e.getMessage());
             } finally {
@@ -38,4 +34,5 @@ public class LuogoController {
         });
         view.mostra(gui);
     }
+
 }

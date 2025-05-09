@@ -290,10 +290,8 @@ public class TipoVisitaController {
         view.setTitoliTipiVisita(tipoVisitaService.getAllTitoli());
         view.setOnTipoVisitaSelected(titolo -> {
             try {
-                tipoVisitaService.rimuoviByTitolo(titolo);
-                luogoService.rimuoviNonAssociati();
-                volontarioService.rimuoviNonAssociati();
-                new PopupChiudi(gui).mostra("", "Il tipo di visita è stato rimosso con successo");
+                tipoVisitaService.inserisciTVDaRimuovere(titolo);
+                new PopupChiudi(gui).mostra("", "Il tipo di visita verrà rimosso con successo");
             } catch (Exception e) {
                 new PopupChiudi(gui).mostra("Errore", e.getMessage());
             } finally {
@@ -309,10 +307,8 @@ public class TipoVisitaController {
         view.setVolontari(nomi);
         view.setOnVolontarioSelected(nome -> {
             try {
-                volontarioService.rimuoviByNome(nome);
-                tipoVisitaService.rimuoviNonAssociati();
-                luogoService.rimuoviNonAssociati();
-                new PopupChiudi(gui).mostra("", "Il volontario è stato rimosso con successo");
+                volontarioService.inserisciVolontarioDaRimuovere(nome);
+                new PopupChiudi(gui).mostra("", "Il volontario verrà rimosso con successo");
             } catch (Exception e) {
                 new PopupChiudi(gui).mostra("Errore", e.getMessage());
             } finally {

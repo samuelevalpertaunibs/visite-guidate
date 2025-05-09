@@ -111,15 +111,6 @@ public class VolontarioService {
         }
     }
 
-    public void rimuoviByNome(String nome) {
-        try {
-            utenteDao.rimuovi(nome);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante la rimozione del volontario per nome: " + nome, e);
-            throw new DatabaseException("Errore durante la rimozione del volontario.");
-        }
-    }
-
     public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
         try {
             return utenteDao.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
@@ -137,6 +128,27 @@ public class VolontarioService {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore durante l'associazione dei volontari", e);
             throw new DatabaseException("Errore durante l'associazione dei volontari.");
+        }
+    }
+
+    public void applicaRimozioneVolontari() throws DatabaseException {
+            try {
+                utenteDao.applicaRimozioneVolontari();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei volontari eliminati", e);
+                throw new DatabaseException("Impossibile rimuovere i volontari eliminati.");
+            }
+
+    }
+
+    public void inserisciVolontarioDaRimuovere(String nome) throws DatabaseException {
+        try {
+            int id = utenteDao.getIdByUsername(nome).orElseThrow(Exception::new);
+            utenteDao.inserisciVolontarioDaRimuovere(id);
+            utenteDao.terminaTVAssociatiAlVolontario(id);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione del tipo di visita.", e);
+            throw new DatabaseException("Impossibile rimuovere il tipo di visita.");
         }
     }
 }

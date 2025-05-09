@@ -94,11 +94,11 @@ public class FruitoreController implements IUserController {
     }
 
     private void apriVisualizzaTutteVisite() {
-        visitaController.apriVisualizzaVisitePerTipologia(List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.CANCELLATA));
+        visitaController.apriVisualizzaVisitePerTipologia(List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.COMPLETA, Visita.StatoVisita.CANCELLATA));
     }
 
     private void apriVisiteConIscrizione() {
-        visitaController.apriVisualizzaVisiteConIscrizione(fruitore.getUsername(), List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.CANCELLATA));
+        visitaController.apriVisualizzaVisiteConIscrizione(fruitore.getUsername(), List.of(Visita.StatoVisita.PROPOSTA, Visita.StatoVisita.CONFERMATA, Visita.StatoVisita.COMPLETA, Visita.StatoVisita.CANCELLATA));
     }
 
     private void handleMenuAction(Runnable action) {

@@ -103,8 +103,8 @@ public class LuogoDao {
         return Optional.empty();
     }
 
-    public void rimuovi(int id) throws SQLException {
-        String sql = "DELETE FROM luoghi WHERE id = ?";
+    public void inserisciLuogoDaRimuovere(int id) throws SQLException {
+        String sql = "INSERT INTO rimozioni_luoghi (luogo_id, mese_rimozione) VALUES (?, (SELECT MONTH(periodo_corrente) + 2 FROM config))";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -128,6 +128,45 @@ public class LuogoDao {
         }
 
         return idLuoghi;
+    }
+
+    public void applicaRimozioneLuoghi() throws SQLException {
+        String sql = "DELETE FROM luoghi WHERE id IN (SELECT luogo_id FROM rimozioni_luoghi WHERE mese_rimozione = (SELECT MONTH(periodo_corrente) + 1 FROM config))";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.executeUpdate();
+        }
+    }
+
+    public void terminaTVAssociatiAlLuogo(Integer idLuogo) throws SQLException {
+        String sql = """
+                    UPDATE tipi_visita
+                    SET data_fine = (
+                        SELECT LAST_DAY(DATE_ADD(periodo_corrente, INTERVAL 1 MONTH))
+                        FROM config
+                    )
+                    WHERE luogo_id = ?
+                """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idLuogo);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void rimuovi(int id) throws SQLException {
+        String sql = "DELETE FROM luoghi WHERE id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
     }
 }
 
