@@ -56,17 +56,6 @@ CREATE TABLE tipi_visita
     UNIQUE (indirizzo_incontro, comune_incontro, provincia_incontro)
 );
 
-CREATE TABLE visite
-(
-    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    tipo_visita_id   INT UNSIGNED                                                            NOT NULL,
-    volontario_id    INT UNSIGNED                                                            NOT NULL,
-    data_svolgimento DATE                                                                    NOT NULL,
-    stato            ENUM ('PROPOSTA', 'COMPLETA', 'CONFERMATA', 'CANCELLATA', 'EFFETTUATA') NOT NULL DEFAULT 'PROPOSTA',
-    FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita (id) ON DELETE CASCADE,
-    FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
-);
-
 CREATE TABLE ruoli
 (
     id   INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -82,6 +71,17 @@ CREATE TABLE utenti
     ruolo_id      INT UNSIGNED NOT NULL,
     last_login    DATE DEFAULT NULL,
     FOREIGN KEY (ruolo_id) REFERENCES ruoli (id) ON DELETE CASCADE
+);
+
+CREATE TABLE visite
+(
+    id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tipo_visita_id   INT UNSIGNED                                                            NOT NULL,
+    volontario_id    INT UNSIGNED                                                            NOT NULL,
+    data_svolgimento DATE                                                                    NOT NULL,
+    stato            ENUM ('PROPOSTA', 'COMPLETA', 'CONFERMATA', 'CANCELLATA', 'EFFETTUATA') NOT NULL DEFAULT 'PROPOSTA',
+    FOREIGN KEY (tipo_visita_id) REFERENCES tipi_visita (id) ON DELETE CASCADE,
+    FOREIGN KEY (volontario_id) REFERENCES utenti (id) ON DELETE CASCADE
 );
 
 CREATE TABLE tipi_visita_volontari
@@ -136,7 +136,8 @@ VALUES (1, 'Lunedì'),
 
 INSERT INTO ruoli (`id`, `nome`)
 VALUES (1, 'CONF'),
-       (2, 'VOL');
+       (2, 'VOL'),
+       (3,'FRUITORE');
 
 INSERT INTO `utenti` (`username`, `password_hash`, `salt`, `ruolo_id`, `last_login`)
 VALUES ('conf', 'b724e99182ef638e767025d03abb735b49a52d05c8906e08912779c395dc182e', 0xb58f6b3d21a3058fd90df2e8f8f1afc0,

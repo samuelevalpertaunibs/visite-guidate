@@ -140,9 +140,8 @@ public class VisitaService {
                 throw new IllegalArgumentException("Nessuna iscrizione trovata con questo codice per il tuo utente");
             }
 
-            visitaDao.disdiciIscrizione(codiceIscrizione);
-
             Integer visitaId = visitaDao.getIdVisitaByIdIscrizione(codiceIscrizione);
+            visitaDao.disdiciIscrizione(codiceIscrizione);
 
             // Se la visita era al completo, dopo l'iscrizione torna proposta
             if (visitaDao.getStatoById(visitaId) == Visita.StatoVisita.COMPLETA) {
