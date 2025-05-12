@@ -11,9 +11,19 @@ public class SelezioneMultiplaView<T extends ElementoSelezionabile> {
     private final List<T> elementi;
     private Window window;
     private final Map<T, CheckBox> checkBoxMap = new HashMap<>();
+    private final Button aggiungiButton;
 
-    public SelezioneMultiplaView(List<T> elementi) {
+    public SelezioneMultiplaView(List<T> elementi, boolean creaAggiungiButton) {
         this.elementi = elementi;
+        if (creaAggiungiButton) {
+            aggiungiButton = new Button("Nuovo");
+        } else {
+            aggiungiButton = null;
+        }
+    }
+
+    public Button getAggiungiButton() {
+        return aggiungiButton;
     }
 
     private Window creaFinestra(AtomicReference<Set<T>> selezionatiRef, Set<T> preSelezionati, String titolo) {
@@ -31,6 +41,11 @@ public class SelezioneMultiplaView<T extends ElementoSelezionabile> {
             panel.addComponent(checkBox);
         }
 
+        if (aggiungiButton != null) {
+            panel.addComponent(aggiungiButton);
+            panel.addComponent(new EmptySpace());
+        }
+
         // Bottone conferma
         panel.addComponent(new Button("Conferma", () -> {
             Set<T> selezionati = new HashSet<>();
@@ -46,6 +61,10 @@ public class SelezioneMultiplaView<T extends ElementoSelezionabile> {
         window.setHints(List.of(Window.Hint.CENTERED, Window.Hint.MODAL));
         window.setComponent(panel);
         return window;
+    }
+
+    public void chiudi() {
+        window.close();
     }
 
     public Set<T> mostra(WindowBasedTextGUI gui, Set<T> preSelezionati, String titolo) {

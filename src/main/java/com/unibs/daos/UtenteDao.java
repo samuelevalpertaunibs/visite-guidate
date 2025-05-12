@@ -238,7 +238,11 @@ public class UtenteDao {
             stmt.setString(2, nuovoUtente.getPasswordHash());
             stmt.setBytes(3, nuovoUtente.getSalt());
             stmt.setInt(4, nuovoUtente.getRole());
-            stmt.setDate(5, Date.valueOf(nuovoUtente.getLastLogin()));
+            if ((nuovoUtente.getLastLogin() == null)) {
+                stmt.setNull(5, Types.DATE);
+            } else {
+                stmt.setDate(5, Date.valueOf(nuovoUtente.getLastLogin()));
+            }
 
             stmt.executeUpdate();
         }

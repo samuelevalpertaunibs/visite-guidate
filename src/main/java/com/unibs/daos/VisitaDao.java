@@ -535,10 +535,50 @@ public class VisitaDao {
         }
     }
 
-    // TODO
-    public List<Visita> getVisiteFromArchivio() {
-        String sql = "SELECT * FROM archivio_storico";
-        return null;
+    public List<Visita> getVisiteFromArchivio() throws SQLException {
+        String sql = "SELECT * FROM archivio";
+        List<Visita> visite = new ArrayList<>();
+        Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                int tipoVisitaId = rs.getInt("tipo_visita_id");
+                String indirizzo = rs.getString("indirizzo_incontro");
+                String comune = rs.getString("comune_incontro");
+                String provincia = rs.getString("provincia_incontro");
+                String titolo = rs.getString("titolo");
+                String descrizione = rs.getString("descrizione");
+                LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
+                LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
+                LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
+                int durataMinuti = rs.getInt("durata_minuti");
+                boolean entrataLibera = rs.getBoolean("entrata_libera");
+                int numMinPartecipanti = rs.getInt("num_min_partecipanti");
+                int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
+                LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
+                Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
+                String luogoNome = rs.getString("luogo_nome");
+                String nomeVolontario = rs.getString("username_volontario");
+                Integer id = rs.getInt("id");
+
+                TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
+                if (tipoVisita == null) {
+                    PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
+                    Luogo luogo = new Luogo(null, luogoNome, null, null);
+                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
+                    tipoVisitaCache.put(tipoVisitaId, tipoVisita);
+                }
+
+                Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeVolontario, null, null, null), statoVisita);
+                visite.add(visita);
+            }
+        }
+
+        return visite;
     }
 
     public void rimuoviById(Integer idVisita) throws SQLException {
@@ -554,10 +594,10 @@ public class VisitaDao {
 
     public void archiviaVisita(Integer idVisita) throws SQLException {
         String sql = "INSERT INTO archivio (" +
-                "titolo, descrizione, indirizzo_incontro, comune_incontro, provincia_incontro, " +
+                "tipo_visita_id, titolo, descrizione, indirizzo_incontro, comune_incontro, provincia_incontro, " +
                 "ora_inizio, durata_minuti, entrata_libera, luogo_nome, data_svolgimento, stato, username_volontario" +
                 ") " +
-                "SELECT tv.titolo, tv.descrizione, tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro, " +
+                "SELECT tv.id, tv.titolo, tv.descrizione, tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro, " +
                 "tv.ora_inizio, tv.durata_minuti, tv.entrata_libera, l.nome, v.data_svolgimento, ?, u.username " +
                 "FROM visite v " +
                 "JOIN tipi_visita tv ON v.tipo_visita_id = tv.id " +

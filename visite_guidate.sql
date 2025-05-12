@@ -152,6 +152,7 @@ CREATE TABLE rimozioni_volontari
 CREATE TABLE archivio
 (
     id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tipo_visita_id      INT UNSIGNED        NOT NULL,
     titolo              VARCHAR(64)         NOT NULL,
     descrizione         VARCHAR(512)        NOT NULL,
     indirizzo_incontro  VARCHAR(64)         NOT NULL,

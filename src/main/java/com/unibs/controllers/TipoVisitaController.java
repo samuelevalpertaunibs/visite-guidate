@@ -29,6 +29,7 @@ public class TipoVisitaController {
     private Comune comuneSelezionato;
     private Set<Giorno> giorniSelezionati;
     private Set<Volontario> volontariSelezionati;
+    private SelezioneMultiplaView<Volontario> selezioneMultiplaVolontariView;
 
     protected TipoVisitaController(WindowBasedTextGUI gui, LuogoService luogoService, ConfigService configService, GiornoService giornoService, VolontarioService volontarioService, TipoVisitaService tipoVisitaService) {
         this.gui = gui;
@@ -46,6 +47,8 @@ public class TipoVisitaController {
         aggiungiTipoVisitaView = new AggiungiTipoVisitaView();
         initListenerAggiungiTipoVisitaView();
         aggiungiTipoVisitaView.mostra(gui);
+        // Durante l'aggiunta di un tv il configuratore può creare dei volontari ma non è detto scelga di associarli, nel caso non succede li rimuovo
+        volontarioService.rimuoviNonAssociati();
     }
 
     private void initListenerAggiungiTipoVisitaView() {
@@ -59,6 +62,10 @@ public class TipoVisitaController {
     private void aggiungiTipoVisitaPoiAggiornaFinestra(Button button) {
         try {
             aggiungiTipoVisita();
+            // Reset valori selezionati
+            luogoSelezionato = null;
+            giorniSelezionati = new HashSet<>();
+            volontariSelezionati = new HashSet<>();
 
             // Aggiorno il pannello del recap dei TipoVisita aggiunti
             StringBuilder sb = new StringBuilder();
@@ -66,11 +73,7 @@ public class TipoVisitaController {
             for (String tipo : tipiVisita) {
                 sb.append(" - ").append(tipo).append("\n");
             }
-
             aggiungiTipoVisitaView.aggiornaVisite(sb.toString());
-            //luogoSelezionato = null;
-            giorniSelezionati = new HashSet<>();
-            volontariSelezionati = new HashSet<>();
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
@@ -79,7 +82,7 @@ public class TipoVisitaController {
     private void apriSelezionaGiorni(Button button) {
         try {
             List<Giorno> giorni = giornoService.getGiorni();
-            SelezioneMultiplaView<Giorno> selezioneMultiplaGiorni = new SelezioneMultiplaView<>(giorni);
+            SelezioneMultiplaView<Giorno> selezioneMultiplaGiorni = new SelezioneMultiplaView<>(giorni, false);
             Set<Giorno> setSelezionati = new HashSet<>(giorniSelezionati);
             giorniSelezionati = selezioneMultiplaGiorni.mostra(gui, setSelezionati, "Seleziona i giorni della settimana in cui verra svolta la visita");
             aggiungiTipoVisitaView.aggiornaGiorniSelezionati(giorniSelezionati);
@@ -91,13 +94,36 @@ public class TipoVisitaController {
     private void apriSelezionaVolontari(Button button) {
         try {
             List<Volontario> volontari = volontarioService.findAllVolontari();
-            SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontari);
+            selezioneMultiplaVolontariView = new SelezioneMultiplaView<>(volontari, true);
+            Button aggiungiButton = selezioneMultiplaVolontariView.getAggiungiButton();
+            if (aggiungiButton != null) {
+                aggiungiButton.addListener(this::apriAggiungiVolontario);
+            }
             Set<Volontario> setSelezionati = new HashSet<>(volontariSelezionati);
-            volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
+            volontariSelezionati = selezioneMultiplaVolontariView.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
             aggiungiTipoVisitaView.aggiornaVolontariSelezionati(volontariSelezionati);
         } catch (DatabaseException e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
+    }
+
+    private void apriAggiungiVolontario(Button button) {
+        AggiungiVolontarioView aggiungiVolontarioView = new AggiungiVolontarioView();
+        aggiungiVolontarioView.getAggiungiButton().addListener((b) -> {
+            String username = aggiungiVolontarioView.getUsername();
+            try {
+                volontarioService.aggiungiVolontario(username);
+                aggiungiVolontarioView.chiudi();
+                // Se il volontario è stato creato correttamente ricreo la finestra della selezione volontari con il nuovo volontario
+                selezioneMultiplaVolontariView.chiudi();
+                apriSelezionaVolontari(null);
+
+            } catch (Exception e) {
+                aggiungiVolontarioView.mostraErrore(e.getMessage());
+            }
+        });
+        aggiungiVolontarioView.mostra(gui);
+
     }
 
     private void chiudiAggiungiTipoVisita(Button button) {
@@ -118,14 +144,13 @@ public class TipoVisitaController {
         try {
             List<Luogo> luoghi = luogoService.findAll();
             luogoSelezionato = selezionaLuogoView.mostra(gui, luoghi);
+            // Aggiorno la view principale dopo aver selezionato un luogo
+            aggiungiTipoVisitaView.aggiornaLuogo(luogoSelezionato.getNome());
+            button.setEnabled(false);
+            aggiungiTipoVisitaView.focusTitolo();
         } catch (DatabaseException e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
-
-        // Aggiorno la view principale dopo aver selezionato un luogo
-        aggiungiTipoVisitaView.aggiornaLuogo(luogoSelezionato.getNome());
-        button.setEnabled(false);
-        aggiungiTipoVisitaView.focusTitolo();
     }
 
     private void initListenerSelezionaLuogoView() {
@@ -242,9 +267,14 @@ public class TipoVisitaController {
     private void aggiungiTipoVisitaLuogoFissato(Button button) {
         try {
             aggiungiTipoVisita();
+
             // Reimposto il luogo fissato
             aggiungiTipoVisitaView.aggiornaLuogo(luogoSelezionato.getNome());
             aggiungiTipoVisitaView.getSelezionaLuogoButton().setEnabled(false);
+
+            // Reset valori selezionati
+            giorniSelezionati = new HashSet<>();
+            volontariSelezionati = new HashSet<>();
 
             // Aggiorno il pannello del recap dei TipoVisita aggiunti
             StringBuilder sb = new StringBuilder();
@@ -252,11 +282,8 @@ public class TipoVisitaController {
             for (String tipo : tipiVisita) {
                 sb.append(" - ").append(tipo).append("\n");
             }
-
             aggiungiTipoVisitaView.aggiornaVisite(sb.toString());
-            //luogoSelezionato = null;
-            giorniSelezionati = new HashSet<>();
-            volontariSelezionati = new HashSet<>();
+
         } catch (Exception e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
@@ -365,7 +392,7 @@ public class TipoVisitaController {
             if (volontariAssociabili.isEmpty()) {
                 throw new IllegalArgumentException("Tutti i volontari esistenti sono già associati a questo tipo di visita");
             }
-            SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList());
+            SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList(), false);
             volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, new HashSet<>(), "Seleziona i volontari da associare al tipo di visita");
             if (volontariSelezionati.isEmpty()) {
                 new PopupChiudi(gui).mostra("", "Nessun volontario aggiunto.");

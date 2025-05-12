@@ -168,7 +168,7 @@ public class VisitaService {
             for (Integer idVisita : idVisiteComplete) {
                 visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite complete.", e);
             throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite complete.");
         }
@@ -180,7 +180,7 @@ public class VisitaService {
             for (Integer idVisita : idVisiteDaFare) {
                 visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti raggiunto.", e);
             throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite proposte.");
         }
@@ -192,7 +192,7 @@ public class VisitaService {
             for (Integer idVisita : idVisiteDaCancellare) {
                 visitaDao.setStatoById(idVisita, Visita.StatoVisita.CANCELLATA.name());
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti non raggiunto.", e);
             throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite proposte.");
         }
@@ -205,7 +205,7 @@ public class VisitaService {
                 visitaDao.archiviaVisita(idVisita);
                 visitaDao.rimuoviById(idVisita);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante  la generazione delle visite effettuate.", e);
             throw new DatabaseException("Errore durante la generazione delle visite effettuate.");
         }
@@ -214,7 +214,7 @@ public class VisitaService {
     public void rimuoviVisiteCancellate() throws DatabaseException {
         try {
             visitaDao.rimuoviVisiteCancellate();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione delle visite cancellate.", e);
             throw new DatabaseException("Errore durante la rimozione delle visite cancellate.");
         }
@@ -223,7 +223,7 @@ public class VisitaService {
     public List<Visita> getVisiteFromArchivio() throws DatabaseException {
         try {
             return visitaDao.getVisiteFromArchivio();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite nell'archivio.", e);
             throw new DatabaseException("Errore durante il recupero delle visite nell'archivio.");
         }

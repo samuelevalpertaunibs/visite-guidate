@@ -9,16 +9,20 @@ import com.unibs.models.AppService;
 import com.unibs.services.ServiceFactory;
 import com.unibs.utils.LoggerConfig;
 
+import java.io.IOException;
+
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        VirtualScreen virtualScreen = null;
         try {
+
             LoggerConfig.setupLogger();
 
             Screen screen = new DefaultTerminalFactory().createScreen();
             screen.startScreen();
 
             // Avvolgi manualmente lo screen in un VirtualScreen
-            VirtualScreen virtualScreen = new VirtualScreen(screen);
+            virtualScreen = new VirtualScreen(screen);
 
             // Ora usa il VirtualScreen per creare il MultiWindowTextGUI
             MultiWindowTextGUI gui = new MultiWindowTextGUI(virtualScreen);
@@ -33,6 +37,11 @@ public class App {
             loginController.apriLogin(gui);
 
         } catch (Exception e) {
+            try {
+                virtualScreen.stopScreen();
+            } catch (IOException ex) {
+                System.out.println(e.getMessage());
+            }
             System.out.println(e.getMessage());
         }
     }
