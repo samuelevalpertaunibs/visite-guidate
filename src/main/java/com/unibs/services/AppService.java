@@ -1,6 +1,5 @@
-package com.unibs.models;
+package com.unibs.services;
 
-import com.unibs.services.VisitaService;
 import com.unibs.utils.DatabaseException;
 
 public class AppService {

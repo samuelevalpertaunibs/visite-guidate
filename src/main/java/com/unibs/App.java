@@ -5,7 +5,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.VirtualScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.unibs.controllers.LoginController;
-import com.unibs.models.AppService;
+import com.unibs.services.AppService;
 import com.unibs.services.ServiceFactory;
 import com.unibs.utils.LoggerConfig;
 
