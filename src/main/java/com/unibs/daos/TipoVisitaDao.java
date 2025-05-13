@@ -1,9 +1,6 @@
 package com.unibs.daos;
 
-import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
-import com.unibs.models.PuntoIncontro;
-import com.unibs.models.TipoVisita;
 import com.unibs.utils.DatabaseException;
 import com.unibs.utils.DatabaseManager;
 
@@ -271,69 +268,6 @@ public class TipoVisitaDao {
         }
 
         return tipiVisita;
-    }
-
-    public TipoVisita getByTitolo(String titolo) throws SQLException {
-        String sql = """
-                    SELECT tv.id, tv.titolo, tv.descrizione, tv.data_inizio, tv.data_fine, tv.ora_inizio,
-                           tv.durata_minuti, tv.entrata_libera, tv.num_min_partecipanti, tv.num_max_partecipanti,
-                           l.id AS luogo_id, l.nome AS luogo_nome, l.descrizione AS luogo_descrizione,
-                           c.id AS comune_id, c.nome AS comune_nome, c.provincia AS comune_provincia, c.regione AS comune_regione,
-                           tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro
-                    FROM tipi_visita tv
-                    JOIN luoghi l ON tv.luogo_id = l.id
-                    JOIN comuni c ON l.comune_id = c.id
-                    WHERE tv.titolo = ?
-                """;
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, titolo);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-
-                Comune comune = new Comune(
-                        rs.getInt("comune_id"),
-                        rs.getString("comune_nome"),
-                        rs.getString("comune_provincia"),
-                        rs.getString("comune_regione")
-                );
-
-                Luogo luogo = new Luogo(
-                        rs.getInt("luogo_id"),
-                        rs.getString("luogo_nome"),
-                        rs.getString("luogo_descrizione"),
-                        comune
-                );
-
-                PuntoIncontro puntoIncontro = new PuntoIncontro(
-                        rs.getString("indirizzo_incontro"),
-                        rs.getString("comune_incontro"),
-                        rs.getString("provincia_incontro")
-                );
-
-                return new TipoVisita(
-                        rs.getInt("id"),
-                        rs.getString("titolo"),
-                        rs.getString("descrizione"),
-                        rs.getDate("data_inizio").toLocalDate(),
-                        rs.getDate("data_fine").toLocalDate(),
-                        rs.getTime("ora_inizio").toLocalTime(),
-                        rs.getInt("durata_minuti"),
-                        rs.getBoolean("entrata_libera"),
-                        rs.getInt("num_min_partecipanti"),
-                        rs.getInt("num_max_partecipanti"),
-                        luogo,
-                        puntoIncontro,
-                        null,
-                        null
-                );
-            } else {
-                return null;
-            }
-        }
     }
 
 

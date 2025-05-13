@@ -2,7 +2,6 @@ package com.unibs.daos;
 
 import com.unibs.models.*;
 import com.unibs.utils.DatabaseManager;
-import com.unibs.utils.DateService;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -57,7 +56,7 @@ public class VisitaDao {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                @SuppressWarnings("DuplicatedCode") int tipoVisitaId = rs.getInt("tipo_visita_id");
+                int tipoVisitaId = rs.getInt("tipo_visita_id");
                 String indirizzo = rs.getString("indirizzo_incontro");
                 String comune = rs.getString("comune_incontro");
                 String provincia = rs.getString("provincia_incontro");
@@ -89,108 +88,6 @@ public class VisitaDao {
             }
         }
         return visite;
-    }
-
-    public void setStatoById(Integer visitaId, String stato) throws SQLException {
-        String sql = "UPDATE visite SET stato = ? WHERE id = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, stato);
-            stmt.setInt(2, visitaId);
-            stmt.executeUpdate();
-        }
-    }
-
-    public List<Integer> getIdVisiteCompleteDaChiudere() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
-        String sql = "SELECT id FROM visite WHERE stato = 'COMPLETA' AND data_svolgimento <= ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
-            }
-        }
-
-        return idVisite;
-    }
-
-    public List<Integer> getIdVisiteDaFare() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
-        String sql = """
-                SELECT v.id FROM visite v JOIN tipi_visita tv ON tv.id = v.tipo_visita_id WHERE v.stato = 'PROPOSTA' AND v.data_svolgimento <= ? AND (SELECT SUM(iscrizioni.numero_iscritti) FROM iscrizioni WHERE iscrizioni.visita_id = v.id) >= tv.num_min_partecipanti
-                """;
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
-            }
-        }
-
-        return idVisite;
-    }
-
-    public List<Integer> getIdVisiteDaCancellare() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
-        String sql = """
-                    SELECT v.id
-                                               FROM visite v
-                                               JOIN tipi_visita tv ON tv.id = v.tipo_visita_id
-                                               WHERE v.stato = 'PROPOSTA'
-                                                 AND v.data_svolgimento <= ?
-                                                 AND (
-                                                   SELECT COALESCE(SUM(i.numero_iscritti), 0)
-                                                   FROM iscrizioni i
-                                                   WHERE i.visita_id = v.id
-                                                 ) < tv.num_min_partecipanti
-                """;
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
-            }
-        }
-
-        return idVisite;
-    }
-
-    public List<Integer> getIdVisiteDaRendereEffettuate() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
-        String sql = "SELECT v.id FROM visite v WHERE v.stato = 'CONFERMATA' AND v.data_svolgimento < ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today()));
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
-            }
-        }
-
-        return idVisite;
-    }
-
-    public void rimuoviVisiteCancellate() throws SQLException {
-        String sql = "DELETE FROM visite WHERE stato = 'CANCELLATA' AND data_svolgimento < ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today()));
-
-            stmt.executeUpdate();
-        }
     }
 
     public List<Visita> getVisiteFromArchivio() throws SQLException {
@@ -239,36 +136,4 @@ public class VisitaDao {
         return visite;
     }
 
-    public void rimuoviById(Integer idVisita) throws SQLException {
-        String sql = "DELETE FROM visite WHERE id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, idVisita);
-
-            stmt.executeUpdate();
-        }
-    }
-
-    public void archiviaVisita(Integer idVisita) throws SQLException {
-        String sql = "INSERT INTO archivio (" +
-                "tipo_visita_id, titolo, descrizione, indirizzo_incontro, comune_incontro, provincia_incontro, " +
-                "ora_inizio, durata_minuti, entrata_libera, luogo_nome, data_svolgimento, stato, username_volontario" +
-                ") " +
-                "SELECT tv.id, tv.titolo, tv.descrizione, tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro, " +
-                "tv.ora_inizio, tv.durata_minuti, tv.entrata_libera, l.nome, v.data_svolgimento, ?, u.username " +
-                "FROM visite v " +
-                "JOIN tipi_visita tv ON v.tipo_visita_id = tv.id " +
-                "JOIN utenti u ON v.volontario_id = u.id " +
-                "JOIN luoghi l ON tv.luogo_id = l.id " +
-                "WHERE v.id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, Visita.StatoVisita.EFFETTUATA.name());
-            stmt.setInt(2, idVisita);
-            stmt.executeUpdate();
-        }
-    }
 }

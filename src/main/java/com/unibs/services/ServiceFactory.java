@@ -40,10 +40,7 @@ public class ServiceFactory {
 
     public TipoVisitaService getTipoVisitaService() {
         if (tipoVisitaService == null) {
-            tipoVisitaService = new TipoVisitaService(getGiornoService());
-            if (volontarioService != null) {
-                tipoVisitaService.setVolontarioService(volontarioService);
-            }
+            tipoVisitaService = new TipoVisitaService();
         }
         return tipoVisitaService;
     }
@@ -64,11 +61,7 @@ public class ServiceFactory {
 
     public VolontarioService getVolontarioService() {
         if (volontarioService == null) {
-            if (tipoVisitaService == null) {
-                this.tipoVisitaService = new TipoVisitaService(getGiornoService());
-            }
-            volontarioService = new VolontarioService(tipoVisitaService, getGiornoService(), getDatePrecluseService());
-            tipoVisitaService.setVolontarioService(volontarioService);
+            volontarioService = new VolontarioService();
         }
         return volontarioService;
     }

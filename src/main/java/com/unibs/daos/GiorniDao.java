@@ -8,9 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 
 public class GiorniDao {
@@ -32,25 +30,5 @@ public class GiorniDao {
         return giorni;
     }
 
-    public Set<Giorno> findByTipoVisitaId(int tipoVisitaId) throws SQLException {
-        Set<Giorno> giorni = new HashSet<>();
-        String query = "SELECT g.id, g.nome FROM giorni_settimana g JOIN giorni_settimana_tipi_visita tvg ON g.id = tvg.giorno_settimana_id WHERE tvg.tipo_visita_id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setInt(1, tipoVisitaId);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String nome = rs.getString("nome");
-                giorni.add(new Giorno(id, nome));
-            }
-
-        }
-
-        return giorni;
-    }
 }
 

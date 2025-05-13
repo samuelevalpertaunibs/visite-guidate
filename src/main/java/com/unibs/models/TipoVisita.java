@@ -10,10 +10,6 @@ public record TipoVisita(int id, String titolo, String descrizione, LocalDate da
                          int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro, Set<Giorno> giorni,
                          Set<Volontario> volontari) {
 
-    public Set<Giorno> getGiorniSettimana() {
-        return giorni;
-    }
-
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");

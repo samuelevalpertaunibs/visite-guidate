@@ -25,8 +25,6 @@ public class LoginController {
         this.utente = currentUtente;
         if (currentUtente.getRole() == 1) {
             inizializzaConfiguratore();
-        } else if (currentUtente.getRole() == 2) {
-            inizializzaVolontario();
         } else {
             loginView.mostraErrore("Ruolo non riconosciuto.");
         }
@@ -35,11 +33,6 @@ public class LoginController {
     private void inizializzaConfiguratore() {
         ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, serviceFactory);
         configuratoreController.start();
-    }
-
-    private void inizializzaVolontario() {
-        VolontarioController volontarioController = new VolontarioController(gui, utente, serviceFactory);
-        volontarioController.start();
     }
 
     public void apriLogin(MultiWindowTextGUI gui) {

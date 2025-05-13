@@ -210,13 +210,6 @@ public class TipoVisitaController {
         elencoLuoghiConVisiteAssociateView.mostra(gui);
     }
 
-    public void apriVisualizzaTipiVisiteAssociateAlVolontario(Volontario volontario) {
-        TVAssociateAlVolontarioView view = new TVAssociateAlVolontarioView(volontario);
-        List<TipoVisita> visite = tipoVisitaService.findByVolontario(volontario.getId());
-        view.impostaVisite(visite);
-        view.mostra(gui);
-    }
-
     private void aggiungiTipoVisita() {
         String titolo = aggiungiTipoVisitaView.getTitolo();
         String descrizione = aggiungiTipoVisitaView.getDescrizione();

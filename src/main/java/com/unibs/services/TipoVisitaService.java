@@ -9,9 +9,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,12 +19,9 @@ public class TipoVisitaService {
     private static final int MINUTES_PER_DAY = 24 * 60;
 
     private final TipoVisitaDao tipoVisitaDao;
-    private final GiornoService giornoService;
-    private VolontarioService volontarioService;
 
-    public TipoVisitaService(GiornoService giornoService) {
+    public TipoVisitaService() {
         this.tipoVisitaDao = new TipoVisitaDao();
-        this.giornoService = giornoService;
     }
 
     public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
@@ -177,58 +172,6 @@ public class TipoVisitaService {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita: ", e);
             throw new DatabaseException("Errore durante il recupero dei tipi di visita.");
         }
-    }
-
-    public ArrayList<TipoVisita> findByVolontario(int id) throws DatabaseException {
-        ArrayList<TipoVisita> visite = new ArrayList<>();
-
-        for (String titolo : getTitoliByVolontarioId(id)) {
-            Optional<TipoVisita> tipoVisita = getByTitolo(titolo);
-            if (tipoVisita.isEmpty()) {
-                throw new DatabaseException("Errore durante il recupero di un tipo di visita");
-            }
-            visite.add(tipoVisita.get());
-        }
-        return visite;
-
-    }
-
-    public Optional<TipoVisita> getByTitolo(String titolo) throws DatabaseException {
-        try {
-            TipoVisita base = tipoVisitaDao.getByTitolo(titolo);
-            if (base == null) {
-                return Optional.empty();
-            }
-
-            int tipoVisitaId = base.id();
-
-            Set<Giorno> giorni = giornoService.getByTipoVisitaId(tipoVisitaId);
-            Set<Volontario> volontari = volontarioService.getByTipoVisitaId(tipoVisitaId);
-
-            return Optional.of(new TipoVisita(
-                    base.id(),
-                    base.titolo(),
-                    base.descrizione(),
-                    base.dataInizio(),
-                    base.dataFine(),
-                    base.oraInizio(),
-                    base.durataMinuti(),
-                    base.entrataLibera(),
-                    base.numMinPartecipanti(),
-                    base.numMaxPartecipanti(),
-                    base.luogo(),
-                    base.puntoIncontro(),
-                    giorni,
-                    volontari
-            ));
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupera del tipo di visita", e);
-            throw new DatabaseException("Impossibile recuperare il tipo di visita");
-        }
-    }
-
-    public void setVolontarioService(VolontarioService volontarioService) {
-        this.volontarioService = volontarioService;
     }
 
 }

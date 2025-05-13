@@ -8,7 +8,6 @@ import com.unibs.utils.DateService;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,22 +129,6 @@ public class ConfigService {
 
     public int getNumeroMax() {
         return getConfig().getNumeroMassimoIscrizioniPrenotazione();
-    }
-
-    public YearMonth getMesePeriodoCorrente() throws DatabaseException {
-        return YearMonth.from(getConfig().getPeriodoCorrente());
-    }
-
-    // Nel database utilizzo la dataPeriodoCorrente per indicare oltre che il periodo corrente anche la momentanea apertura
-    // alla raccolta delle disponibilità dei volontari
-    // Imposto il giorno della dataPeriodoCorrente al 28 mentre la raccolta delle disponibilità è chiusa, altrimenti
-    // sarà il 16 del mese del periodo di attività.
-    public boolean isRaccoltaDisponibilitaChiusa() {
-        try {
-            return getConfig().getPeriodoCorrente().getDayOfMonth() == 28;
-        } catch (Exception e) {
-            return true;
-        }
     }
 
 }

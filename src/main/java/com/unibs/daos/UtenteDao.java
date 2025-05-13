@@ -9,7 +9,6 @@ import com.unibs.utils.DateService;
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.*;
 
 public class UtenteDao {
@@ -83,84 +82,6 @@ public class UtenteDao {
             }
         }
         return volontari;
-    }
-
-    public Set<Volontario> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
-        Set<Volontario> volontari = new HashSet<>();
-        String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, tipoVisitaId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String username = rs.getString("username");
-
-                volontari.add(new Volontario(id, username, null, null, null));
-            }
-        }
-
-        return volontari;
-    }
-
-    public List<LocalDate> getDateDisponibiliByMese(int volontarioID, YearMonth mese) throws SQLException {
-        String sql = "SELECT data_disponibile FROM disponibilita " + "WHERE volontario_id = ? AND YEAR(data_disponibile) = ? AND MONTH(data_disponibile) = ?";
-
-        List<LocalDate> dateDisponibili = new ArrayList<>();
-
-        try (Connection connection = DatabaseManager.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
-
-            statement.setInt(1, volontarioID);
-            statement.setInt(2, mese.getYear());
-            statement.setInt(3, mese.getMonthValue());
-
-            try (ResultSet rs = statement.executeQuery()) {
-                while (rs.next()) {
-                    dateDisponibili.add(rs.getDate("data_disponibile").toLocalDate());
-                }
-            }
-        }
-
-        return dateDisponibili;
-    }
-
-    public void sovrascriviDisponibilita(Volontario volontario, List<LocalDate> selezionate) throws SQLException {
-        if (selezionate == null || selezionate.isEmpty()) {
-            return;
-        }
-
-        LocalDate primaData = selezionate.get(0);
-        int mese = primaData.getMonthValue();
-        int anno = primaData.getYear();
-
-        String deleteQuery = "DELETE FROM disponibilita WHERE volontario_id = ? AND EXTRACT(MONTH FROM data_disponibile) = ? AND EXTRACT(YEAR FROM data_disponibile) = ?";
-        String insertQuery = "INSERT INTO disponibilita (volontario_id, data_disponibile) VALUES (?, ?)";
-
-        try (Connection conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery); PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
-                deleteStmt.setInt(1, volontario.getId());
-                deleteStmt.setInt(2, mese);
-                deleteStmt.setInt(3, anno);
-                deleteStmt.executeUpdate();
-
-                // Inserisce le nuove date
-                for (LocalDate data : selezionate) {
-                    insertStmt.setInt(1, volontario.getId());
-                    insertStmt.setDate(2, Date.valueOf(data));
-                    insertStmt.addBatch();
-                }
-
-                insertStmt.executeBatch();
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-                conn.setAutoCommit(true);
-            }
-        }
     }
 
     public void rimuovi(int id) throws SQLException {

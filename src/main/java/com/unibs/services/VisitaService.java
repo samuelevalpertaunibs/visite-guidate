@@ -25,64 +25,6 @@ public class VisitaService {
         }
     }
 
-    public void chiudiIscrizioneVisiteComplete() throws DatabaseException {
-        try {
-            List<Integer> idVisiteComplete = visitaDao.getIdVisiteCompleteDaChiudere();
-            for (Integer idVisita : idVisiteComplete) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite complete.", e);
-            throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite complete.");
-        }
-    }
-
-    public void chiudiIscrizioneVisiteDaFare() throws DatabaseException {
-        try {
-            List<Integer> idVisiteDaFare = visitaDao.getIdVisiteDaFare();
-            for (Integer idVisita : idVisiteDaFare) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti raggiunto.", e);
-            throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite proposte.");
-        }
-    }
-
-    public void chiudiIscrizioneVisitaDaCancellare() throws DatabaseException {
-        try {
-            List<Integer> idVisiteDaCancellare = visitaDao.getIdVisiteDaCancellare();
-            for (Integer idVisita : idVisiteDaCancellare) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CANCELLATA.name());
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti non raggiunto.", e);
-            throw new DatabaseException("Errore durante la chiusura delle iscrizioni di visite proposte.");
-        }
-    }
-
-    public void generaVisiteEffettuate() {
-        try {
-            List<Integer> idVisiteDaRendereEffettuate = visitaDao.getIdVisiteDaRendereEffettuate();
-            for (Integer idVisita : idVisiteDaRendereEffettuate) {
-                visitaDao.archiviaVisita(idVisita);
-                visitaDao.rimuoviById(idVisita);
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante  la generazione delle visite effettuate.", e);
-            throw new DatabaseException("Errore durante la generazione delle visite effettuate.");
-        }
-    }
-
-    public void rimuoviVisiteCancellate() throws DatabaseException {
-        try {
-            visitaDao.rimuoviVisiteCancellate();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione delle visite cancellate.", e);
-            throw new DatabaseException("Errore durante la rimozione delle visite cancellate.");
-        }
-    }
-
     public List<Visita> getVisiteFromArchivio() throws DatabaseException {
         try {
             return visitaDao.getVisiteFromArchivio();
