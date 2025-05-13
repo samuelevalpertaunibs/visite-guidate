@@ -13,7 +13,6 @@ public class LoginView {
     private final TextBox passwordField;
     private final Label errorLabel;
     private final Button loginButton;
-    private final Button registratiButton;
     private final BasicWindow window;
     // Le successive due variabili sono equivalenti a window.getSize().get{Rows,Columns}()
     private int defaultWindowRows;
@@ -24,12 +23,7 @@ public class LoginView {
         passwordField = new TextBox(new TerminalSize(18, 1)).setMask('*'); // Maschera la password
         errorLabel = new Label("").setForegroundColor(TextColor.ANSI.RED);
         loginButton = new Button("Accedi");
-        registratiButton = new Button("Registrati");
         window = new BasicWindow("Login");
-    }
-
-    public Button getRegistratiButton() {
-        return registratiButton;
     }
 
     private Window creaFinestra() {
@@ -45,8 +39,6 @@ public class LoginView {
 
         panel.addComponent(new EmptySpace());
         panel.addComponent(loginButton);
-        panel.addComponent(registratiButton);
-        panel.addComponent(new EmptySpace());
         panel.addComponent(errorLabel);
 
         TerminalSize defaultSize = panel.calculatePreferredSize().withRelative(4, 0);

@@ -8,15 +8,10 @@ import com.unibs.utils.DateService;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class LoginService {
     final UtenteDao utenteDao = new UtenteDao();
-    private static final Logger LOGGER = Logger.getLogger(LoginService.class.getName());
 
     public Utente autentica(String username, String password)
             throws DatabaseException, IllegalArgumentException {
@@ -102,48 +97,4 @@ public class LoginService {
         return hexString.toString();
     }
 
-    public void registraFruitore(String username, String password, String confermaPassword)
-            throws DatabaseException, IllegalArgumentException {
-
-        try {
-            if (username == null || username.isBlank() ||
-                    password == null || password.isBlank() ||
-                    confermaPassword == null || confermaPassword.isBlank()) {
-                throw new IllegalArgumentException("Tutti i campi sono obbligatori.");
-            }
-
-            if (!password.equals(confermaPassword)) {
-                throw new IllegalArgumentException("Le password non coincidono.");
-            }
-
-            if (utenteDao.findByUsername(username) != null) {
-                throw new IllegalArgumentException("Username già in uso.");
-            }
-
-            if (password.length() < 8 ||
-                    !password.matches(".*[a-z].*") ||
-                    !password.matches(".*[A-Z].*") ||
-                    !password.matches(".*\\d.*") ||
-                    !password.matches(".*[+*@?=)(/&%$£!].*")) {
-                throw new IllegalArgumentException("La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero ed un carattere speciale.");
-            }
-
-            byte[] salt = generateSalt();
-            String hashedPassword = hashPassword(password, salt);
-
-            Utente nuovoUtente = new Utente(0, username, hashedPassword, salt, 3, DateService.today());
-
-            utenteDao.inserisciUtente(nuovoUtente);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la registrazinoe dell'utente", e);
-            throw new DatabaseException("Impossibile registrare l'utente.");
-        }
-    }
-
-    private byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
 }

@@ -5,7 +5,6 @@ import com.unibs.models.Utente;
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.views.CambioPasswordView;
 import com.unibs.views.LoginView;
-import com.unibs.views.RegistrazioneView;
 
 public class LoginController {
 
@@ -14,7 +13,6 @@ public class LoginController {
     private LoginView loginView;
     private final MultiWindowTextGUI gui;
     private CambioPasswordView cambioPasswordView;
-    private RegistrazioneView registrazioneView;
     private Utente utente;
 
     public LoginController(MultiWindowTextGUI gui, ServiceFactory serviceFactory) {
@@ -47,26 +45,7 @@ public class LoginController {
     public void apriLogin(MultiWindowTextGUI gui) {
         loginView = new LoginView();
         loginView.getLoginButton().addListener(button1 -> verificaCredenziali());
-        loginView.getRegistratiButton().addListener(button -> apriRegistrazione());
         loginView.mostra(gui);
-    }
-
-    private void apriRegistrazione() {
-        registrazioneView = new RegistrazioneView();
-        registrazioneView.getRegistratiButton().addListener(button1 -> registraFruitore());
-        registrazioneView.mostra(gui);
-    }
-
-    private void registraFruitore() {
-        String username = registrazioneView.getUsername();
-        String password = registrazioneView.getPassword();
-        String confermaPassword = registrazioneView.getConfermaPassword();
-        try {
-            loginService.registraFruitore(username, password, confermaPassword);
-            registrazioneView.chiudi();
-        } catch (Exception e) {
-            registrazioneView.mostraErrore(e.getMessage());
-        }
     }
 
     private void verificaCredenziali() {
