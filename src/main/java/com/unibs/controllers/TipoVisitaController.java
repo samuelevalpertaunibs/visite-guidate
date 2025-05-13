@@ -52,14 +52,14 @@ public class TipoVisitaController {
     }
 
     private void initListenerAggiungiTipoVisitaView() {
-        aggiungiTipoVisitaView.getFineButton().addListener(this::chiudiAggiungiTipoVisita);
+        aggiungiTipoVisitaView.getFineButton().addListener(button3 -> chiudiAggiungiTipoVisita());
         aggiungiTipoVisitaView.getSelezionaLuogoButton().addListener(this::apriSelezioneLuogo);
-        aggiungiTipoVisitaView.getAssociaGiorniButton().addListener(this::apriSelezionaGiorni);
-        aggiungiTipoVisitaView.getAssociaVolontariButton().addListener(this::apriSelezionaVolontari);
-        aggiungiTipoVisitaView.getAggiungiButton().addListener(this::aggiungiTipoVisitaPoiAggiornaFinestra);
+        aggiungiTipoVisitaView.getAssociaGiorniButton().addListener(button2 -> apriSelezionaGiorni());
+        aggiungiTipoVisitaView.getAssociaVolontariButton().addListener(button1 -> apriSelezionaVolontari());
+        aggiungiTipoVisitaView.getAggiungiButton().addListener(button -> aggiungiTipoVisitaPoiAggiornaFinestra());
     }
 
-    private void aggiungiTipoVisitaPoiAggiornaFinestra(Button button) {
+    private void aggiungiTipoVisitaPoiAggiornaFinestra() {
         try {
             aggiungiTipoVisita();
             // Reset valori selezionati
@@ -79,7 +79,7 @@ public class TipoVisitaController {
         }
     }
 
-    private void apriSelezionaGiorni(Button button) {
+    private void apriSelezionaGiorni() {
         try {
             List<Giorno> giorni = giornoService.getGiorni();
             SelezioneMultiplaView<Giorno> selezioneMultiplaGiorni = new SelezioneMultiplaView<>(giorni, false);
@@ -91,13 +91,13 @@ public class TipoVisitaController {
         }
     }
 
-    private void apriSelezionaVolontari(Button button) {
+    private void apriSelezionaVolontari() {
         try {
             List<Volontario> volontari = volontarioService.findAllVolontari();
             selezioneMultiplaVolontariView = new SelezioneMultiplaView<>(volontari, true);
             Button aggiungiButton = selezioneMultiplaVolontariView.getAggiungiButton();
             if (aggiungiButton != null) {
-                aggiungiButton.addListener(this::apriAggiungiVolontario);
+                aggiungiButton.addListener(button1 -> apriAggiungiVolontario());
             }
             Set<Volontario> setSelezionati = new HashSet<>(volontariSelezionati);
             volontariSelezionati = selezioneMultiplaVolontariView.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
@@ -107,7 +107,7 @@ public class TipoVisitaController {
         }
     }
 
-    private void apriAggiungiVolontario(Button button) {
+    private void apriAggiungiVolontario() {
         AggiungiVolontarioView aggiungiVolontarioView = new AggiungiVolontarioView();
         aggiungiVolontarioView.getAggiungiButton().addListener((b) -> {
             String username = aggiungiVolontarioView.getUsername();
@@ -116,7 +116,7 @@ public class TipoVisitaController {
                 aggiungiVolontarioView.chiudi();
                 // Se il volontario è stato creato correttamente ricreo la finestra della selezione volontari con il nuovo volontario
                 selezioneMultiplaVolontariView.chiudi();
-                apriSelezionaVolontari(null);
+                apriSelezionaVolontari();
 
             } catch (Exception e) {
                 aggiungiVolontarioView.mostraErrore(e.getMessage());
@@ -126,7 +126,7 @@ public class TipoVisitaController {
 
     }
 
-    private void chiudiAggiungiTipoVisita(Button button) {
+    private void chiudiAggiungiTipoVisita() {
         try {
             if (tipoVisitaService.esisteAlmenoUnaVisita()) {
                 aggiungiTipoVisitaView.chiudi();
@@ -154,21 +154,21 @@ public class TipoVisitaController {
     }
 
     private void initListenerSelezionaLuogoView() {
-        selezionaLuogoView.getAggiungiLuogoButton().addListener(this::apriAggiungiLuogo);
+        selezionaLuogoView.getAggiungiLuogoButton().addListener(button -> apriAggiungiLuogo());
     }
 
-    private void apriAggiungiLuogo(Button button) {
+    private void apriAggiungiLuogo() {
         aggiungiLuogoView = new AggiungiLuogoView();
         initListenerAggiungiLuogoInizializzazioneView();
         aggiungiLuogoView.mostra(gui);
     }
 
     private void initListenerAggiungiLuogoInizializzazioneView() {
-        aggiungiLuogoView.getAggiungiLuogoButton().addListener(this::aggiungiLuogo);
+        aggiungiLuogoView.getAggiungiLuogoButton().addListener(button -> aggiungiLuogo());
         aggiungiLuogoView.getSelezionaComuneButton().addListener(this::apriSelezionaComune);
     }
 
-    private void aggiungiLuogo(Button button) {
+    private void aggiungiLuogo() {
         String nome = aggiungiLuogoView.getNome();
         String descrizione = aggiungiLuogoView.getDescrizione();
         try {
@@ -228,11 +228,11 @@ public class TipoVisitaController {
     }
 
     private void initListenerAggiungiLuogoView() {
-        aggiungiLuogoView.getAggiungiLuogoButton().addListener(this::aggiungiNuovoLuogo);
+        aggiungiLuogoView.getAggiungiLuogoButton().addListener(button -> aggiungiNuovoLuogo());
         aggiungiLuogoView.getSelezionaComuneButton().addListener(this::apriSelezionaComune);
     }
 
-    private void aggiungiNuovoLuogo(Button button) {
+    private void aggiungiNuovoLuogo() {
         String nome = aggiungiLuogoView.getNome();
         String descrizione = aggiungiLuogoView.getDescrizione();
         try {
@@ -258,13 +258,13 @@ public class TipoVisitaController {
     }
 
     private void initListenerAggiungiTipoVisitaLuogoFissatoView() {
-        aggiungiTipoVisitaView.getFineButton().addListener(this::chiudiAggiungiTipoVisitaLuogoFissato);
-        aggiungiTipoVisitaView.getAssociaGiorniButton().addListener(this::apriSelezionaGiorni);
-        aggiungiTipoVisitaView.getAssociaVolontariButton().addListener(this::apriSelezionaVolontari);
-        aggiungiTipoVisitaView.getAggiungiButton().addListener(this::aggiungiTipoVisitaLuogoFissato);
+        aggiungiTipoVisitaView.getFineButton().addListener(button3 -> chiudiAggiungiTipoVisitaLuogoFissato());
+        aggiungiTipoVisitaView.getAssociaGiorniButton().addListener(button2 -> apriSelezionaGiorni());
+        aggiungiTipoVisitaView.getAssociaVolontariButton().addListener(button1 -> apriSelezionaVolontari());
+        aggiungiTipoVisitaView.getAggiungiButton().addListener(button -> aggiungiTipoVisitaLuogoFissato());
     }
 
-    private void aggiungiTipoVisitaLuogoFissato(Button button) {
+    private void aggiungiTipoVisitaLuogoFissato() {
         try {
             aggiungiTipoVisita();
 
@@ -306,7 +306,7 @@ public class TipoVisitaController {
         aggiungiTipoVisitaView.clearAll();
     }
 
-    private void chiudiAggiungiTipoVisitaLuogoFissato(Button button) {
+    private void chiudiAggiungiTipoVisitaLuogoFissato() {
         if (new PopupConferma(gui).mostra("Attenzione", "I dati non salvati andranno persi.\nSei sicuro di voler uscire?")) {
             aggiungiTipoVisitaView.chiudi();
         }

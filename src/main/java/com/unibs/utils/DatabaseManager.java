@@ -13,7 +13,7 @@ public class DatabaseManager {
     private static String user;
     private static String pass;
 
-    public static Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException, IllegalStateException {
         if (ip == null && port == null && name == null && user == null && pass == null) {
             ip = System.getenv("DB_URL");
             port = System.getenv("DB_PORT");
@@ -33,7 +33,7 @@ public class DatabaseManager {
             try {
                 connection = DriverManager.getConnection(url, user, pass);
             } catch (SQLException e) {
-                throw new SQLException("Impossibile comunicare con il database");
+                throw new IllegalStateException("Impossibile comunicare con il database");
             }
         }
         return connection;

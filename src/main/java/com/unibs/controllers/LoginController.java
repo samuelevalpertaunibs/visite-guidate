@@ -29,16 +29,9 @@ public class LoginController {
             inizializzaConfiguratore();
         } else if (currentUtente.getRole() == 2) {
             inizializzaVolontario();
-        } else if (currentUtente.getRole() == 3) {
-            inizializzaFruitore();
         } else {
             loginView.mostraErrore("Ruolo non riconosciuto.");
         }
-    }
-
-    private void inizializzaFruitore() {
-        FruitoreController fruitoreController = new FruitoreController(gui, utente, serviceFactory);
-        fruitoreController.start();
     }
 
     private void inizializzaConfiguratore() {
@@ -53,18 +46,18 @@ public class LoginController {
 
     public void apriLogin(MultiWindowTextGUI gui) {
         loginView = new LoginView();
-        loginView.getLoginButton().addListener(this::verificaCredenziali);
-        loginView.getRegistratiButton().addListener(this::apriRegistrazione);
+        loginView.getLoginButton().addListener(button1 -> verificaCredenziali());
+        loginView.getRegistratiButton().addListener(button -> apriRegistrazione());
         loginView.mostra(gui);
     }
 
-    private void apriRegistrazione(Button button) {
+    private void apriRegistrazione() {
         registrazioneView = new RegistrazioneView();
-        registrazioneView.getRegistratiButton().addListener(this::registraFruitore);
+        registrazioneView.getRegistratiButton().addListener(button1 -> registraFruitore());
         registrazioneView.mostra(gui);
     }
 
-    private void registraFruitore(Button button) {
+    private void registraFruitore() {
         String username = registrazioneView.getUsername();
         String password = registrazioneView.getPassword();
         String confermaPassword = registrazioneView.getConfermaPassword();
@@ -76,7 +69,7 @@ public class LoginController {
         }
     }
 
-    private void verificaCredenziali(Button button) {
+    private void verificaCredenziali() {
         String username = loginView.getUsername();
         String password = loginView.getPassword();
         try {
@@ -102,10 +95,10 @@ public class LoginController {
     }
 
     private void initListenerCambioPasswordView() {
-        cambioPasswordView.getConfermaButton().addListener(this::updatePassword);
+        cambioPasswordView.getConfermaButton().addListener(button -> updatePassword());
     }
 
-    private void updatePassword(Button button) {
+    private void updatePassword() {
         cambioPasswordView.mostraErrore("");
         String password = cambioPasswordView.getPassword();
         String confermaPassword = cambioPasswordView.getConfermaPassword();

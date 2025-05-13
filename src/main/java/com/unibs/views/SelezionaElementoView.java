@@ -31,7 +31,4 @@ public class SelezionaElementoView<T extends ElementoSelezionabile> {
         return elementoSelezionato.get();
     }
 
-    public void chiudi() {
-        window.close();
-    }
 }

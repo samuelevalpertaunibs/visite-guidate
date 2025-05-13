@@ -84,25 +84,6 @@ public class LuogoDao {
         return Optional.empty();
     }
 
-    public Optional<Luogo> findById(int id) throws SQLException {
-        String sql = "SELECT * FROM luoghi WHERE id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    Luogo luogoTrovato = mapLuogo(rs);
-                    return Optional.of(luogoTrovato);
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
-
     public void inserisciLuogoDaRimuovere(int id) throws SQLException {
         String sql = "INSERT INTO rimozioni_luoghi (luogo_id, mese_rimozione) VALUES (?, (SELECT MONTH(periodo_corrente) + 2 FROM config))";
 

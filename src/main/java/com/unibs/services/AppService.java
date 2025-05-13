@@ -9,7 +9,7 @@ public class AppService {
         this.visitaService = visitaService;
     }
 
-    public void eseguiOperazioniGiornaliere() throws DatabaseException {
+    public void eseguiOperazioniGiornaliere() throws DatabaseException, IllegalStateException {
 
         //Alla chiusura delle iscrizioni, cioè
         //tre giorni prima della data di svolgimento, una visita completa passa nello stato di visita

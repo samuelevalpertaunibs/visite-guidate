@@ -8,7 +8,6 @@ import com.unibs.views.ElencoVisiteView;
 import com.unibs.views.components.PopupChiudi;
 import com.unibs.views.components.PopupConferma;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VisitaController {
@@ -24,7 +23,7 @@ public class VisitaController {
     }
 
     public void apriVisualizzaVisitePerTipologia(List<Visita.StatoVisita> statiDaMostrare) {
-        elencoVisiteView = new ElencoVisiteView("Visualizza elenco visite per stato", false);
+        elencoVisiteView = new ElencoVisiteView("Visualizza elenco visite per stato");
         initElencoVisiteViewListener(statiDaMostrare);
         elencoVisiteView.mostra(gui);
     }
@@ -69,24 +68,4 @@ public class VisitaController {
         return false;
     }
 
-    public void apriVisualizzaVisiteConIscrizione(String nomeFruitoreConIscrizione, List<Visita.StatoVisita> statiDaMostrare) {
-        elencoVisiteView = new ElencoVisiteView("Visualizza elenco visite a cui sei iscritto", true);
-        initElencoVisiteConIscrizioneViewListener(statiDaMostrare, nomeFruitoreConIscrizione);
-        elencoVisiteView.mostra(gui);
-    }
-
-    private void initElencoVisiteConIscrizioneViewListener(List<Visita.StatoVisita> stati, String nomeFruitore) {
-        try {
-            elencoVisiteView.setStati(stati, stato -> {
-                List<Visita> visite = visitaService.getVisitePreviewByFruitore(stato, nomeFruitore);
-                List<List<String>> codiciPrenotazione = new ArrayList<>();
-                for (Visita visita : visite) {
-                    codiciPrenotazione.add(visitaService.getCodiciPrenotazioneFruitorePerVista(nomeFruitore, visita.getId()));
-                }
-                elencoVisiteView.aggiornaVisite(visite, stato, codiciPrenotazione);
-            });
-        } catch (Exception e) {
-            elencoVisiteView.mostraErrore(e.getMessage());
-        }
-    }
 }

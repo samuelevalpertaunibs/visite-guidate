@@ -7,22 +7,19 @@ import java.time.format.DateTimeFormatter;
 
 
 public class Visita implements ElementoSelezionabile {
-    private final Integer id;
     private final TipoVisita tipoVisita;
     private final LocalDate dataSvolgimento;
     private final Volontario volontario;
     private final StatoVisita stato;
 
-    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario, StatoVisita stato) {
-        this.id = id;
+    public Visita(TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario, StatoVisita stato) {
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
         this.volontario = volontario;
         this.stato = stato;
     }
 
-    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario) {
-        this.id = id;
+    public Visita(TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario) {
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
         this.volontario = volontario;
@@ -48,10 +45,6 @@ public class Visita implements ElementoSelezionabile {
 
     public Volontario getVolontario() {
         return volontario;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public enum StatoVisita {

@@ -12,7 +12,7 @@ import com.unibs.utils.LoggerConfig;
 import java.io.IOException;
 
 public class App {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         VirtualScreen virtualScreen = null;
         try {
 

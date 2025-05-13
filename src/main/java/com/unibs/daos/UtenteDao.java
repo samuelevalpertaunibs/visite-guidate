@@ -188,16 +188,6 @@ public class UtenteDao {
         return idVolontari;
     }
 
-    public void rimuovi(String nome) throws SQLException {
-        String sql = "DELETE FROM utenti WHERE username = ?";
-
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, nome);
-            stmt.executeUpdate();
-        }
-    }
-
     public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
         String sql = "SELECT id, username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
         Set<Volontario> volontari = new HashSet<>();

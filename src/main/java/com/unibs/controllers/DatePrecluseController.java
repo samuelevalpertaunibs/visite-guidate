@@ -1,6 +1,5 @@
 package com.unibs.controllers;
 
-import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.services.DatePrecluseService;
 import com.unibs.views.AggiungiDatePrecluseView;
@@ -27,10 +26,10 @@ public class DatePrecluseController {
     }
 
     private void initDatePrecluseViewListener() {
-        aggiungiDatePrecluseView.getPrecludiButton().addListener(this::aggiungiDataPreclusa);
+        aggiungiDatePrecluseView.getPrecludiButton().addListener(button -> aggiungiDataPreclusa());
     }
 
-    private void aggiungiDataPreclusa(Button button) {
+    private void aggiungiDataPreclusa() {
         try {
             LocalDate dataDaPrecludere = aggiungiDatePrecluseView.getData();
             precluseService.aggiungiDataPreclusa(dataDaPrecludere);

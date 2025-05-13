@@ -35,24 +35,6 @@ public class VisitaService {
         }
     }
 
-    public List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, String nomeFruitore) throws DatabaseException {
-        try {
-            return visitaDao.getVisitePreviewByFruitore(stato, nomeFruitore);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite", e);
-            throw new DatabaseException("Impossibile recuperare le visite.");
-        }
-    }
-
-    public List<Visita> getVisitePreviewByVolontario(Visita.StatoVisita stato, Volontario volontario) throws DatabaseException {
-        try {
-            return visitaDao.getVisitePreviewByVolontario(stato, volontario.getUsername());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle visite", e);
-            throw new DatabaseException("Impossibile recuperare le visite.");
-        }
-    }
-
     public void creaPiano() throws DatabaseException {
         YearMonth meseTarget = configService.getMesePeriodoCorrente().plusMonths(2);
         Set<TipoVisita> tipiVisite = new HashSet<>(tipoVisitaService.findByMese(meseTarget));
@@ -81,7 +63,7 @@ public class VisitaService {
                     if (occupateTipo.contains(data) || occupateVolontario.contains(data)) continue;
 
                     // Assegna la visita
-                    Visita visita = new Visita(null, tipoVisita, data, volontario);
+                    Visita visita = new Visita(tipoVisita, data, volontario);
                     visitePerVolontario.computeIfAbsent(volontarioId, k -> new HashSet<>()).add(visita);
 
                     occupateTipo.add(data);
@@ -114,52 +96,6 @@ public class VisitaService {
             throw new DatabaseException("Errore durante la rimozione delle disponibilità.");
         }
 
-    }
-
-    public int getIscrizioniRimanentiById(Integer id) {
-        try {
-            return visitaDao.getIscrizioniRimanentiById(id);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il calcolo dei posti disponibili per visita con id: " + id, e);
-            throw new DatabaseException("Errore durante il calcolo dei posti disponibili.");
-        }
-    }
-
-    public List<String> getCodiciPrenotazioneFruitorePerVista(String nomeFruitore, Integer idVisita) {
-        try {
-            return visitaDao.getCodiciPrenotazioneFruitorePerVista(nomeFruitore, idVisita);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle prenotazioni per: " + nomeFruitore, e);
-            throw new DatabaseException("Errore durante il recupero delle prenotazioni.");
-        }
-    }
-
-    public void disdici(Fruitore fruitore, Integer codiceIscrizione) {
-        try {
-            if (!fruitore.getId().equals(visitaDao.getIdFruitoreByIdIscrizione(codiceIscrizione))) {
-                throw new IllegalArgumentException("Nessuna iscrizione trovata con questo codice per il tuo utente");
-            }
-
-            Integer visitaId = visitaDao.getIdVisitaByIdIscrizione(codiceIscrizione);
-            visitaDao.disdiciIscrizione(codiceIscrizione);
-
-            // Se la visita era al completo, dopo l'iscrizione torna proposta
-            if (visitaDao.getStatoById(visitaId) == Visita.StatoVisita.COMPLETA) {
-                visitaDao.setStatoById(visitaId, Visita.StatoVisita.PROPOSTA.name());
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero della prenotazione.", e);
-            throw new DatabaseException("Impossibile recuperare l'iscrizione.");
-        }
-    }
-
-    public List<String> getCodiciPrenotazionePerVista(Volontario volontario, Integer id) throws DatabaseException {
-        try {
-            return visitaDao.getCodiciPrenotazionePerVista(volontario.getUsername(), id);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle prenotazioni per: " + volontario.getUsername(), e);
-            throw new DatabaseException("Errore durante il recupero delle prenotazioni.");
-        }
     }
 
     public void chiudiIscrizioneVisiteComplete() throws DatabaseException {

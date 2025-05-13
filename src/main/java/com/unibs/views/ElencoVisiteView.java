@@ -22,10 +22,8 @@ public class ElencoVisiteView {
     private final AtomicInteger currentIndex = new AtomicInteger(0);
     private List<Visita> visite;
     private Visita.StatoVisita statoAttuale;
-    private final boolean mostraCodiciPrenotazione;
-    private List<List<String>> codiciPrenotazinone;
 
-    public ElencoVisiteView(String titolo, boolean mostraCodiciPrenotazione) {
+    public ElencoVisiteView(String titolo) {
         window = new BasicWindow(titolo);
         counterLabel.setText("Nessuna visita caricata.");
         statoList = new ActionListBox();
@@ -33,7 +31,6 @@ public class ElencoVisiteView {
         errorLabel = new Label("");
         statoPanel = new Panel(new LinearLayout(Direction.VERTICAL));
         visitePanel = new Panel(new LinearLayout(Direction.VERTICAL));
-        this.mostraCodiciPrenotazione = mostraCodiciPrenotazione;
         creaFinestra();
     }
 
@@ -87,27 +84,6 @@ public class ElencoVisiteView {
         }
     }
 
-    public void aggiornaVisite(List<Visita> visitePassate, Visita.StatoVisita stato, List<List<String>> codiciPrenotazione) {
-        this.visite = visitePassate;
-        this.statoAttuale = stato;
-        this.codiciPrenotazinone = codiciPrenotazione;
-
-        currentIndex.set(0);
-
-        if (visite == null || visite.isEmpty()) {
-            visitaLabel.setText("");
-            visitaLabel.setText("Nessuna visita disponibile.");
-            counterLabel.setVisible(false);
-            nextButton.setEnabled(false);
-            nextButton.setVisible(false);
-        } else {
-            counterLabel.setVisible(true);
-            nextButton.setEnabled(true);
-            nextButton.setVisible(true);
-            aggiornaVisita(0);
-        }
-    }
-
     private void mostraProssimaVisita() {
         int next = currentIndex.incrementAndGet();
         if (next >= visite.size()) {
@@ -137,9 +113,6 @@ public class ElencoVisiteView {
             sb.append("\nEntrata libera: ").append(tipoVisita.entrataLibera() ? "Sì" : "No");
             sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
-            if (mostraCodiciPrenotazione) {
-                sb.append("\nCodici prenotazione: ").append(codiciPrenotazinone.get(index).isEmpty() ? "Nessun iscritto" : codiciPrenotazinone.get(index));
-            }
         }
 
         visitaLabel.setText(sb.toString());
