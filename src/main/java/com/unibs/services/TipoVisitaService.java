@@ -8,7 +8,6 @@ import com.unibs.utils.DateService;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -180,15 +179,6 @@ public class TipoVisitaService {
         }
     }
 
-    public List<String> getPreviewTipiVisita(String luogoNome) throws DatabaseException {
-        try {
-            return tipoVisitaDao.getPreviewTipiVisita(luogoNome);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita associati al luogo: " + luogoNome, e);
-            throw new DatabaseException("Errore durante il recupero dei tipi di visita associati al luogo.");
-        }
-    }
-
     public ArrayList<TipoVisita> findByVolontario(int id) throws DatabaseException {
         ArrayList<TipoVisita> visite = new ArrayList<>();
 
@@ -201,29 +191,6 @@ public class TipoVisitaService {
         }
         return visite;
 
-    }
-
-    public ArrayList<TipoVisita> findByMese(YearMonth mese) throws DatabaseException {
-        ArrayList<TipoVisita> visite = new ArrayList<>();
-
-        for (String titolo : getTitoliByMese(mese)) {
-            Optional<TipoVisita> tipoVisita = getByTitolo(titolo);
-            if (tipoVisita.isEmpty()) {
-                throw new DatabaseException("Errore durante il recupero di un tipo di visita.");
-            }
-            visite.add(tipoVisita.get());
-        }
-        return visite;
-
-    }
-
-    public List<String> getTitoliByMese(YearMonth mese) throws DatabaseException {
-        try {
-            return tipoVisitaDao.getTitoliByMese(mese);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita ricorrenti nel mese " + mese + ": ", e);
-            throw new DatabaseException("Errore nel recupero dei tipi di visita ricorrenti nel mese.");
-        }
     }
 
     public Optional<TipoVisita> getByTitolo(String titolo) throws DatabaseException {
@@ -264,53 +231,4 @@ public class TipoVisitaService {
         this.volontarioService = volontarioService;
     }
 
-    public List<String> getAllTitoli() throws DatabaseException {
-        try {
-            return tipoVisitaDao.getAllTitoli();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita", e);
-            throw new DatabaseException("Errore nel recupero dei tipi di visita.");
-        }
-    }
-
-    public Optional<Integer> getIdByNome(String tv) throws DatabaseException {
-        try {
-            return tipoVisitaDao.getIdByNome(tv);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero del tipo di visita con nome" + tv, e);
-            throw new DatabaseException("Impossibile recuperare il tipo di visita.");
-        }
-    }
-
-    public void applicaRimozioneTipiVisita() throws DatabaseException {
-        try {
-            tipoVisitaDao.applicaRimozioneTipiVisita();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei tipi di visita eliminati", e);
-            throw new DatabaseException("Impossibile rimuovere i tipi di visita eliminati.");
-        }
-    }
-
-    public void inserisciTVDaRimuovere(String titolo) throws DatabaseException {
-        try {
-            int id = tipoVisitaDao.getIdByNome(titolo).orElseThrow(Exception::new);
-            tipoVisitaDao.inserisciTVDaRimuovere(id);
-            tipoVisitaDao.termina(id);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione del tipo di visita.", e);
-            throw new DatabaseException("Impossibile rimuovere il tipo di visita.");
-        }
-    }
-
-    public void rimuoviNonAssociati() throws DatabaseException {
-        try {
-            List<String> titoli = tipoVisitaDao.getTitoliNonAssociati();
-            for (String titolo : titoli) {
-                tipoVisitaDao.rimuovi(titolo);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione del tipo di visita.", e);
-            throw new DatabaseException("Impossibile cancellare un tipo di visita..");
-        }
-    }
 }

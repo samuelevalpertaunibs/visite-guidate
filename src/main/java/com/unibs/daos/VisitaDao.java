@@ -91,36 +91,6 @@ public class VisitaDao {
         return visite;
     }
 
-    public void inserisciVisite(List<Visita> tutteLeVisite) throws SQLException {
-        String sql = "INSERT INTO visite (tipo_visita_id, volontario_id, data_svolgimento, stato) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            for (Visita visita : tutteLeVisite) {
-                stmt.setInt(1, visita.getTipoVisita().id());
-                stmt.setInt(2, visita.getVolontario().getId());
-                stmt.setDate(3, Date.valueOf(visita.getDataSvolgimento()));
-                stmt.setString(4, visita.getStato().name());
-                stmt.addBatch();
-            }
-
-            // Eseguo tutte le insert una sola volta assieme
-            stmt.executeBatch();
-        }
-    }
-
-    @SuppressWarnings("SqlWithoutWhere")
-    public void rimuoviDisponibilita() throws SQLException {
-        String sql = "DELETE FROM disponibilita";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.executeUpdate(); // Esegue direttamente la DELETE
-        }
-    }
-
     public void setStatoById(Integer visitaId, String stato) throws SQLException {
         String sql = "UPDATE visite SET stato = ? WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();

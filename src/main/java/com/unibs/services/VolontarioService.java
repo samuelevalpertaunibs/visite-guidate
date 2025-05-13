@@ -117,47 +117,6 @@ public class VolontarioService {
         }
     }
 
-    public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
-        try {
-            return utenteDao.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore durante il recupero dei volontari", e);
-            throw new DatabaseException("Errore durante il recupero dei volontari.");
-        }
-    }
-
-    public void associaATipoVisita(Set<Volontario> volontariSelezionati, int tipoVisitaId) {
-        try {
-            for (Volontario volontario : volontariSelezionati) {
-                utenteDao.associaATipoVisitaById(volontario.getId(), tipoVisitaId);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore durante l'associazione dei volontari", e);
-            throw new DatabaseException("Errore durante l'associazione dei volontari.");
-        }
-    }
-
-    public void applicaRimozioneVolontari() throws DatabaseException {
-            try {
-                utenteDao.applicaRimozioneVolontari();
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei volontari eliminati", e);
-                throw new DatabaseException("Impossibile rimuovere i volontari eliminati.");
-            }
-
-    }
-
-    public void inserisciVolontarioDaRimuovere(String nome) throws DatabaseException {
-        try {
-            int id = utenteDao.getIdByUsername(nome).orElseThrow(Exception::new);
-            utenteDao.inserisciVolontarioDaRimuovere(id);
-            utenteDao.terminaTVAssociatiAlVolontario(id);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione del tipo di visita.", e);
-            throw new DatabaseException("Impossibile rimuovere il tipo di visita.");
-        }
-    }
-
     public void aggiungiVolontario(String username) {
         if (utenteDao.findByUsername(username) != null) {
             throw new IllegalArgumentException("Username già esistente.");

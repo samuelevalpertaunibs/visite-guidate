@@ -19,13 +19,6 @@ public class Visita implements ElementoSelezionabile {
         this.stato = stato;
     }
 
-    public Visita(TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario) {
-        this.tipoVisita = tipoVisita;
-        this.dataSvolgimento = dataSvolgimento;
-        this.volontario = volontario;
-        this.stato = StatoVisita.PROPOSTA;
-    }
-
     @Override
     public String getPlaceHolder() {
         return tipoVisita.titolo() + " in data " + dataSvolgimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
@@ -37,10 +30,6 @@ public class Visita implements ElementoSelezionabile {
 
     public LocalDate getDataSvolgimento() {
         return dataSvolgimento;
-    }
-
-    public StatoVisita getStato() {
-        return stato;
     }
 
     public Volontario getVolontario() {

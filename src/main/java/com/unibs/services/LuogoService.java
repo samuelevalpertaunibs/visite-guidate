@@ -84,35 +84,4 @@ public class LuogoService {
         }
     }
 
-    public void rimuoviNonAssociati() {
-        try {
-            List<Integer> luoghiNonAssociati = luogoDao.getIdNonAssociati();
-            for (Integer id : luoghiNonAssociati) {
-                luogoDao.rimuovi(id);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei volontari non associati", e);
-            throw new DatabaseException("Impossibile rimuovere i volontari non associati ad alcuna visita.");
-        }
-    }
-
-    public void applicaRimozioneLuoghi() {
-        try {
-            luogoDao.applicaRimozioneLuoghi();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei luoghi eliminati", e);
-            throw new DatabaseException("Impossibile rimuovere i luoghi eliminati.");
-        }
-    }
-
-    public void inserisciLuogoDaRimuovere(Integer idLuogo) {
-        try {
-            luogoDao.inserisciLuogoDaRimuovere(idLuogo);
-            luogoDao.terminaTVAssociatiAlLuogo(idLuogo);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei luoghi eliminati", e);
-            throw new DatabaseException("Impossibile rimuovere il luogo selezionato.");
-        }
-    }
-
 }

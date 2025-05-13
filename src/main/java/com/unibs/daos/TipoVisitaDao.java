@@ -10,10 +10,8 @@ import com.unibs.utils.DatabaseManager;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class TipoVisitaDao {
 
@@ -338,127 +336,5 @@ public class TipoVisitaDao {
         }
     }
 
-    public List<String> getTitoliByMese(YearMonth mese) throws SQLException {
-        List<String> titoliTipiVisita = new ArrayList<>();
 
-        LocalDate startOfMonth = mese.atDay(1);
-        LocalDate endOfMonth = mese.atEndOfMonth();
-
-        String sql = "SELECT titolo FROM tipi_visita WHERE data_inizio <= ? AND data_fine >= ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setDate(1, Date.valueOf(endOfMonth));
-            stmt.setDate(2, Date.valueOf(startOfMonth));
-
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                titoliTipiVisita.add(rs.getString("titolo"));
-            }
-        }
-
-        return titoliTipiVisita;
-    }
-
-    public List<String> getAllTitoli() throws SQLException {
-        List<String> titoliTipiVisita = new ArrayList<>();
-        String sql = "SELECT titolo FROM tipi_visita";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                titoliTipiVisita.add(rs.getString("titolo"));
-            }
-
-        }
-
-        return titoliTipiVisita;
-    }
-
-    public void rimuovi(String titolo) throws SQLException {
-        String sql = "DELETE FROM tipi_visita WHERE titolo = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, titolo);
-            stmt.executeUpdate();
-        }
-    }
-
-    public List<String> getTitoliNonAssociati() throws SQLException {
-        String sql = "SELECT titolo FROM tipi_visita WHERE id NOT IN (SELECT tipo_visita_id FROM tipi_visita_volontari)";
-        List<String> titoliTv = new ArrayList<>();
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                titoliTv.add(rs.getString("titolo"));
-            }
-        }
-
-        return titoliTv;
-    }
-
-
-    public Optional<Integer> getIdByNome(String tv) throws SQLException {
-        String sql = "SELECT id FROM tipi_visita WHERE titolo = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, tv);
-
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next())
-                return Optional.of(rs.getInt("id"));
-
-        }
-        return Optional.empty();
-    }
-
-    public void inserisciTVDaRimuovere(int id) throws SQLException {
-        String sql = "INSERT INTO rimozioni_tv (tv_id, mese_rimozione) VALUES (?, (SELECT MONTH(periodo_corrente) + 2 FROM config))";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
-    }
-
-    public void applicaRimozioneTipiVisita() throws SQLException {
-        String sql = "DELETE FROM tipi_visita WHERE id IN (SELECT tv_id FROM rimozioni_tv WHERE mese_rimozione = (SELECT MONTH(periodo_corrente) + 1 FROM config))";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.executeUpdate();
-        }
-    }
-
-    public void termina(int id) throws SQLException {
-        String sql = """
-                    UPDATE tipi_visita
-                    SET data_fine = (
-                        SELECT LAST_DAY(DATE_ADD(periodo_corrente, INTERVAL 1 MONTH))
-                        FROM config
-                    )
-                    WHERE id = ?
-                """;
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        }
-    }
 }

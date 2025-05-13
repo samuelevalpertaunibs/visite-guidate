@@ -5,7 +5,6 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.VirtualScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.unibs.controllers.LoginController;
-import com.unibs.services.AppService;
 import com.unibs.services.ServiceFactory;
 import com.unibs.utils.LoggerConfig;
 
@@ -28,10 +27,6 @@ public class App {
             MultiWindowTextGUI gui = new MultiWindowTextGUI(virtualScreen);
 
             ServiceFactory serviceFactory = new ServiceFactory();
-
-            // Prima di avviare la schermata accessibile all'utente, esegui tutte le operazioni relative alla giornata odierna sulla base di dati
-            AppService appService = new AppService(serviceFactory.getVisitaService());
-            appService.eseguiOperazioniGiornaliere();
 
             LoginController loginController = new LoginController(gui, serviceFactory);
             loginController.apriLogin(gui);

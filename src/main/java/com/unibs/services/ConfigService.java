@@ -148,32 +148,4 @@ public class ConfigService {
         }
     }
 
-    // Se oggi è almeno il 16 del mese successivo a quello attivo la creazione è possibile
-    public boolean isCreazioneNuovoPianoPossibile() {
-        YearMonth periodoCorrente = getMesePeriodoCorrente();
-        return DateService.today().isAfter(periodoCorrente.plusMonths(1).atDay(15));
-    }
-
-    // Utilizzo la dataPeriodoCorrente per distinguere un periodo di raccolta disponibilita attiva da uno non
-    // RACCOLTA ATTIVA -> dataPeriodoCorrente ha giorno del mese 16
-    // RACCOLTA DISATTIVA -> dataPeriodoCorrente ha giorno del mese 28
-    public void chiudiRaccoltaDisponibilita() throws DatabaseException {
-        try {
-            LocalDate dataInizioPeriodoCorrente = getConfig().getPeriodoCorrente();
-            configDao.setPeriodoCorrente(dataInizioPeriodoCorrente.withDayOfMonth(28));
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la chiusura della raccolta disponibilità", e);
-            throw new DatabaseException("Impossibile chiudere la raccolta delle disponibilità.");
-        }
-    }
-
-    public void riapriRaccoltaDisponibilita() throws DatabaseException {
-        try {
-            LocalDate dataInizioPeriodoCorrente = getConfig().getPeriodoCorrente();
-            configDao.setPeriodoCorrente(dataInizioPeriodoCorrente.withDayOfMonth(16).plusMonths(1));
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante la riapertura della raccolta disponibilità", e);
-            throw new DatabaseException("Impossibile riaprire la raccolta delle disponibilità.");
-        }
-    }
 }
