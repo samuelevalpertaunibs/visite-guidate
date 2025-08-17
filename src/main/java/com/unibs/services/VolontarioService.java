@@ -1,20 +1,13 @@
 package com.unibs.services;
 
 import com.unibs.daos.UtenteDao;
-import com.unibs.models.Giorno;
-import com.unibs.models.TipoVisita;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -23,15 +16,20 @@ import java.util.logging.Logger;
 public class VolontarioService {
     private static final Logger LOGGER = Logger.getLogger(VolontarioService.class.getName());
     private static final String DEFAULT_PASSWORD = "password";
+
     private final TipoVisitaService tipoVisitaService;
     private final GiornoService giornoService;
     private final DatePrecluseService datePrecluseService;
+    private final PasswordService passwordService;
+    private final DisponibilitaCalculatorService disponibilitaCalculatorService;
     final UtenteDao utenteDao = new UtenteDao();
 
     public VolontarioService(TipoVisitaService tipoVisitaService, GiornoService giornoService, DatePrecluseService datePrecluseService) {
         this.tipoVisitaService = tipoVisitaService;
         this.giornoService = giornoService;
         this.datePrecluseService = datePrecluseService;
+        this.passwordService = new PasswordService();
+        this.disponibilitaCalculatorService = new DisponibilitaCalculatorService(tipoVisitaService, giornoService, datePrecluseService);
     }
 
     public List<Volontario> findAllVolontari() throws DatabaseException {
@@ -44,38 +42,7 @@ public class VolontarioService {
     }
 
     public Set<LocalDate> calcolaDateDiCuiRichiedereDisponibilitaPerVolontario(Volontario volontario, YearMonth mese) throws DatabaseException {
-        Set<LocalDate> risultati = new HashSet<>();
-        int volontarioId = volontario.getId();
-
-        try {
-            Set<LocalDate> datePrecluse = datePrecluseService.findByMonth(mese);
-            for (TipoVisita visita : tipoVisitaService.findByVolontario(volontarioId)) {
-
-                LocalDate start = visita.dataInizio();
-                LocalDate end = visita.dataFine();
-
-                Set<Giorno> giorni = visita.getGiorniSettimana();
-
-                LocalDate primoGiornoMese = mese.atDay(1);
-                LocalDate ultimoGiornoMese = mese.atEndOfMonth();
-
-                // Intersezione tra (dataInizio, dataFine) e mese
-                LocalDate inizio = primoGiornoMese.isAfter(start) ? primoGiornoMese : start;
-                LocalDate fine = ultimoGiornoMese.isBefore(end) ? ultimoGiornoMese : end;
-
-                for (LocalDate giorno = inizio; !giorno.isAfter(fine); giorno = giorno.plusDays(1)) {
-                    Giorno giornoItaliano = giornoService.fromDayOfWeek(giorno.getDayOfWeek());
-                    if (giorni.contains(giornoItaliano) && !datePrecluse.contains(giorno)) {
-                        risultati.add(giorno);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle date selezionabili", e);
-            throw new DatabaseException("Errore nel recupero delle date selezionabili.");
-        }
-
-        return risultati;
+        return disponibilitaCalculatorService.calcolaDateDisponibili(volontario, mese);
     }
 
     public void sovrascriviDisponibilita(Volontario volontario, List<LocalDate> selezionate) throws DatabaseException {
@@ -144,7 +111,6 @@ public class VolontarioService {
                 LOGGER.log(Level.SEVERE, "Errore SQL durante la rimozione dei volontari eliminati", e);
                 throw new DatabaseException("Impossibile rimuovere i volontari eliminati.");
             }
-
     }
 
     public void inserisciVolontarioDaRimuovere(String nome) throws DatabaseException {
@@ -159,48 +125,18 @@ public class VolontarioService {
     }
 
     public void aggiungiVolontario(String username) {
-        if (utenteDao.findByUsername(username) != null) {
-            throw new IllegalArgumentException("Username già esistente.");
+        if(utenteDao.findByUsername(username) != null) {
+            throw new IllegalArgumentException("Username già esistente");
         }
-
-        try {
-            byte[] salt = generateSalt();
-            String hashedPassword = hashPassword(DEFAULT_PASSWORD, salt);
+        try{
+            byte[] salt = passwordService.generateSalt();
+            String hashedPassword = passwordService.hashPassword(DEFAULT_PASSWORD, salt);
 
             Utente nuovoVolontario = new Utente(0, username, hashedPassword, salt, 2, null);
             utenteDao.inserisciUtente(nuovoVolontario);
-
-        } catch (SQLException e) {
+        }catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del volontario.", e);
-            throw new DatabaseException("Impossibile aggiungere il volontario.");
+            throw new DatabaseException("Impossibile aggiunta del volontario.");
         }
-    }
-
-    private byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
-    }
-
-    private String hashPassword(String password, byte[] salt) {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
-        md.update(salt);
-        byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(hashedPassword);
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder(2 * bytes.length);
-        for (byte b : bytes) {
-            hexString.append(String.format("%02x", b));
-        }
-        return hexString.toString();
     }
 }
