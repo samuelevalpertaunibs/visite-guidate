@@ -29,13 +29,6 @@ public class Luogo {
         return comune;
     }
 
-    @Override
-    public String toString() {
-        return String.format(
-                "Nome: %s\nDescrizione: %s\nComune: %s",
-                nome, descrizione, comune.toString());
-    }
-
     public void setComune(Comune comune) {
         this.comune = comune;
     }

@@ -7,17 +7,29 @@ import com.unibs.utils.ElementoSelezionabile;
  */
 public record Comune(int id, String nome, String provincia, String regione) implements ElementoSelezionabile {
 
-    public boolean equals(Comune comune) {
-        return this.nome.equalsIgnoreCase(comune.nome());
+    public int getId() {
+        return id;
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s (%s), %s", nome, provincia, regione);
+    public String getNome() {
+        return nome;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public String getRegione() {
+        return regione;
+    }
+
+    public boolean equals(Comune comune) {
+        return this.nome.equalsIgnoreCase(comune.nome());
     }
 
     @Override
     public String getPlaceHolder() {
         return nome();
     }
+
 }

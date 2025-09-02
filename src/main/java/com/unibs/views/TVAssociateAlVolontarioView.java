@@ -1,6 +1,7 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
+import com.unibs.formatters.TipoVisitaFormatter;
 import com.unibs.models.TipoVisita;
 import com.unibs.models.Volontario;
 
@@ -63,7 +64,8 @@ public class TVAssociateAlVolontarioView {
 
     private void aggiornaVisita(int index) {
         TipoVisita visita = tipiVisita.get(index);
-        visitaLabel.setText(visita.toString());
+        TipoVisitaFormatter formatter = new TipoVisitaFormatter();
+        visitaLabel.setText(formatter.format(visita));
         counterLabel.setText("Visita " + (index + 1) + " di " + tipiVisita.size());
     }
 

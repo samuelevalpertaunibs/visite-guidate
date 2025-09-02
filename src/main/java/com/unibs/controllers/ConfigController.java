@@ -2,6 +2,7 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.formatters.ComuneFormatter;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
 import com.unibs.services.ConfigService;
@@ -63,9 +64,10 @@ public class ConfigController {
         try {
             Config config = configService.getConfig();
             StringBuilder sb = new StringBuilder();
+            ComuneFormatter comuneFormatter = new ComuneFormatter();
             sb.append("Ambito territoriale:\n");
             for (Comune comune : config.getAmbitoTerritoriale()) {
-                sb.append(" - ").append(comune.toString()).append("\n");
+                sb.append(" - ").append(comuneFormatter.format(comune)).append("\n");
             }
             return sb.toString();
         } catch (Exception e) {
