@@ -61,10 +61,6 @@ public record TipoVisita(int id, String titolo, String descrizione, LocalDate da
         return puntoIncontro;
     }
 
-    public Set<Giorno> getGiorni() {
-        return giorni;
-    }
-
     public Set<Volontario> getVolontari() {
         return volontari;
     }
