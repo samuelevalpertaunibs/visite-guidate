@@ -53,11 +53,11 @@ public class VolontarioController implements IUserController {
         }
     }
 
-    private void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
         new RegimeNonAttivoView().mostra(gui);
     }
 
-    private void showMenu() {
+    public void showMenu() {
         List<MenuOption> menuOptions = Arrays.asList(
                 new MenuOption("Inserisci disponibilità", (v) -> handleMenuAction(this::apriInserisciDisponibilita)),
                 new MenuOption("Visualizza tipi di visita", (v) -> handleMenuAction(this::apriVisualizzaTipiVisiteAssociate)),

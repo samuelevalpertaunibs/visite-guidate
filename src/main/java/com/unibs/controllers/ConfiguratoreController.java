@@ -88,7 +88,7 @@ public class ConfiguratoreController implements IUserController {
         configService.setPeriodoCorrente(prossimoSedici);
     }
 
-    private void showMenu() {
+    public void showMenu() {
         menuOptions.add(new MenuOption("Inserisci date precluse", (v) -> handleMenuAction(this::inserisciDatePrecluse)));
         menuOptions.add(new MenuOption("Modifica numero massimo persone", (v) -> handleMenuAction(this::modificaNumeroMaxPersone)));
         menuOptions.add(new MenuOption("Visualizza l’elenco dei volontari", (v) -> handleMenuAction(this::visualizzaElencoVolontari)));
@@ -181,7 +181,7 @@ public class ConfiguratoreController implements IUserController {
         tipoVisitaController.apriVisualizzaVisitePerVolontari();
     }
 
-    private void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
         new RegimeNonAttivoView().mostra(gui);
     }
 

@@ -46,11 +46,11 @@ public class FruitoreController implements IUserController {
         }
     }
 
-    private void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
+    public void mostraAvvisoNonRegime(WindowBasedTextGUI gui) {
         new RegimeNonAttivoView().mostra(gui);
     }
 
-    private void showMenu() {
+    public void showMenu() {
         List<MenuOption> menuOptions = Arrays.asList(
                 new MenuOption("Visualizza tutte le visite", (v) -> handleMenuAction(this::apriVisualizzaTutteVisite)),
                 new MenuOption("Iscriviti ad una visita proposta", (v) -> handleMenuAction(this::apriIscrivitiVisitaProposta)),
