@@ -302,6 +302,7 @@ public class TipoVisitaController {
         String indirizzo = aggiungiTipoVisitaView.getIndirizzo();
         String comune = aggiungiTipoVisitaView.getComune();
         String provincia = aggiungiTipoVisitaView.getProvincia();
+
         tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio, dataFine, oraInizio, durata, entrataLibera, numeroMin, numeroMax, luogoSelezionato, volontariSelezionati, giorniSelezionati, indirizzo, comune, provincia);
         aggiungiTipoVisitaView.clearAll();
     }
