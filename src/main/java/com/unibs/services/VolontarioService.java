@@ -17,17 +17,11 @@ public class VolontarioService {
     private static final Logger LOGGER = Logger.getLogger(VolontarioService.class.getName());
     private static final String DEFAULT_PASSWORD = "password";
 
-    private final TipoVisitaService tipoVisitaService;
-    private final GiornoService giornoService;
-    private final DatePrecluseService datePrecluseService;
     private final PasswordService passwordService;
     private final DisponibilitaCalculatorService disponibilitaCalculatorService;
     final UtenteDao utenteDao = new UtenteDao();
 
     public VolontarioService(TipoVisitaService tipoVisitaService, GiornoService giornoService, DatePrecluseService datePrecluseService) {
-        this.tipoVisitaService = tipoVisitaService;
-        this.giornoService = giornoService;
-        this.datePrecluseService = datePrecluseService;
         this.passwordService = new PasswordService();
         this.disponibilitaCalculatorService = new DisponibilitaCalculatorService(tipoVisitaService, giornoService, datePrecluseService);
     }
