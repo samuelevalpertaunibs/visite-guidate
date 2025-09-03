@@ -20,7 +20,6 @@ public class SelezionaElementoView<T extends ElementoSelezionabile> {
                 window.close();
             }));
         }
-
         window.setHints(List.of(Window.Hint.MENU_POPUP, Window.Hint.CENTERED, Window.Hint.EXPANDED));
         window.setComponent(panel);
     }
