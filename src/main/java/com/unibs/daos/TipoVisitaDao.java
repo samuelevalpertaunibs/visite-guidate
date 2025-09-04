@@ -19,7 +19,7 @@ public class TipoVisitaDao {
 
     public void aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
                                LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
-                               int luogoId, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro,
+                               Luogo luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro,
                                String comunePuntoIncontro, String provinciaPuntoIncontro) throws SQLException {
 
         Connection conn = null;
@@ -27,7 +27,7 @@ public class TipoVisitaDao {
             conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
 
-            int tipoVisitaId = inserisciTipoVisita(conn, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLiberaBool, numeroMin, numeroMax, luogoId, indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
+            int tipoVisitaId = inserisciTipoVisita(conn, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLiberaBool, numeroMin, numeroMax, luogoDaAssociare.getId(), indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro);
             inserisciVolontari(conn, tipoVisitaId, volontariIds);
             inserisciGiorni(conn, tipoVisitaId, giorniIds);
             conn.commit();

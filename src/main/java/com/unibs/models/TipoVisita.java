@@ -4,69 +4,30 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
 
-public record TipoVisita(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
-                         LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti,
-                         int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro, Set<Giorno> giorni,
-                         Set<Volontario> volontari) {
+public class TipoVisita extends TipoVisitaAbstract {
+    private final Luogo luogo;
+    private final Set<Giorno> giorni;
+    private final Set<Volontario> volontari;
+
+
+    public TipoVisita(Integer id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine, LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti, int numMaxPartecipanti, Luogo luogo, PuntoIncontro puntoIncontro, Set<Giorno> giorni, Set<Volontario> volontari) {
+
+        super(id, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, puntoIncontro);
+        this.luogo = luogo;
+        this.giorni = giorni;
+        this.volontari = volontari;
+    }
 
     public Set<Giorno> getGiorniSettimana() {
         return giorni;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getTitolo() {
-        return titolo;
-    }
-
-    public String getDescrizione() {
-        return descrizione;
-    }
-
-    public LocalDate getDataInizio() {
-        return dataInizio;
-    }
-
-    public LocalDate getDataFine() {
-        return dataFine;
-    }
-
-    public LocalTime getOraInizio() {
-        return oraInizio;
-    }
-
-    public int getDurataMinuti() {
-        return durataMinuti;
-    }
-
-    public boolean isEntrataLibera() {
-        return entrataLibera;
-    }
-
-    public int getNumMinPartecipanti() {
-        return numMinPartecipanti;
-    }
-
-    public int getNumMaxPartecipanti() {
-        return numMaxPartecipanti;
-    }
-
-    public Luogo getLuogo() {
-        return luogo;
-    }
-
-    public PuntoIncontro getPuntoIncontro() {
-        return puntoIncontro;
     }
 
     public Set<Volontario> getVolontari() {
         return volontari;
     }
 
-    @Override
-    public String toString() {
-        return "TipoVisita{}";
+    public Luogo getLuogo() {
+        return luogo;
     }
+
 }

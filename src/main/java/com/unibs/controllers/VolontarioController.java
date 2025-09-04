@@ -2,6 +2,7 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facades.VolontarioFacade;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
@@ -21,32 +22,22 @@ import java.util.*;
 
 public class VolontarioController implements IUserController {
     private final Volontario volontario;
-    private final ConfigService configService;
     private final MenuView menuView;
     private final MultiWindowTextGUI gui;
     private final TipoVisitaController tipoVisitaController;
-    private final VolontarioService volontarioService;
     private ElencoVisiteView elencoVisiteView;
-    private final VisitaService visitaService;
+    private final VolontarioFacade volFacade;
 
     public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
         this.gui = gui;
-        this.configService = serviceFactory.getConfigService();
-        this.volontarioService = serviceFactory.getVolontarioService();
         this.menuView = new MenuView(gui);
         this.volontario = new Volontario(currentUtente);
-
-        visitaService = serviceFactory.getVisitaService();
-        LuogoService luogoService = serviceFactory.getLuogoService();
-        ConfigService configService = serviceFactory.getConfigService();
-        GiornoService giornoService = serviceFactory.getGiornoService();
-        TipoVisitaService tipoVisitaService = serviceFactory.getTipoVisitaService();
-
-        this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
+        this.tipoVisitaController = new TipoVisitaController(gui, serviceFactory);
+        this.volFacade = new VolontarioFacade(serviceFactory);
     }
 
     public void start() {
-        if (configService.regimeAttivo()) {
+        if (volFacade.regimeAttivo()) {
             showMenu();
         } else {
             mostraAvvisoNonRegime(gui);
@@ -76,10 +67,10 @@ public class VolontarioController implements IUserController {
     private void initElencoVisiteConIscrizioneViewListener(List<Visita.StatoVisita> stati) {
         try {
             elencoVisiteView.setStati(stati, stato -> {
-                List<Visita> visite = visitaService.getVisitePreviewByVolontario(stato, volontario);
-                List<List<String>> codiciPrenotazione = new ArrayList<>();
+                List<Visita> visite = volFacade.getVisitePreviewByVolontario(stato, volontario);
+                List<List<java.lang.String>> codiciPrenotazione = new ArrayList<>();
                 for (Visita visita : visite) {
-                    codiciPrenotazione.add(visitaService.getCodiciPrenotazionePerVista(volontario, visita.getId()));
+                    codiciPrenotazione.add(volFacade.getCodiciPrenotazionePerVisita(volontario, visita.getId()));
                 }
                 elencoVisiteView.aggiornaVisite(visite, stato, codiciPrenotazione);
             });
@@ -106,21 +97,21 @@ public class VolontarioController implements IUserController {
         try {
 
             // Se il configuratore sta creando il piano visite in questo momento la raccolta disponbilita è chiusa
-            if (configService.isRaccoltaDisponibilitaChiusa()) {
+            if (volFacade.raccoltaDisponibilitaChiusa()) {
                 new PopupChiudi(gui).mostra("Attenzione", "La raccolta delle disponibilità dei volontari è momentaneamente chiusa.");
                 return;
             }
 
-            YearMonth mese = configService.getMesePeriodoCorrente().plusMonths(2);
+            YearMonth mese = volFacade.getMesePeriodoCorrente().plusMonths(2);
 
             // Recupero date disponibili e le imposto nella view
-            Set<LocalDate> dateSet = volontarioService.calcolaDateDiCuiRichiedereDisponibilitaPerVolontario(volontario, mese);
+            Set<LocalDate> dateSet = volFacade.calcolaDateDiCuiRichiedereDisponibilita(volontario, mese);
             List<LocalDate> dateDisponibili = dateSet.stream()
                     .sorted(Comparator.comparing(LocalDate::toString))
                     .toList();
             view.setDateDisponibili(dateDisponibili);
 
-            List<LocalDate> dateAttualmenteDisponibili = volontarioService.getDateDisponibiliByMese(volontario, mese);
+            List<LocalDate> dateAttualmenteDisponibili = volFacade.getDateDisponibiliByMese(volontario, mese);
             view.setDateSelezionate(dateAttualmenteDisponibili);
 
             // Imposto azione del bottone Salva
@@ -136,7 +127,7 @@ public class VolontarioController implements IUserController {
 
     private void sovrascriviDisponibilita(List<LocalDate> selezionate) {
         try {
-            volontarioService.sovrascriviDisponibilita(volontario, selezionate);
+            volFacade.sovrascriviDisponibilita(volontario, selezionate);
             new PopupChiudi(gui).mostra("", "Aggiornamento avvenuto con successo.");
         } catch (DatabaseException e) {
             new PopupChiudi(gui).mostra("Errore", e.getMessage());

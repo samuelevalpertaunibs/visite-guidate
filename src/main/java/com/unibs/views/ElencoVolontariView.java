@@ -27,12 +27,12 @@ public class ElencoVolontariView {
         return window;
     }
 
-    public void aggiungiVolontario(Volontario volontario, List<String> titoliTipiVisita) {
+    public void aggiungiVolontario(Volontario volontario, List<java.lang.String> titoliTipiVisita) {
         components.add(new Label("Volontario: " + volontario.getUsername()));
 
-        String visitaText = titoliTipiVisita.isEmpty()
+        java.lang.String visitaText = titoliTipiVisita.isEmpty()
                 ? "Nessun tipo di visita associato"
-                : "Visite associate: " + String.join(", ", titoliTipiVisita);
+                : "Visite associate: " + java.lang.String.join(", ", titoliTipiVisita);
 
         components.add(new Label(visitaText));
         components.add(new EmptySpace());

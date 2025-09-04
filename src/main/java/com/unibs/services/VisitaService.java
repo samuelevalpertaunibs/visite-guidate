@@ -2,6 +2,7 @@ package com.unibs.services;
 
 import com.unibs.daos.VisitaDao;
 import com.unibs.models.*;
+import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
 
 import java.sql.SQLException;
@@ -35,7 +36,7 @@ public class VisitaService {
         }
     }
 
-    public List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, String nomeFruitore) throws DatabaseException {
+    public List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, java.lang.String nomeFruitore) throws DatabaseException {
         try {
             return visitaDao.getVisitePreviewByFruitore(stato, nomeFruitore);
         } catch (Exception e) {
@@ -61,7 +62,7 @@ public class VisitaService {
         Map<TipoVisita, Set<LocalDate>> dateOccupateTipoVisita = new HashMap<>();
 
         for (TipoVisita tipoVisita : tipiVisite) {
-            for (Volontario volontario : tipoVisita.volontari()) {
+            for (Volontario volontario : tipoVisita.getVolontari()) {
                 int volontarioId = volontario.getId();
                 List<LocalDate> disponibilita = volontarioService.getDateDisponibiliByMese(volontario, meseTarget);
 
@@ -72,7 +73,7 @@ public class VisitaService {
                     Giorno giornoSettimana = giornoService.fromDayOfWeek(data.getDayOfWeek());
 
                     // Skip se il giorno non è valido per il tipoVisita
-                    if (!tipoVisita.giorni().contains(giornoSettimana)) continue;
+                    if (!tipoVisita.getGiorniSettimana().contains(giornoSettimana)) continue;
 
                     Set<LocalDate> occupateTipo = dateOccupateTipoVisita.get(tipoVisita);
                     Set<LocalDate> occupateVolontario = dateOccupateVolontario.get(volontarioId);
@@ -125,7 +126,7 @@ public class VisitaService {
         }
     }
 
-    public List<String> getCodiciPrenotazioneFruitorePerVista(String nomeFruitore, Integer idVisita) {
+    public List<java.lang.String> getCodiciPrenotazioneFruitorePerVista(java.lang.String nomeFruitore, Integer idVisita) {
         try {
             return visitaDao.getCodiciPrenotazioneFruitorePerVista(nomeFruitore, idVisita);
         } catch (Exception e) {
@@ -143,9 +144,9 @@ public class VisitaService {
             Integer visitaId = visitaDao.getIdVisitaByIdIscrizione(codiceIscrizione);
             visitaDao.disdiciIscrizione(codiceIscrizione);
 
-            // Se la visita era al completo, dopo l'iscrizione torna proposta
-            if (visitaDao.getStatoById(visitaId) == Visita.StatoVisita.COMPLETA) {
-                visitaDao.setStatoById(visitaId, Visita.StatoVisita.PROPOSTA.name());
+            // Se la visita era al completo, dopo la disdetta torna proposta
+            if (visitaDao.getStatoById(visitaId).get() == Visita.StatoVisita.COMPLETA) {
+                visitaDao.setStatoById(visitaId, Visita.StatoVisita.PROPOSTA);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero della prenotazione.", e);
@@ -153,7 +154,7 @@ public class VisitaService {
         }
     }
 
-    public List<String> getCodiciPrenotazionePerVista(Volontario volontario, Integer id) throws DatabaseException {
+    public List<java.lang.String> getCodiciPrenotazionePerVista(Volontario volontario, Integer id) throws DatabaseException {
         try {
             return visitaDao.getCodiciPrenotazionePerVista(volontario.getUsername(), id);
         } catch (Exception e) {
@@ -166,7 +167,7 @@ public class VisitaService {
         try {
             List<Integer> idVisiteComplete = visitaDao.getIdVisiteCompleteDaChiudere();
             for (Integer idVisita : idVisiteComplete) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite complete.", e);
@@ -178,7 +179,7 @@ public class VisitaService {
         try {
             List<Integer> idVisiteDaFare = visitaDao.getIdVisiteDaFare();
             for (Integer idVisita : idVisiteDaFare) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA.name());
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CONFERMATA);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti raggiunto.", e);
@@ -190,7 +191,7 @@ public class VisitaService {
         try {
             List<Integer> idVisiteDaCancellare = visitaDao.getIdVisiteDaCancellare();
             for (Integer idVisita : idVisiteDaCancellare) {
-                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CANCELLATA.name());
+                visitaDao.setStatoById(idVisita, Visita.StatoVisita.CANCELLATA);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la chiudura delle iscrizioni di visite proposte con minimo iscritti non raggiunto.", e);

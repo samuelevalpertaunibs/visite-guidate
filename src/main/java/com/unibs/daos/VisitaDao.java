@@ -5,127 +5,92 @@ import com.unibs.utils.DatabaseManager;
 import com.unibs.utils.DateService;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class VisitaDao {
+
+    private Visita mapResultSetToVisita(ResultSet rs, Map<Integer, TipoVisitaPreview> cache) throws SQLException {
+        int tipoVisitaId = rs.getInt("tipo_visita_id");
+
+        TipoVisitaPreview tipoVisita = cache.get(tipoVisitaId);
+        if (tipoVisita == null) {
+            PuntoIncontro puntoIncontro = new PuntoIncontro(rs.getString("indirizzo_incontro"), rs.getString("comune_incontro"), rs.getString("provincia_incontro"));
+
+            tipoVisita = new TipoVisitaPreview(tipoVisitaId, rs.getString("titolo"), rs.getString("descrizione"), rs.getDate("data_inizio").toLocalDate(), rs.getDate("data_fine").toLocalDate(), rs.getTime("ora_inizio").toLocalTime(), rs.getInt("durata_minuti"), rs.getBoolean("entrata_libera"), rs.getInt("num_min_partecipanti"), rs.getInt("num_max_partecipanti"), puntoIncontro, rs.getString("luogo_nome"));
+
+            cache.put(tipoVisitaId, tipoVisita);
+        }
+
+        return new Visita(rs.getInt("id"), tipoVisita, rs.getDate("data_svolgimento").toLocalDate(), new Volontario(rs.getString("volontario_username")), Visita.StatoVisita.valueOf(rs.getString("stato")));
+    }
 
     /**
      * Ritorno una lista di Visite, i cui tipi di visita associati sono solo PARZIALMENTE inizializzati
      */
     public List<Visita> getVisitePreview(Visita.StatoVisita stato) throws SQLException {
-        List<Visita> visite = new ArrayList<>();
-        Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
-
         String sql = """
-                                    SELECT
-                                        v.id,
-                                        v.tipo_visita_id,
-                                        t.indirizzo_incontro,
-                                        t.comune_incontro,
-                                        t.provincia_incontro,
-                                        t.titolo,
-                                        t.descrizione,
-                                        t.data_inizio,
-                                        t.data_fine,
-                                        t.ora_inizio,
-                                        t.durata_minuti,
-                                        t.entrata_libera,
-                                        t.num_min_partecipanti,
-                                        t.num_max_partecipanti,
-                                        v.data_svolgimento,
-                                        v.stato,
-                                        u.username,
-                                        l.nome
-                                    FROM
-                                        visite v
-                                    JOIN tipi_visita t ON v.tipo_visita_id = t.id
-                                    JOIN utenti u ON volontario_id = u.id
-                                    JOIN luoghi l ON t.luogo_id = l.id
-                                    WHERE
-                                        v.stato = ?
+                SELECT v.id, v.tipo_visita_id, t.indirizzo_incontro, t.comune_incontro, t.provincia_incontro,
+                       t.titolo, t.descrizione, t.data_inizio, t.data_fine, t.ora_inizio, t.durata_minuti,
+                       t.entrata_libera, t.num_min_partecipanti, t.num_max_partecipanti, v.data_svolgimento,
+                       v.stato, u.username AS volontario_username, l.nome AS luogo_nome
+                FROM visite v
+                JOIN tipi_visita t ON v.tipo_visita_id = t.id
+                JOIN utenti u ON v.volontario_id = u.id
+                JOIN luoghi l ON t.luogo_id = l.id
+                WHERE v.stato = ?
                 ORDER BY v.data_svolgimento
                 """;
+
+        Map<Integer, TipoVisitaPreview> cache = new HashMap<>();
+        List<Visita> visite = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, stato.name());
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                int tipoVisitaId = rs.getInt("tipo_visita_id");
-                String indirizzo = rs.getString("indirizzo_incontro");
-                String comune = rs.getString("comune_incontro");
-                String provincia = rs.getString("provincia_incontro");
-                String titolo = rs.getString("titolo");
-                String descrizione = rs.getString("descrizione");
-                LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
-                LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
-                LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
-                int durataMinuti = rs.getInt("durata_minuti");
-                boolean entrataLibera = rs.getBoolean("entrata_libera");
-                int numMinPartecipanti = rs.getInt("num_min_partecipanti");
-                int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
-                LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
-                Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
-                String nomeVolontario = rs.getString("username");
-                String luogoNome = rs.getString("nome");
-                Integer visitaId = rs.getInt("id");
-
-                // Utilizzo una cache per evitare di creare un nuovo tipo visita per ogni istanza di visita
-                TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
-                if (tipoVisita == null) {
-                    PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
-                    Luogo luogo = new Luogo(null, luogoNome, null, null);
-                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
-                    tipoVisitaCache.put(tipoVisitaId, tipoVisita);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    visite.add(mapResultSetToVisita(rs, cache));
                 }
-
-                visite.add(new Visita(visitaId, tipoVisita, dataSvolgimento, new Volontario(null, nomeVolontario, null, null, null), statoVisita));
             }
         }
+
         return visite;
     }
 
     public void inserisciVisite(List<Visita> tutteLeVisite) throws SQLException {
         String sql = "INSERT INTO visite (tipo_visita_id, volontario_id, data_svolgimento, stato) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             for (Visita visita : tutteLeVisite) {
-                stmt.setInt(1, visita.getTipoVisita().id());
+                stmt.setInt(1, visita.getTipoVisita().getId());
                 stmt.setInt(2, visita.getVolontario().getId());
                 stmt.setDate(3, Date.valueOf(visita.getDataSvolgimento()));
                 stmt.setString(4, visita.getStato().name());
                 stmt.addBatch();
             }
 
-            // Eseguo tutte le insert una sola volta assieme
             stmt.executeBatch();
         }
     }
 
     @SuppressWarnings("SqlWithoutWhere")
     public void rimuoviDisponibilita() throws SQLException {
-        String sql = "DELETE FROM disponibilita";
+        java.lang.String sql = "DELETE FROM disponibilita";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.executeUpdate(); // Esegue direttamente la DELETE
         }
     }
 
     public Integer iscrivi(Integer utenteId, Integer visitaSelezionataId, Integer numeroIscritti) throws SQLException {
-        String sql = "INSERT INTO iscrizioni (fruitore_id, visita_id, numero_iscritti) VALUES (?, ?, ?)";
+        java.lang.String sql = "INSERT INTO iscrizioni (fruitore_id, visita_id, numero_iscritti) VALUES (?, ?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, utenteId);
             stmt.setInt(2, visitaSelezionataId);
@@ -149,32 +114,26 @@ public class VisitaDao {
 
     public int getIscrizioniRimanentiById(int visitaId) throws SQLException {
         String sql = """
-                SELECT tv.num_max_partecipanti - COALESCE(SUM(i.numero_iscritti), 0) AS posti_disponibili
+                SELECT tv.num_max_partecipanti - COALESCE(SUM(i.numero_iscritti),0) AS posti_disponibili
                 FROM visite v
-                    INNER JOIN tipi_visita tv ON v.tipo_visita_id = tv.id
-                    LEFT JOIN iscrizioni i ON v.id = i.visita_id
-                WHERE v.id = ? GROUP BY tv.num_max_partecipanti;
+                INNER JOIN tipi_visita tv ON v.tipo_visita_id = tv.id
+                LEFT JOIN iscrizioni i ON v.id = i.visita_id
+                WHERE v.id = ? GROUP BY tv.num_max_partecipanti
                 """;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, visitaId);
-
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("posti_disponibili");
-                }
+                if (rs.next()) return rs.getInt("posti_disponibili");
             }
         }
         return 0;
     }
 
-    public void setStatoById(Integer visitaId, String stato) throws SQLException {
+    public void setStatoById(Integer visitaId, Visita.StatoVisita stato) throws SQLException {
         String sql = "UPDATE visite SET stato = ? WHERE id = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, stato);
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, stato.name());
             stmt.setInt(2, visitaId);
             stmt.executeUpdate();
         }
@@ -182,37 +141,37 @@ public class VisitaDao {
 
     public List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, String nomeFruitoreIscritto) throws SQLException {
         List<Visita> visite = new ArrayList<>();
-        Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
+        Map<Integer, TipoVisitaPreview> tipoVisitaCache = new HashMap<>();
 
         String sql = """
-                SELECT DISTINCT
-                    v.id,
-                    v.tipo_visita_id,
-                    t.indirizzo_incontro,
-                    t.comune_incontro,
-                    t.provincia_incontro,
-                    t.titolo,
-                    t.descrizione,
-                    t.data_inizio,
-                    t.data_fine,
-                    t.ora_inizio,
-                    t.durata_minuti,
-                    t.entrata_libera,
-                    t.num_min_partecipanti,
-                    t.num_max_partecipanti,
-                    v.data_svolgimento,
-                    v.stato,
-                    u.username AS volontario_username,
-                    l.nome AS luogo_nome
-                FROM visite v
-                    JOIN tipi_visita t ON v.tipo_visita_id = t.id
-                    JOIN utenti u ON v.volontario_id = u.id
-                    JOIN luoghi l ON t.luogo_id = l.id
-                    JOIN iscrizioni i ON v.id = i.visita_id
-                    JOIN utenti f ON i.fruitore_id = f.id
-                WHERE v.stato = ? AND f.username = ?
-                ORDER BY v.data_svolgimento
-                """;
+            SELECT DISTINCT
+                v.id,
+                v.tipo_visita_id,
+                t.indirizzo_incontro,
+                t.comune_incontro,
+                t.provincia_incontro,
+                t.titolo,
+                t.descrizione,
+                t.data_inizio,
+                t.data_fine,
+                t.ora_inizio,
+                t.durata_minuti,
+                t.entrata_libera,
+                t.num_min_partecipanti,
+                t.num_max_partecipanti,
+                v.data_svolgimento,
+                v.stato,
+                u.username AS volontario_username,
+                l.nome AS luogo_nome
+            FROM visite v
+                JOIN tipi_visita t ON v.tipo_visita_id = t.id
+                JOIN utenti u ON v.volontario_id = u.id
+                JOIN luoghi l ON t.luogo_id = l.id
+                JOIN iscrizioni i ON v.id = i.visita_id
+                JOIN utenti f ON i.fruitore_id = f.id
+            WHERE v.stato = ? AND f.username = ?
+            ORDER BY v.data_svolgimento
+            """;
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -222,34 +181,7 @@ public class VisitaDao {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    int tipoVisitaId = rs.getInt("tipo_visita_id");
-                    String indirizzo = rs.getString("indirizzo_incontro");
-                    String comune = rs.getString("comune_incontro");
-                    String provincia = rs.getString("provincia_incontro");
-                    String titolo = rs.getString("titolo");
-                    String descrizione = rs.getString("descrizione");
-                    LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
-                    LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
-                    LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
-                    int durataMinuti = rs.getInt("durata_minuti");
-                    boolean entrataLibera = rs.getBoolean("entrata_libera");
-                    int numMinPartecipanti = rs.getInt("num_min_partecipanti");
-                    int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
-                    LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
-                    Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
-                    String nomeVolontario = rs.getString("volontario_username");
-                    String luogoNome = rs.getString("luogo_nome");
-                    Integer id = rs.getInt("id");
-
-                    TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
-                    if (tipoVisita == null) {
-                        PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
-                        Luogo luogo = new Luogo(null, luogoNome, null, null);
-                        tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
-                        tipoVisitaCache.put(tipoVisitaId, tipoVisita);
-                    }
-
-                    Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeVolontario, null, null, null), statoVisita);
+                    Visita visita = mapResultSetToVisita(rs, tipoVisitaCache);
                     visite.add(visita);
                 }
             }
@@ -258,15 +190,12 @@ public class VisitaDao {
         return visite;
     }
 
-    public List<String> getCodiciPrenotazioneFruitorePerVista(String nomeFruitore, Integer visitaId) throws SQLException {
-        String sql = "SELECT i.id FROM iscrizioni i " +
-                "JOIN utenti u ON fruitore_id = u.id " +
-                "WHERE u.username = ? AND visita_id = ?";
+    public List<java.lang.String> getCodiciPrenotazioneFruitorePerVista(java.lang.String nomeFruitore, Integer visitaId) throws SQLException {
+        java.lang.String sql = "SELECT i.id FROM iscrizioni i " + "JOIN utenti u ON fruitore_id = u.id " + "WHERE u.username = ? AND visita_id = ?";
 
-        List<String> codiciPrenotazione = new ArrayList<>();
+        List<java.lang.String> codiciPrenotazione = new ArrayList<>();
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, nomeFruitore);
             stmt.setInt(2, visitaId);
@@ -282,10 +211,9 @@ public class VisitaDao {
     }
 
     public Integer getIdFruitoreByIdIscrizione(Integer codiceIscrizione) throws SQLException {
-        String sql = "SELECT fruitore_id FROM iscrizioni WHERE id = ?";
+        java.lang.String sql = "SELECT fruitore_id FROM iscrizioni WHERE id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, codiceIscrizione);
 
@@ -299,10 +227,9 @@ public class VisitaDao {
     }
 
     public Integer getIdVisitaByIdIscrizione(Integer codiceIscrizione) throws SQLException {
-        String sql = "SELECT visita_id FROM iscrizioni WHERE id = ?";
+        java.lang.String sql = "SELECT visita_id FROM iscrizioni WHERE id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, codiceIscrizione);
 
@@ -316,38 +243,32 @@ public class VisitaDao {
     }
 
     public void disdiciIscrizione(Integer codiceIscrizione) throws SQLException {
-        String sql = "DELETE FROM iscrizioni WHERE id = ?";
+        java.lang.String sql = "DELETE FROM iscrizioni WHERE id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, codiceIscrizione);
             stmt.executeUpdate();
         }
     }
 
-    public Visita.StatoVisita getStatoById(Integer visitaId) throws SQLException {
+    public Optional<Visita.StatoVisita> getStatoById(Integer visitaId) throws SQLException {
         String sql = "SELECT stato FROM visite WHERE id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, visitaId);
-
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return Visita.StatoVisita.valueOf(rs.getString("stato"));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return Optional.of(Visita.StatoVisita.valueOf(rs.getString("stato")));
             }
         }
-        return null;
+        return Optional.empty();
     }
 
-    public List<Visita> getVisitePreviewByVolontario(Visita.StatoVisita stato, String nomeVolontario) throws SQLException {
+
+    public List<Visita> getVisitePreviewByVolontario(Visita.StatoVisita stato, java.lang.String nomeString) throws SQLException {
         List<Visita> visite = new ArrayList<>();
         Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
 
-        String sql = """
+        java.lang.String sql = """
                 SELECT DISTINCT
                                     v.id,
                                     v.tipo_visita_id,
@@ -374,20 +295,19 @@ public class VisitaDao {
                                 ORDER BY v.data_svolgimento
                 """;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, stato.name());
-            stmt.setString(2, nomeVolontario);
+            stmt.setString(2, nomeString);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int tipoVisitaId = rs.getInt("tipo_visita_id");
-                    String indirizzo = rs.getString("indirizzo_incontro");
-                    String comune = rs.getString("comune_incontro");
-                    String provincia = rs.getString("provincia_incontro");
-                    String titolo = rs.getString("titolo");
-                    String descrizione = rs.getString("descrizione");
+                    java.lang.String indirizzo = rs.getString("indirizzo_incontro");
+                    java.lang.String comune = rs.getString("comune_incontro");
+                    java.lang.String provincia = rs.getString("provincia_incontro");
+                    java.lang.String titolo = rs.getString("titolo");
+                    java.lang.String descrizione = rs.getString("descrizione");
                     LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
                     LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
                     LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
@@ -397,7 +317,7 @@ public class VisitaDao {
                     int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
                     LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
                     Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
-                    String luogoNome = rs.getString("luogo_nome");
+                    java.lang.String luogoNome = rs.getString("luogo_nome");
                     Integer id = rs.getInt("id");
 
                     TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
@@ -408,7 +328,7 @@ public class VisitaDao {
                         tipoVisitaCache.put(tipoVisitaId, tipoVisita);
                     }
 
-                    Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeVolontario, null, null, null), statoVisita);
+                    Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeString, null, null, null), statoVisita);
                     visite.add(visita);
                 }
             }
@@ -417,18 +337,17 @@ public class VisitaDao {
         return visite;
     }
 
-    public List<String> getCodiciPrenotazionePerVista(String username, Integer id) throws SQLException {
-        String sql = """
+    public List<java.lang.String> getCodiciPrenotazionePerVista(java.lang.String username, Integer id) throws SQLException {
+        java.lang.String sql = """
                 SELECT i.id as iscrizione_id, i.numero_iscritti as numero_iscritti FROM iscrizioni i
                 JOIN visite v ON i.visita_id = v.id
                 WHERE v.volontario_id = ?
                 AND v.id = ?
                 """;
 
-        List<String> codiciPrenotazione = new ArrayList<>();
+        List<java.lang.String> codiciPrenotazione = new ArrayList<>();
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
             stmt.setInt(2, id);
@@ -445,10 +364,9 @@ public class VisitaDao {
 
     public List<Integer> getIdVisiteCompleteDaChiudere() throws SQLException {
         List<Integer> idVisite = new ArrayList<>();
-        String sql = "SELECT id FROM visite WHERE stato = 'COMPLETA' AND data_svolgimento <= ?";
+        java.lang.String sql = "SELECT id FROM visite WHERE stato = 'COMPLETA' AND data_svolgimento <= ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
 
             ResultSet rs = stmt.executeQuery();
@@ -461,97 +379,87 @@ public class VisitaDao {
     }
 
     public List<Integer> getIdVisiteDaFare() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
         String sql = """
-                SELECT v.id FROM visite v JOIN tipi_visita tv ON tv.id = v.tipo_visita_id WHERE v.stato = 'PROPOSTA' AND v.data_svolgimento <= ? AND (SELECT SUM(iscrizioni.numero_iscritti) FROM iscrizioni WHERE iscrizioni.visita_id = v.id) >= tv.num_min_partecipanti
+                SELECT v.id
+                FROM visite v
+                JOIN tipi_visita tv ON tv.id = v.tipo_visita_id
+                WHERE v.stato = 'PROPOSTA'
+                  AND v.data_svolgimento <= ?
+                  AND (SELECT COALESCE(SUM(numero_iscritti),0) FROM iscrizioni WHERE visita_id = v.id) >= tv.num_min_partecipanti
                 """;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
+        List<Integer> result = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
+            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(rs.getInt("id"));
+                }
             }
         }
-
-        return idVisite;
+        return result;
     }
 
     public List<Integer> getIdVisiteDaCancellare() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
         String sql = """
-                    SELECT v.id
-                                               FROM visite v
-                                               JOIN tipi_visita tv ON tv.id = v.tipo_visita_id
-                                               WHERE v.stato = 'PROPOSTA'
-                                                 AND v.data_svolgimento <= ?
-                                                 AND (
-                                                   SELECT COALESCE(SUM(i.numero_iscritti), 0)
-                                                   FROM iscrizioni i
-                                                   WHERE i.visita_id = v.id
-                                                 ) < tv.num_min_partecipanti
+                SELECT v.id
+                FROM visite v
+                JOIN tipi_visita tv ON tv.id = v.tipo_visita_id
+                WHERE v.stato = 'PROPOSTA'
+                  AND v.data_svolgimento <= ?
+                  AND (SELECT COALESCE(SUM(numero_iscritti),0) FROM iscrizioni WHERE visita_id = v.id) < tv.num_min_partecipanti
                 """;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
+        List<Integer> result = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
+            stmt.setDate(1, Date.valueOf(DateService.today().plusDays(3)));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) result.add(rs.getInt("id"));
             }
         }
-
-        return idVisite;
+        return result;
     }
 
     public List<Integer> getIdVisiteDaRendereEffettuate() throws SQLException {
-        List<Integer> idVisite = new ArrayList<>();
         String sql = "SELECT v.id FROM visite v WHERE v.stato = 'CONFERMATA' AND v.data_svolgimento < ?";
+        List<Integer> result = new ArrayList<>();
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setDate(1, Date.valueOf(DateService.today()));
-
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                idVisite.add(rs.getInt("id"));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) result.add(rs.getInt("id"));
             }
         }
-
-        return idVisite;
+        return result;
     }
 
     public void rimuoviVisiteCancellate() throws SQLException {
         String sql = "DELETE FROM visite WHERE stato = 'CANCELLATA' AND data_svolgimento < ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDate(1, Date.valueOf(DateService.today()));
-
             stmt.executeUpdate();
         }
     }
 
     public List<Visita> getVisiteFromArchivio() throws SQLException {
-        String sql = "SELECT * FROM archivio";
+        java.lang.String sql = "SELECT * FROM archivio";
         List<Visita> visite = new ArrayList<>();
         Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 int tipoVisitaId = rs.getInt("tipo_visita_id");
-                String indirizzo = rs.getString("indirizzo_incontro");
-                String comune = rs.getString("comune_incontro");
-                String provincia = rs.getString("provincia_incontro");
-                String titolo = rs.getString("titolo");
-                String descrizione = rs.getString("descrizione");
+                java.lang.String indirizzo = rs.getString("indirizzo_incontro");
+                java.lang.String comune = rs.getString("comune_incontro");
+                java.lang.String provincia = rs.getString("provincia_incontro");
+                java.lang.String titolo = rs.getString("titolo");
+                java.lang.String descrizione = rs.getString("descrizione");
                 LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
                 LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
                 LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
@@ -561,8 +469,8 @@ public class VisitaDao {
                 int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
                 LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
                 Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
-                String luogoNome = rs.getString("luogo_nome");
-                String nomeVolontario = rs.getString("username_volontario");
+                java.lang.String luogoNome = rs.getString("luogo_nome");
+                java.lang.String nomeString = rs.getString("username_volontario");
                 Integer id = rs.getInt("id");
 
                 TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
@@ -573,7 +481,7 @@ public class VisitaDao {
                     tipoVisitaCache.put(tipoVisitaId, tipoVisita);
                 }
 
-                Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeVolontario, null, null, null), statoVisita);
+                Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeString, null, null, null), statoVisita);
                 visite.add(visita);
             }
         }
@@ -582,10 +490,9 @@ public class VisitaDao {
     }
 
     public void rimuoviById(Integer idVisita) throws SQLException {
-        String sql = "DELETE FROM visite WHERE id = ?";
+        java.lang.String sql = "DELETE FROM visite WHERE id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idVisita);
 
             stmt.executeUpdate();
@@ -593,21 +500,21 @@ public class VisitaDao {
     }
 
     public void archiviaVisita(Integer idVisita) throws SQLException {
-        String sql = "INSERT INTO archivio (" +
-                "tipo_visita_id, titolo, descrizione, indirizzo_incontro, comune_incontro, provincia_incontro, " +
-                "ora_inizio, durata_minuti, entrata_libera, luogo_nome, data_svolgimento, stato, username_volontario" +
-                ") " +
-                "SELECT tv.id, tv.titolo, tv.descrizione, tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro, " +
-                "tv.ora_inizio, tv.durata_minuti, tv.entrata_libera, l.nome, v.data_svolgimento, ?, u.username " +
-                "FROM visite v " +
-                "JOIN tipi_visita tv ON v.tipo_visita_id = tv.id " +
-                "JOIN utenti u ON v.volontario_id = u.id " +
-                "JOIN luoghi l ON tv.luogo_id = l.id " +
-                "WHERE v.id = ?";
+        String sql = """
+                INSERT INTO archivio (
+                    tipo_visita_id, titolo, descrizione, indirizzo_incontro, comune_incontro, provincia_incontro,
+                    ora_inizio, durata_minuti, entrata_libera, luogo_nome, data_svolgimento, stato, username_volontario
+                )
+                SELECT tv.id, tv.titolo, tv.descrizione, tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro,
+                       tv.ora_inizio, tv.durata_minuti, tv.entrata_libera, l.nome, v.data_svolgimento, ?, u.username
+                FROM visite v
+                JOIN tipi_visita tv ON v.tipo_visita_id = tv.id
+                JOIN utenti u ON v.volontario_id = u.id
+                JOIN luoghi l ON tv.luogo_id = l.id
+                WHERE v.id = ?
+                """;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, Visita.StatoVisita.EFFETTUATA.name());
             stmt.setInt(2, idVisita);
             stmt.executeUpdate();

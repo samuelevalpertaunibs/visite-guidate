@@ -8,12 +8,12 @@ import java.time.format.DateTimeFormatter;
 
 public class Visita implements ElementoSelezionabile {
     private final Integer id;
-    private final TipoVisita tipoVisita;
+    private final TipoVisitaAbstract tipoVisita;
     private final LocalDate dataSvolgimento;
     private final Volontario volontario;
     private final StatoVisita stato;
 
-    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario, StatoVisita stato) {
+    public Visita(Integer id, TipoVisitaAbstract tipoVisita, LocalDate dataSvolgimento, Volontario volontario, StatoVisita stato) {
         this.id = id;
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
@@ -31,10 +31,10 @@ public class Visita implements ElementoSelezionabile {
 
     @Override
     public String getPlaceHolder() {
-        return tipoVisita.titolo() + " in data " + dataSvolgimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        return tipoVisita.getTitolo() + " in data " + dataSvolgimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
-    public TipoVisita getTipoVisita() {
+    public TipoVisitaAbstract getTipoVisita() {
         return tipoVisita;
     }
 
@@ -55,10 +55,6 @@ public class Visita implements ElementoSelezionabile {
     }
 
     public enum StatoVisita {
-        PROPOSTA,
-        CONFERMATA,
-        EFFETTUATA,
-        COMPLETA,
-        CANCELLATA
+        PROPOSTA, CONFERMATA, EFFETTUATA, COMPLETA, CANCELLATA
     }
 }

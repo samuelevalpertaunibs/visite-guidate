@@ -35,7 +35,7 @@ public class FruitoreService {
             }
             Integer codiceUnivoco = visitaDao.iscrivi(fruitore.getId(), visitaSelezionata.getId(), numeroPersoneDaIscrivere);
             if (numeroPersoneDaIscrivere == iscrizioniRimanenti) {
-                visitaDao.setStatoById(visitaSelezionata.getId(), Visita.StatoVisita.COMPLETA.name());
+                visitaDao.setStatoById(visitaSelezionata.getId(), Visita.StatoVisita.COMPLETA);
             }
             return codiceUnivoco;
         } catch (SQLException e) {

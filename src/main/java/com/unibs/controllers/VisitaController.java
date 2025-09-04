@@ -1,9 +1,9 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facades.VisitaFacade;
 import com.unibs.models.Visita;
-import com.unibs.services.ConfigService;
-import com.unibs.services.VisitaService;
+import com.unibs.services.ServiceFactory;
 import com.unibs.views.ElencoVisiteView;
 import com.unibs.views.components.PopupChiudi;
 import com.unibs.views.components.PopupConferma;
@@ -13,14 +13,12 @@ import java.util.List;
 
 public class VisitaController {
     private final WindowBasedTextGUI gui;
-    private final VisitaService visitaService;
-    private final ConfigService configService;
     private ElencoVisiteView elencoVisiteView;
+    private final VisitaFacade visitaFacade;
 
-    public VisitaController(WindowBasedTextGUI gui, VisitaService visitaService, ConfigService configService) {
+    public VisitaController(WindowBasedTextGUI gui, ServiceFactory serviceFactory) {
         this.gui = gui;
-        this.visitaService = visitaService;
-        this.configService = configService;
+        this.visitaFacade = new VisitaFacade(serviceFactory);
     }
 
     public void apriVisualizzaVisitePerTipologia(List<Visita.StatoVisita> statiDaMostrare) {
@@ -34,9 +32,9 @@ public class VisitaController {
             elencoVisiteView.setStati(stati, stato -> {
                 List<Visita> visite;
                 if (stato != Visita.StatoVisita.EFFETTUATA) {
-                    visite = visitaService.getVisitePreviewByStato(stato);
+                    visite = visitaFacade.getVisitePreviewByStato(stato);
                 } else {
-                    visite = visitaService.getVisiteFromArchivio();
+                    visite = visitaFacade.getVisiteFromArchivio();
                 }
                 elencoVisiteView.aggiornaVisite(visite, stato);
             });
@@ -47,9 +45,9 @@ public class VisitaController {
 
     public Boolean apriCreazionePiano() {
         try {
-            if (configService.isRaccoltaDisponibilitaChiusa()) {
-                visitaService.rimuoviVecchieDisponibilita();
-                configService.riapriRaccoltaDisponibilita();
+            if (visitaFacade.isRaccoltaDisponibilitaChiusa()) {
+                visitaFacade.rimuoviVecchieDisponibilita();
+                visitaFacade.riapriRaccoltaDisponibilita();
                 String messaggio = "Il piano delle visite è già stato creato ma il processo è\nstato interrotto prima della riapertura della raccolta disponibilità.\n\nLa riapertura delle dispobilità è appena stata eseguita con successo.";
                 new PopupChiudi(gui).mostra("Attenzione!", messaggio);
 
@@ -59,7 +57,7 @@ public class VisitaController {
 
             String messaggioConferma = "Verrà chiusa la raccolta disponibilità dei volontari e verrà\navviata la produzione del piano delle visite per il mese a venire.\nInoltre non sarà più possibile modificare le date precluse per il mese attuale.";
             if (new PopupConferma(gui).mostra("Attenzione!", messaggioConferma)) {
-                visitaService.creaPiano();
+                visitaFacade.creaPiano();
                 return true;
             }
         } catch (Exception e) {
@@ -78,10 +76,10 @@ public class VisitaController {
     private void initElencoVisiteConIscrizioneViewListener(List<Visita.StatoVisita> stati, String nomeFruitore) {
         try {
             elencoVisiteView.setStati(stati, stato -> {
-                List<Visita> visite = visitaService.getVisitePreviewByFruitore(stato, nomeFruitore);
+                List<Visita> visite = visitaFacade.getVisitePreviewByFruitore(stato, nomeFruitore);
                 List<List<String>> codiciPrenotazione = new ArrayList<>();
                 for (Visita visita : visite) {
-                    codiciPrenotazione.add(visitaService.getCodiciPrenotazioneFruitorePerVista(nomeFruitore, visita.getId()));
+                    codiciPrenotazione.add(visitaFacade.getCodiciPrenotazioneFruitorePerVisita(nomeFruitore, visita.getId()));
                 }
                 elencoVisiteView.aggiornaVisite(visite, stato, codiciPrenotazione);
             });

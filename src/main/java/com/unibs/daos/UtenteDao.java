@@ -14,8 +14,8 @@ import java.util.*;
 
 public class UtenteDao {
 
-    public Utente findByUsername(String username) throws DatabaseException {
-        String sql = "SELECT * FROM utenti WHERE username = ?";
+    public Utente findByUsername(java.lang.String username) throws DatabaseException {
+        java.lang.String sql = "SELECT * FROM utenti WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
@@ -32,7 +32,7 @@ public class UtenteDao {
     }
 
     public void updatePassword(Utente utente) throws DatabaseException {
-        String sql = "UPDATE utenti SET password_hash = ?, last_login = ? WHERE username = ?";
+        java.lang.String sql = "UPDATE utenti SET password_hash = ?, last_login = ? WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, utente.getPasswordHash());
@@ -49,8 +49,8 @@ public class UtenteDao {
         }
     }
 
-    public LocalDate updateLastLogin(String username) throws SQLException {
-        String sql = "UPDATE utenti SET last_login = ? WHERE username = ?";
+    public LocalDate updateLastLogin(java.lang.String username) throws SQLException {
+        java.lang.String sql = "UPDATE utenti SET last_login = ? WHERE username = ?";
         LocalDate now = DateService.today();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -69,14 +69,14 @@ public class UtenteDao {
 
     public List<Volontario> getAllVolontari() throws SQLException {
         ArrayList<Volontario> volontari = new ArrayList<>();
-        String query = "SELECT * FROM utenti WHERE ruolo_id = 2";
+        java.lang.String query = "SELECT * FROM utenti WHERE ruolo_id = 2";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String username = rs.getString("username");
-                String passwordHash = rs.getString("password_hash");
+                java.lang.String username = rs.getString("username");
+                java.lang.String passwordHash = rs.getString("password_hash");
                 byte[] salt = rs.getBytes("salt");
                 LocalDate lastLogin = rs.getObject("last_login", LocalDate.class);
                 volontari.add(new Volontario(id, username, passwordHash, salt, lastLogin));
@@ -87,14 +87,14 @@ public class UtenteDao {
 
     public Set<Volontario> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
         Set<Volontario> volontari = new HashSet<>();
-        String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
+        java.lang.String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, tipoVisitaId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String username = rs.getString("username");
+                java.lang.String username = rs.getString("username");
 
                 volontari.add(new Volontario(id, username, null, null, null));
             }
@@ -104,7 +104,7 @@ public class UtenteDao {
     }
 
     public List<LocalDate> getDateDisponibiliByMese(int volontarioID, YearMonth mese) throws SQLException {
-        String sql = "SELECT data_disponibile FROM disponibilita " + "WHERE volontario_id = ? AND YEAR(data_disponibile) = ? AND MONTH(data_disponibile) = ?";
+        java.lang.String sql = "SELECT data_disponibile FROM disponibilita " + "WHERE volontario_id = ? AND YEAR(data_disponibile) = ? AND MONTH(data_disponibile) = ?";
 
         List<LocalDate> dateDisponibili = new ArrayList<>();
 
@@ -133,8 +133,8 @@ public class UtenteDao {
         int mese = primaData.getMonthValue();
         int anno = primaData.getYear();
 
-        String deleteQuery = "DELETE FROM disponibilita WHERE volontario_id = ? AND EXTRACT(MONTH FROM data_disponibile) = ? AND EXTRACT(YEAR FROM data_disponibile) = ?";
-        String insertQuery = "INSERT INTO disponibilita (volontario_id, data_disponibile) VALUES (?, ?)";
+        java.lang.String deleteQuery = "DELETE FROM disponibilita WHERE volontario_id = ? AND EXTRACT(MONTH FROM data_disponibile) = ? AND EXTRACT(YEAR FROM data_disponibile) = ?";
+        java.lang.String insertQuery = "INSERT INTO disponibilita (volontario_id, data_disponibile) VALUES (?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
@@ -164,7 +164,7 @@ public class UtenteDao {
     }
 
     public void rimuovi(int id) throws SQLException {
-        String sql = "DELETE FROM utenti WHERE id = ?";
+        java.lang.String sql = "DELETE FROM utenti WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -174,7 +174,7 @@ public class UtenteDao {
     }
 
     public List<Integer> getIdVolontariNonAssociati() throws SQLException {
-        String sql = "SELECT id FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT volontario_id FROM tipi_visita_volontari)";
+        java.lang.String sql = "SELECT id FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT volontario_id FROM tipi_visita_volontari)";
         List<Integer> idVolontari = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -188,8 +188,8 @@ public class UtenteDao {
         return idVolontari;
     }
 
-    public void rimuovi(String nome) throws SQLException {
-        String sql = "DELETE FROM utenti WHERE username = ?";
+    public void rimuovi(java.lang.String nome) throws SQLException {
+        java.lang.String sql = "DELETE FROM utenti WHERE username = ?";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -199,7 +199,7 @@ public class UtenteDao {
     }
 
     public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
-        String sql = "SELECT id, username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
+        java.lang.String sql = "SELECT id, username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
         Set<Volontario> volontari = new HashSet<>();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -209,7 +209,7 @@ public class UtenteDao {
 
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String username = rs.getString("username");
+                java.lang.String username = rs.getString("username");
 
                 volontari.add(new Volontario(id, username, null, null, null));
             }
@@ -219,7 +219,7 @@ public class UtenteDao {
     }
 
     public void associaATipoVisitaById(int id, int tipoVisitaId) throws SQLException {
-        String sql = "INSERT INTO tipi_visita_volontari (volontario_id, tipo_visita_id) VALUES (?, ?)";
+        java.lang.String sql = "INSERT INTO tipi_visita_volontari (volontario_id, tipo_visita_id) VALUES (?, ?)";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
@@ -230,7 +230,7 @@ public class UtenteDao {
     }
 
     public void inserisciUtente(Utente nuovoUtente) throws SQLException {
-        String sql = "INSERT INTO utenti VALUES (DEFAULT, ?, ?, ?, ?, ?)";
+        java.lang.String sql = "INSERT INTO utenti VALUES (DEFAULT, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -249,7 +249,7 @@ public class UtenteDao {
     }
 
     public void applicaRimozioneVolontari() throws SQLException {
-        String sql = "DELETE FROM utenti WHERE id IN (SELECT volontario_id FROM rimozioni_volontari WHERE mese_rimozione = (SELECT MONTH(periodo_corrente) + 1 FROM config))";
+        java.lang.String sql = "DELETE FROM utenti WHERE id IN (SELECT volontario_id FROM rimozioni_volontari WHERE mese_rimozione = (SELECT MONTH(periodo_corrente) + 1 FROM config))";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -257,8 +257,8 @@ public class UtenteDao {
         }
     }
 
-    public Optional<Integer> getIdByUsername(String nome) throws SQLException {
-        String sql = "SELECT id FROM utenti WHERE username = ?";
+    public Optional<Integer> getIdByUsername(java.lang.String nome) throws SQLException {
+        java.lang.String sql = "SELECT id FROM utenti WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, nome);
@@ -272,7 +272,7 @@ public class UtenteDao {
     }
 
     public void inserisciVolontarioDaRimuovere(int id) throws SQLException {
-        String sql = "INSERT INTO rimozioni_volontari (volontario_id, mese_rimozione) VALUES (?, (SELECT MONTH(periodo_corrente) + 2 FROM config))";
+        java.lang.String sql = "INSERT INTO rimozioni_volontari (volontario_id, mese_rimozione) VALUES (?, (SELECT MONTH(periodo_corrente) + 2 FROM config))";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -282,7 +282,7 @@ public class UtenteDao {
     }
 
     public void terminaTVAssociatiAlVolontario(int idVolontario) throws SQLException {
-        String sql = """
+        java.lang.String sql = """
                 UPDATE tipi_visita
                     SET data_fine = (
                         SELECT LAST_DAY(DATE_ADD(periodo_corrente, INTERVAL 1 MONTH))

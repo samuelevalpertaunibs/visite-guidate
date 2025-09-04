@@ -2,8 +2,8 @@ package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
 import com.unibs.formatters.TipoVisitaFormatter;
-import com.unibs.models.TipoVisita;
 import com.unibs.models.Volontario;
+import com.unibs.models.TipoVisita;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

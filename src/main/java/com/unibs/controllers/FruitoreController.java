@@ -2,14 +2,12 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facades.FruitoreFacade;
 import com.unibs.models.Fruitore;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
-import com.unibs.services.ConfigService;
-import com.unibs.services.FruitoreService;
 import com.unibs.services.ServiceFactory;
-import com.unibs.services.VisitaService;
 import com.unibs.views.InputNumericoView;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
@@ -22,24 +20,20 @@ import java.util.List;
 public class FruitoreController implements IUserController {
     private final Fruitore fruitore;
     private final WindowBasedTextGUI gui;
-    private final ConfigService configService;
     private final MenuView menuView;
     private final VisitaController visitaController;
-    private final VisitaService visitaService;
-    private final FruitoreService fruitoreService;
+    private final FruitoreFacade fruitoreFacade;
 
     public FruitoreController(MultiWindowTextGUI gui, Utente utente, ServiceFactory serviceFactory) {
         this.gui = gui;
-        this.configService = serviceFactory.getConfigService();
         this.menuView = new MenuView(gui);
         this.fruitore = new Fruitore(utente);
-        this.visitaService = serviceFactory.getVisitaService();
-        this.fruitoreService = serviceFactory.getFruitoreService();
-        this.visitaController = new VisitaController(gui, serviceFactory.getVisitaService(), configService);
+        this.visitaController = new VisitaController(gui, serviceFactory);
+        this.fruitoreFacade = new FruitoreFacade(serviceFactory);
     }
 
     public void start() {
-        if (configService.regimeAttivo()) {
+        if (fruitoreFacade.isRegimeAttivo()) {
             showMenu();
         } else {
             mostraAvvisoNonRegime(gui);
@@ -66,7 +60,7 @@ public class FruitoreController implements IUserController {
             InputNumericoView inputNumericoView = new InputNumericoView("Disdici iscrizione", "Inserisci il codice univoco relativo all'iscrizione da disdire");
             Integer codiceIscrizione = inputNumericoView.mostra(gui);
             if (codiceIscrizione != null) {
-                visitaService.disdici(fruitore, codiceIscrizione);
+                fruitoreFacade.disdiciVisita(fruitore, codiceIscrizione);
                 new PopupChiudi(gui).mostra("", "L'iscrizione è stata annullata correttamente.");
             }
         } catch (Exception e) {
@@ -76,20 +70,27 @@ public class FruitoreController implements IUserController {
 
     private void apriIscrivitiVisitaProposta() {
         SelezionaElementoView<Visita> selezionaVisitaView = new SelezionaElementoView<>();
+        Visita visitaSelezionata = null;
         try {
-            List<Visita> visite = visitaService.getVisitePreviewByStato(Visita.StatoVisita.PROPOSTA);
+            List<Visita> visite = fruitoreFacade.getVisiteProposte();
             InputNumericoView inputNumericoView = new InputNumericoView("Iscrizione", "Inserisci il numero di persone per cui vuoi prenotare");
 
-            Visita visitaSelezionata = selezionaVisitaView.mostra(gui, visite, "Seleziona una visita");
+            if (visite.isEmpty()) {
+                throw new Exception("Nessuna visita attualmente dispobile");
+            }
+
+            visitaSelezionata = selezionaVisitaView.mostra(gui, visite, "Seleziona una visita");
             Integer numeroIscritti = inputNumericoView.mostra(gui);
             if (numeroIscritti != null) {
-                int codiceUnivoco = fruitoreService.iscrivi(fruitore, visitaSelezionata, numeroIscritti);
+                int codiceUnivoco = fruitoreFacade.iscriviAdUnaVisita(fruitore, visitaSelezionata, numeroIscritti);
                 new PopupChiudi(gui).mostra("", "L'iscrizione è avvenuta con successo.\nQuesto è il tuo codice prenotazione: " + codiceUnivoco + ".\nPortalo il giorno della visita o utilizzalo per annullare l'iscrizione.");
             }
         } catch (Exception e) {
             new PopupChiudi(gui).mostra("Errore", e.getMessage());
         } finally {
-            selezionaVisitaView.chiudi();
+           if(visitaSelezionata != null) {
+               selezionaVisitaView.chiudi();
+           }
         }
     }
 

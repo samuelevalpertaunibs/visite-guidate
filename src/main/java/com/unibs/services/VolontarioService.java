@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 public class VolontarioService {
     private static final Logger LOGGER = Logger.getLogger(VolontarioService.class.getName());
-    private static final String DEFAULT_PASSWORD = "password";
+    private static final java.lang.String DEFAULT_PASSWORD = "password";
 
     private final PasswordService passwordService;
     private final DisponibilitaCalculatorService disponibilitaCalculatorService;
@@ -107,7 +107,7 @@ public class VolontarioService {
             }
     }
 
-    public void inserisciVolontarioDaRimuovere(String nome) throws DatabaseException {
+    public void inserisciVolontarioDaRimuovere(java.lang.String nome) throws DatabaseException {
         try {
             int id = utenteDao.getIdByUsername(nome).orElseThrow(Exception::new);
             utenteDao.inserisciVolontarioDaRimuovere(id);
@@ -118,13 +118,13 @@ public class VolontarioService {
         }
     }
 
-    public void aggiungiVolontario(String username) {
+    public void aggiungiVolontario(java.lang.String username) {
         if(utenteDao.findByUsername(username) != null) {
             throw new IllegalArgumentException("Username già esistente");
         }
         try{
             byte[] salt = passwordService.generateSalt();
-            String hashedPassword = passwordService.hashPassword(DEFAULT_PASSWORD, salt);
+            java.lang.String hashedPassword = passwordService.hashPassword(DEFAULT_PASSWORD, salt);
 
             Utente nuovoVolontario = new Utente(0, username, hashedPassword, salt, 2, null);
             utenteDao.inserisciUtente(nuovoVolontario);

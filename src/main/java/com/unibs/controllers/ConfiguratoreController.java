@@ -2,10 +2,11 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facades.ConfiguratoreFacade;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
-import com.unibs.services.*;
+import com.unibs.services.ServiceFactory;
 import com.unibs.utils.DateService;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
@@ -27,14 +28,9 @@ public class ConfiguratoreController implements IUserController {
     private final DatePrecluseController datePrecluseController;
     private final ConfigController configController;
     final List<MenuOption> menuOptions = new ArrayList<>();
-    private final VolontarioService volontarioService;
-    private final LuogoService luogoService;
-    private final TipoVisitaService tipoVisitaService;
     MenuOption creaPianoOption;
     MenuView operazioniSupplementariMenu;
-
-    // Services
-    private final ConfigService configService;
+    private final ConfiguratoreFacade configuratoreFacade;
 
     // Views
     private final MenuView menuView;
@@ -42,30 +38,19 @@ public class ConfiguratoreController implements IUserController {
     public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
         this.gui = gui;
         this.utente = currentUtente;
-
-        LuogoService luogoService = serviceFactory.getLuogoService();
-        configService = serviceFactory.getConfigService();
-        GiornoService giornoService = serviceFactory.getGiornoService();
-        VolontarioService volontarioService = serviceFactory.getVolontarioService();
-        VisitaService visitaService = serviceFactory.getVisitaService();
-        DatePrecluseService datePrecluseService = serviceFactory.getDatePrecluseService();
-        TipoVisitaService tipoVisitaService = serviceFactory.getTipoVisitaService();
-
-        this.luogoController = new LuogoController(gui, luogoService);
-        this.tipoVisitaController = new TipoVisitaController(gui, luogoService, configService, giornoService, volontarioService, tipoVisitaService);
-        this.visitaController = new VisitaController(gui, visitaService, configService);
-        this.datePrecluseController = new DatePrecluseController(gui, datePrecluseService);
-        this.configController = new ConfigController(gui, configService);
+        this.luogoController = new LuogoController(gui, serviceFactory.getLuogoService());
+        this.tipoVisitaController = new TipoVisitaController(gui, serviceFactory);
+        this.visitaController = new VisitaController(gui, serviceFactory);
+        this.datePrecluseController = new DatePrecluseController(gui, serviceFactory.getDatePrecluseService());
+        this.configController = new ConfigController(gui, serviceFactory.getConfigService());
         this.menuView = new MenuView(gui);
-        this.volontarioService = volontarioService;
-        this.luogoService = luogoService;
-        this.tipoVisitaService = tipoVisitaService;
+        this.configuratoreFacade = new ConfiguratoreFacade(serviceFactory);
     }
 
 
     public void start() {
-        if (configService.isInitialized()) {
-            if (configService.regimeAttivo()) {
+        if (configuratoreFacade.isInitialized()) {
+            if (configuratoreFacade.regimeAttivo()) {
                 showMenu();
             } else {
                 mostraAvvisoNonRegime(gui);
@@ -76,7 +61,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     public void inizializzaBaseDiDati() {
-        configService.initDefault();
+        configuratoreFacade.inizializzaConfigurazioneDefault();
         configController.apriConfigurazione();
         tipoVisitaController.apriAggiungiTipoVisita();
 
@@ -85,7 +70,7 @@ public class ConfiguratoreController implements IUserController {
         LocalDate prossimoSedici = oggi.getDayOfMonth() < 16
                 ? oggi.withDayOfMonth(16)
                 : oggi.plusMonths(1).withDayOfMonth(16);
-        configService.setPeriodoCorrente(prossimoSedici);
+        configuratoreFacade.setPeriodoCorrente(prossimoSedici);
     }
 
     public void showMenu() {
@@ -96,7 +81,7 @@ public class ConfiguratoreController implements IUserController {
         menuOptions.add(new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)));
         menuOptions.add(new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite)));
 
-        if (configService.isCreazioneNuovoPianoPossibile()) {
+        if (configuratoreFacade.isCreazioneNuovoPianoPossibile()) {
             creaPianoOption = new MenuOption("Creazione nuovo piano", (v) -> handleMenuAction(this::incrementaPeriodoCorrente));
             menuOptions.add(creaPianoOption);
         }
@@ -105,7 +90,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     private void incrementaPeriodoCorrente() {
-        applicaRimozioni();
+        configuratoreFacade.applicaRimozioni();
 
         Boolean isPianoCreato = visitaController.apriCreazionePiano();
 
@@ -124,7 +109,7 @@ public class ConfiguratoreController implements IUserController {
                 subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> handleMenuAction(this::rimuoviTipoVisita) ));
                 subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> handleMenuAction(this::rimuoviVolontario)));
                 subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> handleMenuAction(() -> {
-                    configService.riapriRaccoltaDisponibilita();
+                    configuratoreFacade.riapriRaccoltaDisponibilita();
                     operazioniSupplementariMenu.close();
                     menuOptions.remove(creaPianoOption);
                     menuView.aggiornaMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);
@@ -136,14 +121,6 @@ public class ConfiguratoreController implements IUserController {
         }
     }
 
-    public void applicaRimozioni() {
-        luogoService.applicaRimozioneLuoghi();
-        tipoVisitaService.applicaRimozioneTipiVisita();
-        volontarioService.applicaRimozioneVolontari();
-        luogoService.rimuoviNonAssociati();
-        tipoVisitaService.rimuoviNonAssociati();
-        volontarioService.rimuoviNonAssociati();
-    }
 
     private void associaAltriVolontari() {
         tipoVisitaController.associaNuoviVolontari();
