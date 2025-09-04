@@ -101,7 +101,7 @@ public class TipoVisitaService {
         }
     }
 
-    public List<String> getPreviewTipiVisita(String luogoNome) throws DatabaseException {
+    public List<String> getNomiTipiVisita(String luogoNome) throws DatabaseException {
         try {
             return tipoVisitaDao.getNomiTipiVisita(luogoNome);
         } catch (SQLException e) {

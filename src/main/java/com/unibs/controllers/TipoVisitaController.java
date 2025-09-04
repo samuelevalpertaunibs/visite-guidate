@@ -285,7 +285,7 @@ public class TipoVisitaController {
         }
     }
 
-    private void aggiungiTipoVisita() {
+    private void aggiungiTipoVisita() throws Exception {
         String titolo = aggiungiTipoVisitaView.getTitolo();
         String descrizione = aggiungiTipoVisitaView.getDescrizione();
         String dataInizio = aggiungiTipoVisitaView.getDataInizio();
