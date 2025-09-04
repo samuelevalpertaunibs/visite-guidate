@@ -1,4 +1,4 @@
-package com.unibs.facade;
+package com.unibs.facades;
 
 import com.unibs.services.*;
 
@@ -27,7 +27,7 @@ public class ConfiguratoreFacade {
         return configService.regimeAttivo();
     }
 
-    public void initDefault() {
+    public void inizializzaConfigurazioneDefault() {
         configService.initDefault();
     }
 

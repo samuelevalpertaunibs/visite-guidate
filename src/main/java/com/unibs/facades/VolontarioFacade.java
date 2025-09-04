@@ -1,6 +1,5 @@
-package com.unibs.facade;
+package com.unibs.facades;
 
-import com.unibs.models.Utente;
 import com.unibs.models.Visita;
 import com.unibs.models.Volontario;
 import com.unibs.services.*;
@@ -58,7 +57,7 @@ public class VolontarioFacade {
     }
 
     /** Recupera i codici prenotazione associati a un volontario per una visita */
-    public List<String> getCodiciPrenotazionePerVisita(Volontario volontario, int visitaId) {
+    public List<java.lang.String> getCodiciPrenotazionePerVisita(Volontario volontario, int visitaId) {
         return visitaService.getCodiciPrenotazionePerVista(volontario, visitaId);
     }
 }

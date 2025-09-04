@@ -2,12 +2,11 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facade.ConfiguratoreFacade;
-import com.unibs.facade.TipoVisiteFacade;
+import com.unibs.facades.ConfiguratoreFacade;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
-import com.unibs.services.*;
+import com.unibs.services.ServiceFactory;
 import com.unibs.utils.DateService;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
@@ -31,7 +30,7 @@ public class ConfiguratoreController implements IUserController {
     final List<MenuOption> menuOptions = new ArrayList<>();
     MenuOption creaPianoOption;
     MenuView operazioniSupplementariMenu;
-    private final ConfiguratoreFacade configFacade;
+    private final ConfiguratoreFacade configuratoreFacade;
 
     // Views
     private final MenuView menuView;
@@ -45,13 +44,13 @@ public class ConfiguratoreController implements IUserController {
         this.datePrecluseController = new DatePrecluseController(gui, serviceFactory.getDatePrecluseService());
         this.configController = new ConfigController(gui, serviceFactory.getConfigService());
         this.menuView = new MenuView(gui);
-        this.configFacade = new ConfiguratoreFacade(serviceFactory);
+        this.configuratoreFacade = new ConfiguratoreFacade(serviceFactory);
     }
 
 
     public void start() {
-        if (configFacade.isInitialized()) {
-            if (configFacade.regimeAttivo()) {
+        if (configuratoreFacade.isInitialized()) {
+            if (configuratoreFacade.regimeAttivo()) {
                 showMenu();
             } else {
                 mostraAvvisoNonRegime(gui);
@@ -62,7 +61,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     public void inizializzaBaseDiDati() {
-        configFacade.initDefault();
+        configuratoreFacade.inizializzaConfigurazioneDefault();
         configController.apriConfigurazione();
         tipoVisitaController.apriAggiungiTipoVisita();
 
@@ -71,7 +70,7 @@ public class ConfiguratoreController implements IUserController {
         LocalDate prossimoSedici = oggi.getDayOfMonth() < 16
                 ? oggi.withDayOfMonth(16)
                 : oggi.plusMonths(1).withDayOfMonth(16);
-        configFacade.setPeriodoCorrente(prossimoSedici);
+        configuratoreFacade.setPeriodoCorrente(prossimoSedici);
     }
 
     public void showMenu() {
@@ -82,7 +81,7 @@ public class ConfiguratoreController implements IUserController {
         menuOptions.add(new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)));
         menuOptions.add(new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite)));
 
-        if (configFacade.isCreazioneNuovoPianoPossibile()) {
+        if (configuratoreFacade.isCreazioneNuovoPianoPossibile()) {
             creaPianoOption = new MenuOption("Creazione nuovo piano", (v) -> handleMenuAction(this::incrementaPeriodoCorrente));
             menuOptions.add(creaPianoOption);
         }
@@ -91,7 +90,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     private void incrementaPeriodoCorrente() {
-        configFacade.applicaRimozioni();
+        configuratoreFacade.applicaRimozioni();
 
         Boolean isPianoCreato = visitaController.apriCreazionePiano();
 
@@ -110,7 +109,7 @@ public class ConfiguratoreController implements IUserController {
                 subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> handleMenuAction(this::rimuoviTipoVisita) ));
                 subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> handleMenuAction(this::rimuoviVolontario)));
                 subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> handleMenuAction(() -> {
-                    configFacade.riapriRaccoltaDisponibilita();
+                    configuratoreFacade.riapriRaccoltaDisponibilita();
                     operazioniSupplementariMenu.close();
                     menuOptions.remove(creaPianoOption);
                     menuView.aggiornaMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);

@@ -1,7 +1,7 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.models.TipoVisita;
+import com.unibs.models.TipoVisitaPreview;
 import com.unibs.models.Visita;
 
 import java.time.format.DateTimeFormatter;
@@ -120,21 +120,21 @@ public class ElencoVisiteView {
     private void aggiornaVisita(int index) {
         StringBuilder sb = new StringBuilder();
         Visita v = visite.get(index);
-        TipoVisita tipoVisita = v.getTipoVisita();
+        TipoVisitaPreview tipoVisita = (TipoVisitaPreview) v.getTipoVisita();
         if (statoAttuale == Visita.StatoVisita.CANCELLATA) {
-            sb.append("Titolo: ").append(tipoVisita.titolo());
-            sb.append("\nLuogo: ").append(tipoVisita.luogo().getNome());
+            sb.append("Titolo: ").append(tipoVisita.getTitolo());
+            sb.append("\nLuogo: ").append(tipoVisita.getNomeLuogo());
             sb.append("\nData di mancato svolgimento: ").append(v.getDataSvolgimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
         } else {
-            sb.append("Titolo: ").append(tipoVisita.titolo());
-            sb.append("\nLuogo: ").append(tipoVisita.luogo().getNome());
-            sb.append("\nDescrizione: ").append(tipoVisita.descrizione());
-            sb.append("\nPunto di incontro: ").append(tipoVisita.puntoIncontro());
+            sb.append("Titolo: ").append(tipoVisita.getTitolo());
+            sb.append("\nLuogo: ").append(tipoVisita.getNomeLuogo());
+            sb.append("\nDescrizione: ").append(tipoVisita.getDescrizione());
+            sb.append("\nPunto di incontro: ").append(tipoVisita.getPuntoIncontro());
             sb.append("\nData di svolgimento: ").append(v.getDataSvolgimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            sb.append("\nOra d'inzio: ").append(tipoVisita.oraInizio());
-            sb.append("\nEntrata libera: ").append(tipoVisita.entrataLibera() ? "Sì" : "No");
+            sb.append("\nOra d'inzio: ").append(tipoVisita.getOraInizio());
+            sb.append("\nEntrata libera: ").append(tipoVisita.isEntrataLibera() ? "Sì" : "No");
             sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
             if (mostraCodiciPrenotazione) {

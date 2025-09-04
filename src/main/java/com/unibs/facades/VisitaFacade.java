@@ -1,4 +1,4 @@
-package com.unibs.facade;
+package com.unibs.facades;
 
 import com.unibs.models.Visita;
 import com.unibs.services.ConfigService;

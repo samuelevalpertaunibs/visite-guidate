@@ -1,4 +1,4 @@
-package com.unibs.facade;
+package com.unibs.facades;
 
 import com.unibs.models.Fruitore;
 import com.unibs.models.Visita;
@@ -22,21 +22,21 @@ public class FruitoreFacade {
     }
 
     // --- Config ---
-    public boolean regimeAttivo() {
+    public boolean isRegimeAttivo() {
         return configService.regimeAttivo();
     }
 
     // --- Visite ---
-    public List<Visita> getVisitePreviewByStato(Visita.StatoVisita stato) {
+    public List<Visita> getVisiteProposte() {
         return visitaService.getVisitePreviewByStato(Visita.StatoVisita.PROPOSTA);
     }
 
-    public void disdici(Fruitore fruitore, int codiceIscrizione) {
+    public void disdiciVisita(Fruitore fruitore, int codiceIscrizione) {
         visitaService.disdici(fruitore, codiceIscrizione);
     }
 
     // --- Iscrizioni ---
-    public int iscrivi(Fruitore fruitore, Visita visita, int numeroIscritti) {
+    public int iscriviAdUnaVisita(Fruitore fruitore, Visita visita, int numeroIscritti) {
         return fruitoreService.iscrivi(fruitore, visita, numeroIscritti);
     }
 }

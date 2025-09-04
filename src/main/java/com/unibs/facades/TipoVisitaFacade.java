@@ -1,6 +1,7 @@
-package com.unibs.facade;
+package com.unibs.facades;
 
 import com.unibs.models.*;
+import com.unibs.models.Volontario;
 import com.unibs.services.*;
 import com.unibs.utils.DatabaseException;
 
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class TipoVisiteFacade {
+public class TipoVisitaFacade {
 
     private final TipoVisitaService tipoVisitaService;
     private final VolontarioService volontarioService;
@@ -16,7 +17,7 @@ public class TipoVisiteFacade {
     private final ConfigService configService;
     private final GiornoService giornoService;
 
-    public TipoVisiteFacade(ServiceFactory serviceFactory) {
+    public TipoVisitaFacade(ServiceFactory serviceFactory) {
         this.tipoVisitaService = serviceFactory.getTipoVisitaService();
         this.volontarioService = serviceFactory.getVolontarioService();
         this.luogoService = serviceFactory.getLuogoService();
@@ -25,49 +26,49 @@ public class TipoVisiteFacade {
     }
 
     // -------------------- TIPO VISITA --------------------
-    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio, String dataFine,
-                               String oraInizio, String durata, boolean entrataLibera,
-                               String numeroMin, String numeroMax, Luogo luogo,
-                               Set<Volontario> volontari, Set<Giorno> giorni,
-                               String indirizzo, String comune, String provincia) throws Exception {
+    public void aggiungiTipoVisita(java.lang.String titolo, java.lang.String descrizione, java.lang.String dataInizio, java.lang.String dataFine,
+                                   java.lang.String oraInizio, java.lang.String durata, boolean entrataLibera,
+                                   java.lang.String numeroMin, java.lang.String numeroMax, Luogo luogo,
+                                   Set<Volontario> volontari, Set<Giorno> giorni,
+                                   java.lang.String indirizzo, java.lang.String comune, java.lang.String provincia) throws Exception {
         tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio, dataFine,
                 oraInizio, durata, entrataLibera, numeroMin, numeroMax, luogo,
                 volontari, giorni, indirizzo, comune, provincia);
     }
 
-    public List<String> getPreviewTipiVisita() throws DatabaseException {
-        return tipoVisitaService.getPreviewTipiVisita();
+    public List<java.lang.String> getNomiTipiVisita() throws DatabaseException {
+        return tipoVisitaService.getNomiTipiVisita();
     }
 
-    public List<String> getPreviewTipiVisita(String luogoNome) throws DatabaseException {
-        return tipoVisitaService.getPreviewTipiVisita(luogoNome);
+    public List<java.lang.String> getNomiTipiVisita(java.lang.String luogoNome) throws DatabaseException {
+        return tipoVisitaService.getNomiTipiVisita(luogoNome);
     }
 
     public boolean esisteAlmenoUnaVisita() throws DatabaseException {
         return tipoVisitaService.esisteAlmenoUnaVisita();
     }
 
-    public Optional<Integer> getIdTipoVisitaByNome(String nome) throws DatabaseException {
+    public Optional<Integer> cercaIDTipoVisitaPerNome(java.lang.String nome) throws DatabaseException {
         return tipoVisitaService.getIdByNome(nome);
     }
 
-    public List<TipoVisita> getVisiteByVolontario(int volontarioId) {
+    public List<TipoVisita> cercaVisiteDelVolontario(int volontarioId) {
         return tipoVisitaService.findByVolontario(volontarioId);
     }
 
-    public List<String> getTitoliTipiVisitaByVolontarioId(int volontarioId) {
+    public List<java.lang.String> cercaNomiDeiTipiVisitaDelVolontario(int volontarioId) {
         return tipoVisitaService.getTitoliByVolontarioId(volontarioId);
     }
 
-    public List<String> getTitoloTipiVisitaByLuogoId(int luogoId) {
+    public List<java.lang.String> cercaTipiVisitaNelLuogo(int luogoId) {
         return tipoVisitaService.getTitoliByLuogoId(luogoId);
     }
 
-    public List<String> getAllTitoliTipiVisita() {
+    public List<java.lang.String> cercaTuttiTipiVisita() {
         return tipoVisitaService.getAllTitoli();
     }
 
-    public void inserisciTipoVisitaTVDaRimuovere(String titolo) throws Exception {
+    public void inserisciTipoVisitaDaRimuovere(java.lang.String titolo) throws Exception {
         tipoVisitaService.inserisciTVDaRimuovere(titolo);
     }
 
@@ -76,32 +77,32 @@ public class TipoVisiteFacade {
         volontarioService.rimuoviNonAssociati();
     }
 
-    public List<Volontario> findAllVolontari() throws DatabaseException {
+    public List<Volontario> cercaTuttiVolontari() throws DatabaseException {
         return volontarioService.findAllVolontari();
     }
 
-    public void aggiungiVolontario(String username) throws Exception {
+    public void aggiungiVolontario(java.lang.String username) throws Exception {
         volontarioService.aggiungiVolontario(username);
     }
 
-    public void associaVolontariATipoVisita(Set<Volontario> volontari, int tipoVisitaId) {
+    public void associaVolontariAlTipoVisita(Set<Volontario> volontari, int tipoVisitaId) {
         volontarioService.associaATipoVisita(volontari, tipoVisitaId);
     }
 
-    public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
+    public Set<Volontario> cercaVolontariAssociabiliAlTipoVisita(int tipoVisitaId) {
         return volontarioService.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
     }
 
-    public void inserisciVolontarioDaRimuovere(String username) throws Exception {
+    public void inserisciVolontarioDaRimuovere(java.lang.String username) throws Exception {
         volontarioService.inserisciVolontarioDaRimuovere(username);
     }
 
     // -------------------- LUOGHI --------------------
-    public List<Luogo> getTuttiLuoghi() throws DatabaseException {
+    public List<Luogo> cercaTuttiLuoghi() throws DatabaseException {
         return luogoService.findAll();
     }
 
-    public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) throws Exception {
+    public Luogo aggiungiLuogo(java.lang.String nome, java.lang.String descrizione, Comune comune) throws Exception {
         return luogoService.aggiungiLuogo(nome, descrizione, comune);
     }
 

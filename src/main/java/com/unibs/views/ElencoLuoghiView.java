@@ -1,6 +1,7 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
+import com.unibs.formatters.ComuneFormatter;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
 
@@ -17,7 +18,8 @@ public class ElencoLuoghiView {
             String nome = luogo.getNome();
             String descrizione = luogo.getDescrizione();
             Comune comune = luogo.getComune();
-            String message = String.format("Nome: %s\nDescrizione: %s\nComune: %s", nome, descrizione, comune);
+            ComuneFormatter comuneFormatter = new ComuneFormatter();
+            String message = String.format("Nome: %s\nDescrizione: %s\nComune: %s", nome, descrizione, comuneFormatter.format(comune));
             panel.addComponent(new Label(message));
             panel.addComponent(new EmptySpace());
         }

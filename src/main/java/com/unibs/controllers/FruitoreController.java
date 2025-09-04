@@ -2,7 +2,7 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facade.FruitoreFacade;
+import com.unibs.facades.FruitoreFacade;
 import com.unibs.models.Fruitore;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
@@ -33,7 +33,7 @@ public class FruitoreController implements IUserController {
     }
 
     public void start() {
-        if (fruitoreFacade.regimeAttivo()) {
+        if (fruitoreFacade.isRegimeAttivo()) {
             showMenu();
         } else {
             mostraAvvisoNonRegime(gui);
@@ -60,7 +60,7 @@ public class FruitoreController implements IUserController {
             InputNumericoView inputNumericoView = new InputNumericoView("Disdici iscrizione", "Inserisci il codice univoco relativo all'iscrizione da disdire");
             Integer codiceIscrizione = inputNumericoView.mostra(gui);
             if (codiceIscrizione != null) {
-                fruitoreFacade.disdici(fruitore, codiceIscrizione);
+                fruitoreFacade.disdiciVisita(fruitore, codiceIscrizione);
                 new PopupChiudi(gui).mostra("", "L'iscrizione è stata annullata correttamente.");
             }
         } catch (Exception e) {
@@ -72,7 +72,7 @@ public class FruitoreController implements IUserController {
         SelezionaElementoView<Visita> selezionaVisitaView = new SelezionaElementoView<>();
         Visita visitaSelezionata = null;
         try {
-            List<Visita> visite = fruitoreFacade.getVisitePreviewByStato(Visita.StatoVisita.PROPOSTA);
+            List<Visita> visite = fruitoreFacade.getVisiteProposte();
             InputNumericoView inputNumericoView = new InputNumericoView("Iscrizione", "Inserisci il numero di persone per cui vuoi prenotare");
 
             if (visite.isEmpty()) {
@@ -82,7 +82,7 @@ public class FruitoreController implements IUserController {
             visitaSelezionata = selezionaVisitaView.mostra(gui, visite, "Seleziona una visita");
             Integer numeroIscritti = inputNumericoView.mostra(gui);
             if (numeroIscritti != null) {
-                int codiceUnivoco = fruitoreFacade.iscrivi(fruitore, visitaSelezionata, numeroIscritti);
+                int codiceUnivoco = fruitoreFacade.iscriviAdUnaVisita(fruitore, visitaSelezionata, numeroIscritti);
                 new PopupChiudi(gui).mostra("", "L'iscrizione è avvenuta con successo.\nQuesto è il tuo codice prenotazione: " + codiceUnivoco + ".\nPortalo il giorno della visita o utilizzalo per annullare l'iscrizione.");
             }
         } catch (Exception e) {

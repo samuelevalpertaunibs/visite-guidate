@@ -250,7 +250,7 @@ public class TipoVisitaDao {
         return false;
     }
 
-    public ArrayList<String> getPreviewTipiVisita(String luogoDaCercare) throws SQLException {
+    public ArrayList<String> getNomiTipiVisita(String luogoDaCercare) throws SQLException {
         String sql;
         if (luogoDaCercare == null) {
             sql = "SELECT titolo, nome FROM tipi_visita JOIN luoghi ON tipi_visita.luogo_id = luoghi.id";

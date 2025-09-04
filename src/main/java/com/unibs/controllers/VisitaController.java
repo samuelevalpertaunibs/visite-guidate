@@ -1,7 +1,7 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facade.VisitaFacade;
+import com.unibs.facades.VisitaFacade;
 import com.unibs.models.Visita;
 import com.unibs.services.ServiceFactory;
 import com.unibs.views.ElencoVisiteView;

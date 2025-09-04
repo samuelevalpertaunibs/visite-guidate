@@ -2,6 +2,7 @@ package com.unibs.services;
 
 import com.unibs.daos.TipoVisitaDao;
 import com.unibs.models.*;
+import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
 import com.unibs.utils.DateService;
 
@@ -30,9 +31,9 @@ public class TipoVisitaService {
         this.giornoService = giornoService;
     }
 
-    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
-                                   String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti,
-                                   String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
+    public void aggiungiTipoVisita(java.lang.String titolo, java.lang.String descrizione, java.lang.String dataInizioString, java.lang.String dataFineString,
+                                   java.lang.String oraInizioString, java.lang.String durataMinutiString, boolean entrataLibera, java.lang.String numeroMinPartecipanti,
+                                   java.lang.String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, java.lang.String indirizzoPuntoIncontro, java.lang.String comunePuntoIncontro, java.lang.String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
         if (titolo == null || titolo.isEmpty())
             throw new IllegalStateException("Il campo Titolo non può essere vuoto");
         if (tipoVisitaDao.esisteConTitolo(titolo))
@@ -131,7 +132,7 @@ public class TipoVisitaService {
         }
     }
 
-    private static int getNumeroMin(String numeroMinPartecipanti, int numeroMax) {
+    private static int getNumeroMin(java.lang.String numeroMinPartecipanti, int numeroMax) {
         int numeroMin;
         try {
             numeroMin = Integer.parseInt(numeroMinPartecipanti);
@@ -153,7 +154,7 @@ public class TipoVisitaService {
         }
     }
 
-    public List<String> getTitoliByVolontarioId(int volontarioId) throws DatabaseException {
+    public List<java.lang.String> getTitoliByVolontarioId(int volontarioId) throws DatabaseException {
         try {
             return tipoVisitaDao.getTitoliByVolontarioId(volontarioId);
         } catch (SQLException e) {
@@ -162,7 +163,7 @@ public class TipoVisitaService {
         }
     }
 
-    public List<String> getTitoliByLuogoId(int luogoId) throws DatabaseException {
+    public List<java.lang.String> getTitoliByLuogoId(int luogoId) throws DatabaseException {
         try {
             return tipoVisitaDao.getTitoliByLuogoId(luogoId);
         } catch (SQLException e) {
@@ -171,18 +172,18 @@ public class TipoVisitaService {
         }
     }
 
-    public List<String> getPreviewTipiVisita() throws DatabaseException {
+    public List<java.lang.String> getNomiTipiVisita() throws DatabaseException {
         try {
-            return tipoVisitaDao.getPreviewTipiVisita(null);
+            return tipoVisitaDao.getNomiTipiVisita(null);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita: ", e);
             throw new DatabaseException("Errore durante il recupero dei tipi di visita.");
         }
     }
 
-    public List<String> getPreviewTipiVisita(String luogoNome) throws DatabaseException {
+    public List<java.lang.String> getNomiTipiVisita(java.lang.String luogoNome) throws DatabaseException {
         try {
-            return tipoVisitaDao.getPreviewTipiVisita(luogoNome);
+            return tipoVisitaDao.getNomiTipiVisita(luogoNome);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero dei tipi di visita associati al luogo: " + luogoNome, e);
             throw new DatabaseException("Errore durante il recupero dei tipi di visita associati al luogo.");
@@ -192,7 +193,7 @@ public class TipoVisitaService {
     public ArrayList<TipoVisita> findByVolontario(int id) throws DatabaseException {
         ArrayList<TipoVisita> visite = new ArrayList<>();
 
-        for (String titolo : getTitoliByVolontarioId(id)) {
+        for (java.lang.String titolo : getTitoliByVolontarioId(id)) {
             Optional<TipoVisita> tipoVisita = getByTitolo(titolo);
             if (tipoVisita.isEmpty()) {
                 throw new DatabaseException("Errore durante il recupero di un tipo di visita");
@@ -206,7 +207,7 @@ public class TipoVisitaService {
     public ArrayList<TipoVisita> findByMese(YearMonth mese) throws DatabaseException {
         ArrayList<TipoVisita> visite = new ArrayList<>();
 
-        for (String titolo : getTitoliByMese(mese)) {
+        for (java.lang.String titolo : getTitoliByMese(mese)) {
             Optional<TipoVisita> tipoVisita = getByTitolo(titolo);
             if (tipoVisita.isEmpty()) {
                 throw new DatabaseException("Errore durante il recupero di un tipo di visita.");
@@ -217,7 +218,7 @@ public class TipoVisitaService {
 
     }
 
-    public List<String> getTitoliByMese(YearMonth mese) throws DatabaseException {
+    public List<java.lang.String> getTitoliByMese(YearMonth mese) throws DatabaseException {
         try {
             return tipoVisitaDao.getTitoliByMese(mese);
         } catch (SQLException e) {
@@ -226,31 +227,31 @@ public class TipoVisitaService {
         }
     }
 
-    public Optional<TipoVisita> getByTitolo(String titolo) throws DatabaseException {
+    public Optional<TipoVisita> getByTitolo(java.lang.String titolo) throws DatabaseException {
         try {
-            TipoVisita base = tipoVisitaDao.getByTitolo(titolo);
-            if (base == null) {
+            TipoVisita tv = tipoVisitaDao.getByTitolo(titolo);
+            if (tv == null) {
                 return Optional.empty();
             }
 
-            int tipoVisitaId = base.id();
+            int tipoVisitaId = tv.getId();
 
             Set<Giorno> giorni = giornoService.getByTipoVisitaId(tipoVisitaId);
             Set<Volontario> volontari = volontarioService.getByTipoVisitaId(tipoVisitaId);
 
             return Optional.of(new TipoVisita(
-                    base.id(),
-                    base.titolo(),
-                    base.descrizione(),
-                    base.dataInizio(),
-                    base.dataFine(),
-                    base.oraInizio(),
-                    base.durataMinuti(),
-                    base.entrataLibera(),
-                    base.numMinPartecipanti(),
-                    base.numMaxPartecipanti(),
-                    base.luogo(),
-                    base.puntoIncontro(),
+                    tv.getId(),
+                    tv.getTitolo(),
+                    tv.getDescrizione(),
+                    tv.getDataInizio(),
+                    tv.getDataFine(),
+                    tv.getOraInizio(),
+                    tv.getDurataMinuti(),
+                    tv.isEntrataLibera(),
+                    tv.getNumMinPartecipanti(),
+                    tv.getNumMaxPartecipanti(),
+                    tv.getLuogo(),
+                    tv.getPuntoIncontro(),
                     giorni,
                     volontari
             ));
@@ -264,7 +265,7 @@ public class TipoVisitaService {
         this.volontarioService = volontarioService;
     }
 
-    public List<String> getAllTitoli() throws DatabaseException {
+    public List<java.lang.String> getAllTitoli() throws DatabaseException {
         try {
             return tipoVisitaDao.getAllTitoli();
         } catch (SQLException e) {
@@ -273,7 +274,7 @@ public class TipoVisitaService {
         }
     }
 
-    public Optional<Integer> getIdByNome(String tv) throws DatabaseException {
+    public Optional<Integer> getIdByNome(java.lang.String tv) throws DatabaseException {
         try {
             return tipoVisitaDao.getIdByNome(tv);
         } catch (Exception e) {
@@ -291,7 +292,7 @@ public class TipoVisitaService {
         }
     }
 
-    public void inserisciTVDaRimuovere(String titolo) throws DatabaseException {
+    public void inserisciTVDaRimuovere(java.lang.String titolo) throws DatabaseException {
         try {
             int id = tipoVisitaDao.getIdByNome(titolo).orElseThrow(Exception::new);
             tipoVisitaDao.inserisciTVDaRimuovere(id);
@@ -304,8 +305,8 @@ public class TipoVisitaService {
 
     public void rimuoviNonAssociati() throws DatabaseException {
         try {
-            List<String> titoli = tipoVisitaDao.getTitoliNonAssociati();
-            for (String titolo : titoli) {
+            List<java.lang.String> titoli = tipoVisitaDao.getTitoliNonAssociati();
+            for (java.lang.String titolo : titoli) {
                 tipoVisitaDao.rimuovi(titolo);
             }
         } catch (Exception e) {

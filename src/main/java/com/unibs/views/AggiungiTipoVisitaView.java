@@ -26,7 +26,7 @@ public class AggiungiTipoVisitaView {
     private final TextBox durataField;
     private final TextBox numeroMinPartecipantiField;
     private final TextBox numeroMaxPartecipantiField;
-    private final RadioBoxList<String> entrataLibera;
+    private final RadioBoxList<java.lang.String> entrataLibera;
     private final Label volontariSelezionatiLabel;
     private final Label giorniSelezionatiLabel;
     private final Label errorLabel;
@@ -175,12 +175,12 @@ public class AggiungiTipoVisitaView {
         tui.addWindowAndWait(window);
     }
 
-    public void mostraErrore(String message) {
+    public void mostraErrore(java.lang.String message) {
         bottomPanel.addComponent(0, errorPanel);
         errorLabel.setText(message);
     }
 
-    public void aggiornaVisite(String message) {
+    public void aggiornaVisite(java.lang.String message) {
         visiteLabel.setText(message);
     }
 
@@ -216,7 +216,7 @@ public class AggiungiTipoVisitaView {
             return;
         }
 
-        String testo = giorniSelezionati.stream()
+        java.lang.String testo = giorniSelezionati.stream()
                 .sorted(Comparator.comparing(Giorno::getId))
                 .map(Giorno::getPlaceHolder)
                 .collect(Collectors.joining(", "));
@@ -228,54 +228,54 @@ public class AggiungiTipoVisitaView {
             volontariSelezionatiLabel.setText("Nessun volontario selezionato");
             return;
         }
-        String testo = volontariSelezionati.stream()
+        java.lang.String testo = volontariSelezionati.stream()
                 .sorted(Comparator.comparing(Volontario::getId))
                 .map(Volontario::getPlaceHolder)
                 .collect(Collectors.joining(", "));
         volontariSelezionatiLabel.setText(testo);
     }
 
-    public String getTitolo() {
+    public java.lang.String getTitolo() {
         return titoloField.getText();
     }
 
-    public String getDescrizione() {
+    public java.lang.String getDescrizione() {
         return descrizioneField.getText();
     }
 
-    public String getIndirizzo() {
+    public java.lang.String getIndirizzo() {
         return indirizzoField.getText();
     }
 
-    public String getComune() {
+    public java.lang.String getComune() {
         return comuneField.getText();
     }
 
-    public String getProvincia() {
+    public java.lang.String getProvincia() {
         return provinciaField.getText();
     }
 
-    public String getDataInizio() {
+    public java.lang.String getDataInizio() {
         return dataInizioField.getText();
     }
 
-    public String getDataFine() {
+    public java.lang.String getDataFine() {
         return dataFineField.getText();
     }
 
-    public String getOraInizio() {
+    public java.lang.String getOraInizio() {
         return oraInizioField.getText();
     }
 
-    public String getDurata() {
+    public java.lang.String getDurata() {
         return durataField.getText();
     }
 
-    public String getNumeroMinPartecipanti() {
+    public java.lang.String getNumeroMinPartecipanti() {
         return numeroMinPartecipantiField.getText();
     }
 
-    public String getNumeroMaxPartecipanti() {
+    public java.lang.String getNumeroMaxPartecipanti() {
         return numeroMaxPartecipantiField.getText();
     }
 
@@ -287,7 +287,7 @@ public class AggiungiTipoVisitaView {
         titoloField.takeFocus();
     }
 
-    public void aggiornaLuogo(String testo) {
+    public void aggiornaLuogo(java.lang.String testo) {
         luogoLabel.setText("Luogo selezionato");
         selezionaLuogoButton.setLabel(testo);
     }

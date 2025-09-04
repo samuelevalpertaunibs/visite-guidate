@@ -1,8 +1,8 @@
 package com.unibs.services;
 
 import com.unibs.models.Giorno;
-import com.unibs.models.TipoVisita;
 import com.unibs.models.Volontario;
+import com.unibs.models.TipoVisita;
 import com.unibs.utils.DatabaseException;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -28,8 +28,8 @@ public class DisponibilitaCalculatorService {
         try{
             Set<LocalDate> datePrecluse = datePrecluseService.findByMonth(mese);
             for(TipoVisita visita : tipoVisitaService.findByVolontario(volontrioId)){
-                LocalDate start = visita.dataInizio();
-                LocalDate end = visita.dataFine();
+                LocalDate start = visita.getDataInizio();
+                LocalDate end = visita.getDataFine();
 
                 Set<Giorno> giorni = visita.getGiorniSettimana();
 

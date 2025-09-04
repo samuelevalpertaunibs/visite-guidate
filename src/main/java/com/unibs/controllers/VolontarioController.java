@@ -2,8 +2,7 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facade.TipoVisiteFacade;
-import com.unibs.facade.VolontarioFacade;
+import com.unibs.facades.VolontarioFacade;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
@@ -69,7 +68,7 @@ public class VolontarioController implements IUserController {
         try {
             elencoVisiteView.setStati(stati, stato -> {
                 List<Visita> visite = volFacade.getVisitePreviewByVolontario(stato, volontario);
-                List<List<String>> codiciPrenotazione = new ArrayList<>();
+                List<List<java.lang.String>> codiciPrenotazione = new ArrayList<>();
                 for (Visita visita : visite) {
                     codiciPrenotazione.add(volFacade.getCodiciPrenotazionePerVisita(volontario, visita.getId()));
                 }
