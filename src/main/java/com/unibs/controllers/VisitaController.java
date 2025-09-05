@@ -45,8 +45,7 @@ public class VisitaController {
     public Boolean apriCreazionePiano() {
         try {
             if (visitaFacade.isRaccoltaDisponibilitaChiusa()) {
-                visitaFacade.rimuoviVecchieDisponibilita();
-                visitaFacade.riapriRaccoltaDisponibilita();
+                visitaFacade.riapriPiano();
                 String messaggio = "Il piano delle visite è già stato creato ma il processo è\nstato interrotto prima della riapertura della raccolta disponibilità.\n\nLa riapertura delle dispobilità è appena stata eseguita con successo.";
                 new PopupChiudi(gui).mostra("Attenzione!", messaggio);
 

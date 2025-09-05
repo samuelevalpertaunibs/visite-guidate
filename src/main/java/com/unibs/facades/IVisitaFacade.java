@@ -7,12 +7,11 @@ public interface IVisitaFacade {
 
     // --- Metodi Config ---
     boolean isRaccoltaDisponibilitaChiusa();
-    void riapriRaccoltaDisponibilita();
+    void riapriPiano();
 
     // --- Metodi Visite ---
     List<Visita> getVisitePreviewByStato(Visita.StatoVisita stato);
     List<Visita> getVisiteFromArchivio();
-    void rimuoviVecchieDisponibilita();
     void creaPiano();
     List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, String nomeFruitore);
     List<String> getCodiciPrenotazioneFruitorePerVisita(String nomeFruitore, int visitaId);

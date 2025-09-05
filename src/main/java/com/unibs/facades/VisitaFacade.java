@@ -24,7 +24,8 @@ public class VisitaFacade implements IVisitaFacade {
     }
 
     @Override
-    public void riapriRaccoltaDisponibilita() {
+    public void riapriPiano() {
+        visitaService.rimuoviVecchieDisponibilita();
         configService.riapriRaccoltaDisponibilita();
     }
 
@@ -37,11 +38,6 @@ public class VisitaFacade implements IVisitaFacade {
     @Override
     public List<Visita> getVisiteFromArchivio() {
         return visitaService.getVisiteFromArchivio();
-    }
-
-    @Override
-    public void rimuoviVecchieDisponibilita() {
-        visitaService.rimuoviVecchieDisponibilita();
     }
 
     @Override
