@@ -2,6 +2,8 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facade.ITipoVisiteFacade;
+import com.unibs.facade.IVolontarioFacade;
 import com.unibs.facade.TipoVisiteFacade;
 import com.unibs.facade.VolontarioFacade;
 import com.unibs.models.MenuOption;
@@ -27,14 +29,14 @@ public class VolontarioController implements IUserController {
     private final MultiWindowTextGUI gui;
     private final TipoVisitaController tipoVisitaController;
     private ElencoVisiteView elencoVisiteView;
-    private final VolontarioFacade volFacade;
+    private final IVolontarioFacade volFacade;
 
-    public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
+    public VolontarioController(MultiWindowTextGUI gui, Utente currentUtente, IVolontarioFacade volFacade, ITipoVisiteFacade tipoVisitaFacade) {
         this.gui = gui;
         this.menuView = new MenuView(gui);
         this.volontario = new Volontario(currentUtente);
-        this.tipoVisitaController = new TipoVisitaController(gui, serviceFactory);
-        this.volFacade = new VolontarioFacade(serviceFactory);
+        this.tipoVisitaController = new TipoVisitaController(gui, tipoVisitaFacade);
+        this.volFacade = volFacade;
     }
 
     public void start() {

@@ -2,12 +2,10 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facade.ConfiguratoreFacade;
-import com.unibs.facade.TipoVisiteFacade;
+import com.unibs.facade.*;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
-import com.unibs.services.*;
 import com.unibs.utils.DateService;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
@@ -31,27 +29,27 @@ public class ConfiguratoreController implements IUserController {
     final List<MenuOption> menuOptions = new ArrayList<>();
     MenuOption creaPianoOption;
     MenuView operazioniSupplementariMenu;
-    private final ConfiguratoreFacade configFacade;
+    private final IConfiguratoreFacade configuratoreFacade;
 
     // Views
     private final MenuView menuView;
 
-    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
+    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, IVisitaFacade visitaFacade, IConfiguratoreFacade configuratoreFacade, ITipoVisiteFacade tipoVisitaFacade, IConfigFacade configFacade, IDatePrecluseFacade datePrecluseFacade, ILuogoFacade luogoFacade) {
         this.gui = gui;
         this.utente = currentUtente;
-        this.luogoController = new LuogoController(gui, serviceFactory.getLuogoService());
-        this.tipoVisitaController = new TipoVisitaController(gui, serviceFactory);
-        this.visitaController = new VisitaController(gui, serviceFactory);
-        this.datePrecluseController = new DatePrecluseController(gui, serviceFactory.getDatePrecluseService());
-        this.configController = new ConfigController(gui, serviceFactory.getConfigService());
+        this.luogoController = new LuogoController(gui, luogoFacade);
+        this.tipoVisitaController = new TipoVisitaController(gui, tipoVisitaFacade);
+        this.visitaController = new VisitaController(gui,visitaFacade);
+        this.datePrecluseController = new DatePrecluseController(gui, datePrecluseFacade);
+        this.configController = new ConfigController(gui, configFacade);
         this.menuView = new MenuView(gui);
-        this.configFacade = new ConfiguratoreFacade(serviceFactory);
+        this.configuratoreFacade = configuratoreFacade;
     }
 
 
     public void start() {
-        if (configFacade.isInitialized()) {
-            if (configFacade.regimeAttivo()) {
+        if (configuratoreFacade.isInitialized()) {
+            if (configuratoreFacade.regimeAttivo()) {
                 showMenu();
             } else {
                 mostraAvvisoNonRegime(gui);
@@ -62,7 +60,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     public void inizializzaBaseDiDati() {
-        configFacade.initDefault();
+        configuratoreFacade.initDefault();
         configController.apriConfigurazione();
         tipoVisitaController.apriAggiungiTipoVisita();
 
@@ -71,7 +69,7 @@ public class ConfiguratoreController implements IUserController {
         LocalDate prossimoSedici = oggi.getDayOfMonth() < 16
                 ? oggi.withDayOfMonth(16)
                 : oggi.plusMonths(1).withDayOfMonth(16);
-        configFacade.setPeriodoCorrente(prossimoSedici);
+        configuratoreFacade.setPeriodoCorrente(prossimoSedici);
     }
 
     public void showMenu() {
@@ -82,7 +80,7 @@ public class ConfiguratoreController implements IUserController {
         menuOptions.add(new MenuOption("Visualizza l’elenco dei luoghi con i relativi tipi di visita associati", (v) -> handleMenuAction(this::visualizzaLuoghiConTipiVisita)));
         menuOptions.add(new MenuOption("Visualizza l’elenco delle visite", (v) -> handleMenuAction(this::visualizzaVisite)));
 
-        if (configFacade.isCreazioneNuovoPianoPossibile()) {
+        if (configuratoreFacade.isCreazioneNuovoPianoPossibile()) {
             creaPianoOption = new MenuOption("Creazione nuovo piano", (v) -> handleMenuAction(this::incrementaPeriodoCorrente));
             menuOptions.add(creaPianoOption);
         }
@@ -91,7 +89,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     private void incrementaPeriodoCorrente() {
-        configFacade.applicaRimozioni();
+        configuratoreFacade.applicaRimozioni();
 
         Boolean isPianoCreato = visitaController.apriCreazionePiano();
 
@@ -110,7 +108,7 @@ public class ConfiguratoreController implements IUserController {
                 subMenuOptions.add(new MenuOption("Rimuovi un tipo di visita", (v) -> handleMenuAction(this::rimuoviTipoVisita) ));
                 subMenuOptions.add(new MenuOption("Rimuovi un volontario dall’elenco dei volontari", (v) -> handleMenuAction(this::rimuoviVolontario)));
                 subMenuOptions.add(new MenuOption("Riapri la raccolta delle disponibilità dei volontari", (v) -> handleMenuAction(() -> {
-                    configFacade.riapriRaccoltaDisponibilita();
+                    configuratoreFacade.riapriRaccoltaDisponibilita();
                     operazioniSupplementariMenu.close();
                     menuOptions.remove(creaPianoOption);
                     menuView.aggiornaMenu(menuOptions, " Menù principale - " + utente.getUsername() + " ", true);

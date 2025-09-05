@@ -2,6 +2,7 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facade.ITipoVisiteFacade;
 import com.unibs.facade.TipoVisiteFacade;
 import com.unibs.models.*;
 import com.unibs.services.ServiceFactory;
@@ -17,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TipoVisitaController {
-    private final TipoVisiteFacade facade;
+    private final ITipoVisiteFacade facade;
     private final WindowBasedTextGUI gui;
 
     private AggiungiTipoVisitaView aggiungiTipoVisitaView;
@@ -30,9 +31,9 @@ public class TipoVisitaController {
     private Set<Volontario> volontariSelezionati;
     private SelezioneMultiplaView<Volontario> selezioneMultiplaVolontariView;
 
-    public TipoVisitaController(WindowBasedTextGUI gui, ServiceFactory serviceFactory) {
+    public TipoVisitaController(WindowBasedTextGUI gui, ITipoVisiteFacade facade) {
         this.gui = gui;
-        this.facade = new TipoVisiteFacade(serviceFactory);
+        this.facade = facade;
         this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView();
         this.giorniSelezionati = new HashSet<>();
         this.volontariSelezionati = new HashSet<>();

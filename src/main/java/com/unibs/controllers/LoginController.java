@@ -1,5 +1,6 @@
 package com.unibs.controllers;
 
+import com.unibs.facade.*;
 import com.unibs.services.*;
 import com.unibs.models.Utente;
 import com.googlecode.lanterna.gui2.*;
@@ -37,17 +38,17 @@ public class LoginController {
     }
 
     private void inizializzaFruitore() {
-        FruitoreController fruitoreController = new FruitoreController(gui, utente, serviceFactory);
+        FruitoreController fruitoreController = new FruitoreController(gui, utente, new VisitaFacade(serviceFactory), new FruitoreFacade(serviceFactory));
         fruitoreController.start();
     }
 
     private void inizializzaConfiguratore() {
-        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, serviceFactory);
+        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, new VisitaFacade(serviceFactory), new ConfiguratoreFacade(serviceFactory), new TipoVisiteFacade(serviceFactory), new ConfigFacade(serviceFactory), new DatePrecluseFacade(serviceFactory), new LuogoFacade(serviceFactory));
         configuratoreController.start();
     }
 
     private void inizializzaVolontario() {
-        VolontarioController volontarioController = new VolontarioController(gui, utente, serviceFactory);
+        VolontarioController volontarioController = new VolontarioController(gui, utente,new VolontarioFacade(serviceFactory), new TipoVisiteFacade(serviceFactory));
         volontarioController.start();
     }
 

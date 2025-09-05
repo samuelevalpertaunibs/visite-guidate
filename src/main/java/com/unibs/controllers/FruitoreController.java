@@ -3,6 +3,9 @@ package com.unibs.controllers;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.facade.FruitoreFacade;
+import com.unibs.facade.IFruitoreFacade;
+import com.unibs.facade.IVisitaFacade;
+import com.unibs.facade.VisitaFacade;
 import com.unibs.models.Fruitore;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
@@ -22,14 +25,14 @@ public class FruitoreController implements IUserController {
     private final WindowBasedTextGUI gui;
     private final MenuView menuView;
     private final VisitaController visitaController;
-    private final FruitoreFacade fruitoreFacade;
+    private final IFruitoreFacade fruitoreFacade;
 
-    public FruitoreController(MultiWindowTextGUI gui, Utente utente, ServiceFactory serviceFactory) {
+    public FruitoreController(MultiWindowTextGUI gui, Utente utente, IVisitaFacade visitaFacade, IFruitoreFacade fruitoreFacade) {
         this.gui = gui;
         this.menuView = new MenuView(gui);
         this.fruitore = new Fruitore(utente);
-        this.visitaController = new VisitaController(gui, serviceFactory);
-        this.fruitoreFacade = new FruitoreFacade(serviceFactory);
+        this.visitaController = new VisitaController(gui, visitaFacade);
+        this.fruitoreFacade = fruitoreFacade;
     }
 
     public void start() {
