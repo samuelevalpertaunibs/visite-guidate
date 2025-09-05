@@ -216,10 +216,11 @@ public class AggiungiTipoVisitaView {
             return;
         }
 
-        java.lang.String testo = giorniSelezionati.stream()
+        String testo = giorniSelezionati.stream()
                 .sorted(Comparator.comparing(Giorno::getId))
-                .map(Giorno::getPlaceHolder)
+                .map(Giorno::getNome)
                 .collect(Collectors.joining(", "));
+
         giorniSelezionatiLabel.setText(testo);
     }
 

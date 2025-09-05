@@ -12,6 +12,7 @@ public class ServiceFactory {
     private DatePrecluseService datePrecluseService;
     private LoginService loginService;
     private FruitoreService fruitoreService;
+    private PasswordService passwordService;
     private final DaoFactory daoFactory = new DaoFactory();
 
     public LuogoService getLuogoService() {
@@ -23,9 +24,16 @@ public class ServiceFactory {
 
     public LoginService getLoginService() {
         if (loginService == null) {
-            loginService = new LoginService(daoFactory.getUtenteDao());
+            loginService = new LoginService(getPasswordService(), daoFactory.getUtenteDao());
         }
         return loginService;
+    }
+
+    public PasswordService getPasswordService() {
+        if (passwordService == null) {
+            passwordService = new PasswordService();
+        }
+        return passwordService;
     }
 
     public ConfigService getConfigService() {

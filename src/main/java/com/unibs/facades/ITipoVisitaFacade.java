@@ -28,7 +28,7 @@ public interface ITipoVisitaFacade {
 
     // -------------------- VOLONTARI --------------------
     void rimuoviVolontariNonAssociati();
-    List<Volontario> cercaTuttiVolontari() throws DatabaseException;
+    Set<CoppiaIdUsername> cercaTuttiVolontari() throws DatabaseException;
     void aggiungiVolontario(String username) throws Exception;
     void associaVolontariAlTipoVisita(Set<CoppiaIdUsername> volontari, int tipoVisitaId);
     Set<CoppiaIdUsername> cercaVolontariAssociabiliAlTipoVisita(int tipoVisitaId);

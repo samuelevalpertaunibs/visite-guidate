@@ -21,6 +21,7 @@ public class TipoVisita extends TipoVisitaCore {
         this(tvc.getId(), tvc.getTitolo(), tvc.getDescrizione(), tvc.getDataInizio(), tvc.getDataFine(), tvc.getOraInizio(), tvc.getDurataMinuti(), tvc.isEntrataLibera(), tvc.getNumMinPartecipanti(), tvc.getNumMaxPartecipanti(), tvc.getPuntoIncontro(), luogo, giorni, volontari);
     }
 
+
     public Set<Giorno> getGiorniSettimana() {
         return giorni;
     }

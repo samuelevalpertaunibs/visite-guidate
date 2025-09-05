@@ -5,10 +5,6 @@ import com.unibs.models.Utente;
 import com.unibs.utils.DatabaseException;
 import com.unibs.utils.DateService;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.logging.Level;
@@ -16,9 +12,11 @@ import java.util.logging.Logger;
 
 public class LoginService {
     final UtenteDao utenteDao;
+    private final PasswordService passwordService;
     private static final Logger LOGGER = Logger.getLogger(LoginService.class.getName());
 
-    public LoginService(UtenteDao utenteDao) {
+    public LoginService(PasswordService passwordService, UtenteDao utenteDao) {
+        this.passwordService = passwordService;
         this.utenteDao = utenteDao;
     }
 
@@ -30,7 +28,7 @@ public class LoginService {
         Utente utente = utenteDao.findByUsername(username);
 
         if (utente != null) {
-            String passwordHash = hashPassword(password, utente.getSalt());
+            String passwordHash = passwordService.hashPassword(password, utente.getSalt());
             if (utente.checkPassword(passwordHash)) {
                 return utente;
             }
@@ -49,7 +47,7 @@ public class LoginService {
 
         String oldPassword = utente.getPasswordHash();
         byte[] salt = utente.getSalt();
-        String hashedNewPassword = hashPassword(nuovaPassword, salt);
+        String hashedNewPassword = passwordService.hashPassword(nuovaPassword, salt);
 
         if (oldPassword.equals(hashedNewPassword)) {
             throw new IllegalArgumentException("La nuova password non può essere uguale alla precedente");
@@ -85,27 +83,6 @@ public class LoginService {
         }
     }
 
-    private String hashPassword(String password, byte[] salt) {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
-        md.update(salt);
-        byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(hashedPassword);
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder(2 * bytes.length);
-        for (byte b : bytes) {
-            hexString.append(String.format("%02x", b));
-        }
-        return hexString.toString();
-    }
-
     public void registraFruitore(String username, String password, String confermaPassword)
             throws DatabaseException, IllegalArgumentException {
 
@@ -132,8 +109,8 @@ public class LoginService {
                 throw new IllegalArgumentException("La password deve contenere almeno 8 caratteri, una maiuscola, una minuscola, un numero ed un carattere speciale.");
             }
 
-            byte[] salt = generateSalt();
-            String hashedPassword = hashPassword(password, salt);
+            byte[] salt = passwordService.generateSalt();
+            String hashedPassword = passwordService.hashPassword(password, salt);
 
             Utente nuovoUtente = new Utente(0, username, hashedPassword, salt, 3, DateService.today());
 
@@ -142,12 +119,5 @@ public class LoginService {
             LOGGER.log(Level.SEVERE, "Errore SQL durante la registrazinoe dell'utente", e);
             throw new DatabaseException("Impossibile registrare l'utente.");
         }
-    }
-
-    private byte[] generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[16];
-        random.nextBytes(salt);
-        return salt;
     }
 }

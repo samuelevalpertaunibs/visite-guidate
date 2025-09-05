@@ -2,8 +2,9 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facades.*;
+import com.unibs.facades.ITipoVisitaFacade;
 import com.unibs.models.*;
+import com.unibs.models.adapters.AdapterElementoSelezionabile;
 import com.unibs.utils.DatabaseException;
 import com.unibs.views.*;
 import com.unibs.views.components.PopupChiudi;
@@ -27,7 +28,7 @@ public class TipoVisitaController {
     private Comune comuneSelezionato;
     private Set<Giorno> giorniSelezionati;
     private Set<CoppiaIdUsername> volontariSelezionati;
-    private SelezioneMultiplaView<Volontario> selezioneMultiplaVolontariView;
+    private SelezioneMultiplaView<AdapterElementoSelezionabile<CoppiaIdUsername>> selezioneMultiplaVolontariView;
 
     public TipoVisitaController(WindowBasedTextGUI gui, ITipoVisitaFacade tvFacade) {
         this.gui = gui;
@@ -76,10 +77,33 @@ public class TipoVisitaController {
     private void apriSelezionaGiorni(Button button) {
         try {
             List<Giorno> giorni = tvFacade.getGiorni();
-            SelezioneMultiplaView<Giorno> selezioneMultiplaGiorni = new SelezioneMultiplaView<>(giorni, false);
-            Set<Giorno> setSelezionati = new HashSet<>(giorniSelezionati);
-            giorniSelezionati = selezioneMultiplaGiorni.mostra(gui, setSelezionati, "Seleziona i giorni della settimana in cui verra svolta la visita");
+
+            // Crea adapter con lambda che definisce come mostrare il placeholder
+            List<AdapterElementoSelezionabile<Giorno>> giorniSelezionabili =
+                    giorni.stream()
+                            .map(g -> new AdapterElementoSelezionabile<>(g, Giorno::getNome))
+                            .toList();
+
+            SelezioneMultiplaView<AdapterElementoSelezionabile<Giorno>> selezioneMultiplaGiorni =
+                    new SelezioneMultiplaView<>(giorniSelezionabili, false);
+
+            // Mappa i giorni già selezionati agli adapter
+            Set<AdapterElementoSelezionabile<Giorno>> preSelezionatiAdapter =
+                    giorniSelezionabili.stream()
+                            .filter(a -> giorniSelezionati.contains(a.getValue()))
+                            .collect(Collectors.toSet());
+
+            // Mostra la view e ottieni gli adapter selezionati
+            Set<AdapterElementoSelezionabile<Giorno>> selezionatiAdapter =
+                    selezioneMultiplaGiorni.mostra(gui, preSelezionatiAdapter, "Seleziona i giorni della settimana");
+
+            // Estrai i valori reali dai rispettivi adapter
+            giorniSelezionati = selezionatiAdapter.stream()
+                    .map(AdapterElementoSelezionabile::getValue)
+                    .collect(Collectors.toSet());
+
             aggiungiTipoVisitaView.aggiornaGiorniSelezionati(giorniSelezionati);
+
         } catch (DatabaseException e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
@@ -87,16 +111,40 @@ public class TipoVisitaController {
 
     private void apriSelezionaVolontari(Button button) {
         try {
-            List<Volontario> volontari = tvFacade.cercaTuttiVolontari();
-            selezioneMultiplaVolontariView = new SelezioneMultiplaView<>(volontari, true);
-            Button aggiungiButton = selezioneMultiplaVolontariView.getAggiungiButton();
-            if (aggiungiButton != null) {
-                aggiungiButton.addListener(this::apriAggiungiVolontario);
-            }
-            Set<CoppiaIdUsername> setSelezionati = new HashSet<>(volontariSelezionati);
-            // TODO implementare interfaccia Selectable per CoppiaIdUsername
-            // volontariSelezionati = selezioneMultiplaVolontariView.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
+            // Prendi tutti i volontari dal facade
+            Set<CoppiaIdUsername> volontari = tvFacade.cercaTuttiVolontari();
+
+            // Crea gli adapter per la view
+            List<AdapterElementoSelezionabile<CoppiaIdUsername>> volontariSelezionabili =
+                    volontari.stream()
+                            .map(v -> new AdapterElementoSelezionabile<>(v, CoppiaIdUsername::getUsername))
+                            .toList();
+
+            selezioneMultiplaVolontariView = new SelezioneMultiplaView<>(volontariSelezionabili, true);
+
+            // Aggiungi listener per il pulsante "Nuovo" se presente
+            Optional.ofNullable(selezioneMultiplaVolontariView.getAggiungiButton())
+                    .ifPresent(b -> b.addListener(this::apriAggiungiVolontario));
+
+            // Mappa i volontari già selezionati agli adapter corrispondenti
+            Set<AdapterElementoSelezionabile<CoppiaIdUsername>> preSelezionatiAdapter =
+                    volontariSelezionabili.stream()
+                            .filter(a -> volontariSelezionati.contains(a.getValue()))
+                            .collect(Collectors.toSet());
+
+            // Mostra la view e ottieni gli adapter selezionati
+            Set<AdapterElementoSelezionabile<CoppiaIdUsername>> selezionatiAdapter =
+                    selezioneMultiplaVolontariView.mostra(gui, preSelezionatiAdapter,
+                            "Seleziona i volontari da associare al tipo di visita");
+
+            // Estrai i valori reali dai rispettivi adapter
+            volontariSelezionati = selezionatiAdapter.stream()
+                    .map(AdapterElementoSelezionabile::getValue)
+                    .collect(Collectors.toSet());
+
+            // Aggiorna la view principale con i volontari selezionati
             aggiungiTipoVisitaView.aggiornaVolontariSelezionati(volontariSelezionati);
+
         } catch (DatabaseException e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
         }
@@ -191,8 +239,8 @@ public class TipoVisitaController {
 
     public void apriVisualizzaVisitePerVolontari() {
         ElencoVolontariView elencoVolontariView = new ElencoVolontariView();
-        List<Volontario> volontari = tvFacade.cercaTuttiVolontari();
-        for (Volontario v : volontari) {
+        Set<CoppiaIdUsername> volontari = tvFacade.cercaTuttiVolontari();
+        for (CoppiaIdUsername v : volontari) {
             List<java.lang.String> titoliTipiVisitaAssociati = tvFacade.cercaNomiDeiTipiVisitaDelVolontario(v.getId());
             elencoVolontariView.aggiungiVolontario(v, titoliTipiVisitaAssociati);
         }
@@ -325,7 +373,7 @@ public class TipoVisitaController {
 
     public void apriRimuoviVolontario() {
         RimuoviVolontarioView view = new RimuoviVolontarioView();
-        List<java.lang.String> nomi = tvFacade.cercaTuttiVolontari().stream().map(Volontario::getUsername).collect(Collectors.toList());
+        List<java.lang.String> nomi = tvFacade.cercaTuttiVolontari().stream().map(CoppiaIdUsername::getUsername).collect(Collectors.toList());
         view.setVolontari(nomi);
         view.setOnVolontarioSelected(nome -> {
             try {
@@ -376,27 +424,48 @@ public class TipoVisitaController {
         view.mostra(gui);
     }
 
-    private void apriAggiungiVolontari(java.lang.String nomeTipoVisita) {
+    private void apriAggiungiVolontari(String nomeTipoVisita) {
         try {
-            Optional<Integer> tipoVisitaIdOptional = tvFacade.cercaIDTipoVisitaPerNome(nomeTipoVisita);
-            if (tipoVisitaIdOptional.isEmpty()) {
-                throw new DatabaseException("Tipo visita non trovato");
-            }
-            int tipoVisitaId = tipoVisitaIdOptional.get();
+            // Ottieni l'id del tipo visita
+            int tipoVisitaId = tvFacade.cercaIDTipoVisitaPerNome(nomeTipoVisita)
+                    .orElseThrow(() -> new DatabaseException("Tipo visita non trovato"));
+
+            // Ottieni i volontari associabili
             Set<CoppiaIdUsername> volontariAssociabili = tvFacade.cercaVolontariAssociabiliAlTipoVisita(tipoVisitaId);
             if (volontariAssociabili.isEmpty()) {
-                throw new IllegalArgumentException("Tutti i volontari esistenti sono già associati a questo tipo di visita");
+                new PopupChiudi(gui).mostra("", "Tutti i volontari esistenti sono già associati a questo tipo di visita.");
+                return;
             }
 
-            // TODO: implementare adapter
-            // SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList(), false);
-            // volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, new HashSet<>(), "Seleziona i volontari da associare al tipo di visita");
-            if (volontariSelezionati.isEmpty()) {
+            // Crea adapter per la selezione multipla
+            List<AdapterElementoSelezionabile<CoppiaIdUsername>> volontariSelezionabili =
+                    volontariAssociabili.stream()
+                            .map(v -> new AdapterElementoSelezionabile<>(v, CoppiaIdUsername::getUsername))
+                            .toList();
+
+            // Mostra la view
+            SelezioneMultiplaView<AdapterElementoSelezionabile<CoppiaIdUsername>> selezioneMultiplaVolontari =
+                    new SelezioneMultiplaView<>(volontariSelezionabili, false);
+
+            Set<AdapterElementoSelezionabile<CoppiaIdUsername>> preSelezionati = Set.of(); // nessuno pre-selezionato
+            Set<AdapterElementoSelezionabile<CoppiaIdUsername>> selezionatiAdapter =
+                    selezioneMultiplaVolontari.mostra(gui, preSelezionati, "Seleziona i volontari da associare al tipo di visita");
+
+            if (selezionatiAdapter.isEmpty()) {
                 new PopupChiudi(gui).mostra("", "Nessun volontario aggiunto.");
                 return;
             }
-            tvFacade.associaVolontariAlTipoVisita(volontariSelezionati, tipoVisitaId);
+
+            // Estrai i volontari reali dai rispettivi adapter
+            Set<CoppiaIdUsername> selezionati = selezionatiAdapter.stream()
+                    .map(AdapterElementoSelezionabile::getValue)
+                    .collect(Collectors.toSet());
+
+            // Associa al tipo visita
+            tvFacade.associaVolontariAlTipoVisita(selezionati, tipoVisitaId);
+
             new PopupChiudi(gui).mostra("", "I volontari sono stati associati correttamente.");
+
         } catch (Exception e) {
             new PopupChiudi(gui).mostra("Errore", e.getMessage());
         }

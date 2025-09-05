@@ -28,7 +28,7 @@ public class VolontarioService {
         this.disponibilitaCalculatorService = new DisponibilitaCalculatorService(tipoVisitaService, giornoService, datePrecluseService);
     }
 
-    public List<Volontario> findAllVolontari() throws DatabaseException {
+    public Set<CoppiaIdUsername> cercaTuttiVolontari() throws DatabaseException {
         try {
             return utenteDao.getAllVolontari();
         } catch (Exception e) {

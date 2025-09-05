@@ -1,7 +1,7 @@
 package com.unibs.views;
 
 import com.googlecode.lanterna.gui2.*;
-import com.unibs.models.Volontario;
+import com.unibs.models.CoppiaIdUsername;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class ElencoVolontariView {
         return window;
     }
 
-    public void aggiungiVolontario(Volontario volontario, List<java.lang.String> titoliTipiVisita) {
+    public void aggiungiVolontario(CoppiaIdUsername volontario, List<java.lang.String> titoliTipiVisita) {
         components.add(new Label("Volontario: " + volontario.getUsername()));
 
         java.lang.String visitaText = titoliTipiVisita.isEmpty()

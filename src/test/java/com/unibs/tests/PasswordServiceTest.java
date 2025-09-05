@@ -143,14 +143,15 @@ class PasswordServiceTest {
         String hash2 = passwordService.hashPassword("TestPassword123@",salt);
         assertNotEquals(hash1, hash2);
 
-        //Conta quanti caratteri sono diversi (dovrebbero essere molti per SHA-256)
+        // Conta quanti caratteri sono diversi (dovrebbero essere molti per SHA-256)
         int differentChars = 0;
         for(int i = 0; i < hash1.length(); i++){
             if(hash1.charAt(i) != hash2.charAt(i)){
                 differentChars++;
             }
         }
-        //Con SHA-256, anche un piccolo cambio dovrebbe modificare circa il 50% dei bit
+
+        // Con SHA-256, anche un piccolo cambio dovrebbe modificare circa il 50% dei bit
         assertTrue(differentChars > 20);
     }
 }

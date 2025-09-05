@@ -87,8 +87,8 @@ public class TipoVisitaFacade implements ITipoVisitaFacade {
     }
 
     @Override
-    public List<Volontario> cercaTuttiVolontari() throws DatabaseException {
-        return volontarioService.findAllVolontari();
+    public Set<CoppiaIdUsername> cercaTuttiVolontari() throws DatabaseException {
+        return volontarioService.cercaTuttiVolontari();
     }
 
     @Override

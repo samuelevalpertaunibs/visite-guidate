@@ -26,7 +26,15 @@ public class UtenteDao {
     }
 
     public Utente findByUsername(java.lang.String username) throws DatabaseException {
-        java.lang.String sql = "SELECT * FROM utenti WHERE username = ?";
+        java.lang.String sql = """
+        SELECT id AS utente_id,
+               username AS utente_username,
+               password_hash AS utente_password_hash,
+               salt AS utente_salt,
+               ruolo_id AS utente_ruolo_id,
+               last_login AS utente_last_login
+               FROM utenti WHERE username = ?
+        """;
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
@@ -78,14 +86,18 @@ public class UtenteDao {
         }
     }
 
-    public List<Volontario> getAllVolontari() throws SQLException {
-        ArrayList<Volontario> volontari = new ArrayList<>();
-        java.lang.String query = "SELECT * FROM utenti WHERE ruolo_id = 2";
+    public Set<CoppiaIdUsername> getAllVolontari() throws SQLException {
+        Set<CoppiaIdUsername> volontari = new HashSet<>();
+        java.lang.String query = """
+        SELECT id AS utente_id,
+               username AS utente_username
+               FROM utenti WHERE ruolo_id = 2
+       \s""";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                volontari.add(new Volontario(utenteMapper.map(rs)));
+                volontari.add(coppiaIdUsernameMapper.map(rs));
             }
         }
         return volontari;
