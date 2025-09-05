@@ -1,50 +1,53 @@
 package com.unibs.daos;
 
-import com.unibs.models.*;
+import com.unibs.mappers.VisitaMapper;
+import com.unibs.models.TipoVisitaCore;
+import com.unibs.models.Visita;
 import com.unibs.utils.DatabaseManager;
 import com.unibs.utils.DateService;
 
 import java.sql.*;
 import java.sql.Date;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.*;
 
 public class VisitaDao {
 
-    private Visita mapResultSetToVisita(ResultSet rs, Map<Integer, TipoVisitaPreview> cache) throws SQLException {
-        int tipoVisitaId = rs.getInt("tipo_visita_id");
+    private final VisitaMapper visitaMapper;
 
-        TipoVisitaPreview tipoVisita = cache.get(tipoVisitaId);
-        if (tipoVisita == null) {
-            PuntoIncontro puntoIncontro = new PuntoIncontro(rs.getString("indirizzo_incontro"), rs.getString("comune_incontro"), rs.getString("provincia_incontro"));
-
-            tipoVisita = new TipoVisitaPreview(tipoVisitaId, rs.getString("titolo"), rs.getString("descrizione"), rs.getDate("data_inizio").toLocalDate(), rs.getDate("data_fine").toLocalDate(), rs.getTime("ora_inizio").toLocalTime(), rs.getInt("durata_minuti"), rs.getBoolean("entrata_libera"), rs.getInt("num_min_partecipanti"), rs.getInt("num_max_partecipanti"), puntoIncontro, rs.getString("luogo_nome"));
-
-            cache.put(tipoVisitaId, tipoVisita);
-        }
-
-        return new Visita(rs.getInt("id"), tipoVisita, rs.getDate("data_svolgimento").toLocalDate(), new Volontario(rs.getString("volontario_username")), Visita.StatoVisita.valueOf(rs.getString("stato")));
+    public VisitaDao(VisitaMapper visitaMapper) {
+        this.visitaMapper = visitaMapper;
     }
 
-    /**
-     * Ritorno una lista di Visite, i cui tipi di visita associati sono solo PARZIALMENTE inizializzati
-     */
     public List<Visita> getVisitePreview(Visita.StatoVisita stato) throws SQLException {
         String sql = """
-                SELECT v.id, v.tipo_visita_id, t.indirizzo_incontro, t.comune_incontro, t.provincia_incontro,
-                       t.titolo, t.descrizione, t.data_inizio, t.data_fine, t.ora_inizio, t.durata_minuti,
-                       t.entrata_libera, t.num_min_partecipanti, t.num_max_partecipanti, v.data_svolgimento,
-                       v.stato, u.username AS volontario_username, l.nome AS luogo_nome
-                FROM visite v
-                JOIN tipi_visita t ON v.tipo_visita_id = t.id
-                JOIN utenti u ON v.volontario_id = u.id
-                JOIN luoghi l ON t.luogo_id = l.id
-                WHERE v.stato = ?
-                ORDER BY v.data_svolgimento
+                                SELECT v.id AS visita_id,
+                                       v.tipo_visita_id AS visita_tipo_visita_id,
+                                       t.indirizzo_incontro AS tv_indirizzo_incontro,
+                                       t.comune_incontro AS tv_comune_incontro,
+                                       t.provincia_incontro AS tv_provincia_incontro,
+                                       t.titolo AS tv_titolo,
+                                       t.descrizione AS tv_descrizione,
+                                       t.data_inizio AS tv_data_inizio,
+                                       t.data_fine AS tv_data_fine,
+                                       t.ora_inizio AS tv_ora_inizio,
+                                       t.durata_minuti AS tv_durata_minuti,
+                                       t.entrata_libera AS tv_entrata_libera,
+                                       t.num_min_partecipanti AS tv_num_min_partecipanti,
+                                       t.num_max_partecipanti AS tv_num_max_partecipanti,
+                                       v.data_svolgimento AS visita_data_svolgimento,
+                                       v.stato AS visita_stato,
+                                       u.username AS utente_username,
+                                       u.id AS utente_id,
+                                       l.nome AS luogo_nome
+                                FROM visite v
+                                JOIN tipi_visita t ON v.tipo_visita_id = t.id
+                                JOIN utenti u ON v.volontario_id = u.id
+                                JOIN luoghi l ON t.luogo_id = l.id
+                                WHERE v.stato = ?
+                                ORDER BY v.data_svolgimento
                 """;
 
-        Map<Integer, TipoVisitaPreview> cache = new HashMap<>();
+        Map<Integer, TipoVisitaCore> cache = new HashMap<>();
         List<Visita> visite = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -52,7 +55,8 @@ public class VisitaDao {
             stmt.setString(1, stato.name());
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    visite.add(mapResultSetToVisita(rs, cache));
+                    Visita visita = visitaMapper.map(rs, cache);
+                    visite.add(visita);
                 }
             }
         }
@@ -67,7 +71,7 @@ public class VisitaDao {
 
             for (Visita visita : tutteLeVisite) {
                 stmt.setInt(1, visita.getTipoVisita().getId());
-                stmt.setInt(2, visita.getVolontario().getId());
+                stmt.setInt(2, (Integer) visita.getVolontario().getKey());
                 stmt.setDate(3, Date.valueOf(visita.getDataSvolgimento()));
                 stmt.setString(4, visita.getStato().name());
                 stmt.addBatch();
@@ -82,7 +86,6 @@ public class VisitaDao {
         java.lang.String sql = "DELETE FROM disponibilita";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.executeUpdate(); // Esegue direttamente la DELETE
         }
     }
@@ -140,48 +143,48 @@ public class VisitaDao {
     }
 
     public List<Visita> getVisitePreviewByFruitore(Visita.StatoVisita stato, String nomeFruitoreIscritto) throws SQLException {
-        List<Visita> visite = new ArrayList<>();
-        Map<Integer, TipoVisitaPreview> tipoVisitaCache = new HashMap<>();
-
         String sql = """
-            SELECT DISTINCT
-                v.id,
-                v.tipo_visita_id,
-                t.indirizzo_incontro,
-                t.comune_incontro,
-                t.provincia_incontro,
-                t.titolo,
-                t.descrizione,
-                t.data_inizio,
-                t.data_fine,
-                t.ora_inizio,
-                t.durata_minuti,
-                t.entrata_libera,
-                t.num_min_partecipanti,
-                t.num_max_partecipanti,
-                v.data_svolgimento,
-                v.stato,
-                u.username AS volontario_username,
-                l.nome AS luogo_nome
-            FROM visite v
+                SELECT DISTINCT
+                       v.id AS visita_id,
+                       v.tipo_visita_id AS visita_tipo_visita_id,
+                       t.indirizzo_incontro AS tv_indirizzo_incontro,
+                       t.comune_incontro AS tv_comune_incontro,
+                       t.provincia_incontro AS tv_provincia_incontro,
+                       t.titolo AS tv_titolo,
+                       t.descrizione AS tv_descrizione,
+                       t.data_inizio AS tv_data_inizio,
+                       t.data_fine AS tv_data_fine,
+                       t.ora_inizio AS tv_ora_inizio,
+                       t.durata_minuti AS tv_durata_minuti,
+                       t.entrata_libera AS tv_entrata_libera,
+                       t.num_min_partecipanti AS tv_num_min_partecipanti,
+                       t.num_max_partecipanti AS tv_num_max_partecipanti,
+                       v.data_svolgimento AS visita_data_svolgimento,
+                       v.stato AS visita_stato,
+                       u.username AS utente_username,
+                       u.id AS utente_id,
+                       l.nome AS luogo_nome
+                FROM visite v
                 JOIN tipi_visita t ON v.tipo_visita_id = t.id
                 JOIN utenti u ON v.volontario_id = u.id
                 JOIN luoghi l ON t.luogo_id = l.id
                 JOIN iscrizioni i ON v.id = i.visita_id
                 JOIN utenti f ON i.fruitore_id = f.id
-            WHERE v.stato = ? AND f.username = ?
-            ORDER BY v.data_svolgimento
-            """;
+                WHERE v.stato = ? AND f.username = ?
+                ORDER BY v.data_svolgimento
+                """;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        Map<Integer, TipoVisitaCore> cache = new HashMap<>();
+        List<Visita> visite = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, stato.name());
             stmt.setString(2, nomeFruitoreIscritto);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    Visita visita = mapResultSetToVisita(rs, tipoVisitaCache);
+                    Visita visita = visitaMapper.map(rs, cache);
                     visite.add(visita);
                 }
             }
@@ -266,33 +269,36 @@ public class VisitaDao {
 
     public List<Visita> getVisitePreviewByVolontario(Visita.StatoVisita stato, java.lang.String nomeString) throws SQLException {
         List<Visita> visite = new ArrayList<>();
-        Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
+        Map<Integer, TipoVisitaCore> cache = new HashMap<>();
 
         java.lang.String sql = """
-                SELECT DISTINCT
-                                    v.id,
-                                    v.tipo_visita_id,
-                                    t.indirizzo_incontro,
-                                    t.comune_incontro,
-                                    t.provincia_incontro,
-                                    t.titolo,
-                                    t.descrizione,
-                                    t.data_inizio,
-                                    t.data_fine,
-                                    t.ora_inizio,
-                                    t.durata_minuti,
-                                    t.entrata_libera,
-                                    t.num_min_partecipanti,
-                                    t.num_max_partecipanti,
-                                    v.data_svolgimento,
-                                    v.stato,
-                                    l.nome AS luogo_nome
-                                FROM visite v
-                                    JOIN tipi_visita t ON v.tipo_visita_id = t.id
-                                    JOIN utenti u ON v.volontario_id = u.id
-                                    JOIN luoghi l ON t.luogo_id = l.id
-                                WHERE v.stato = ? AND u.username = ?
-                                ORDER BY v.data_svolgimento
+                                SELECT DISTINCT
+                       v.id AS visita_id,
+                       v.tipo_visita_id AS visita_tipo_visita_id,
+                       t.indirizzo_incontro AS tv_indirizzo_incontro,
+                       t.comune_incontro AS tv_comune_incontro,
+                       t.provincia_incontro AS tv_provincia_incontro,
+                       t.titolo AS tv_titolo,
+                       t.descrizione AS tv_descrizione,
+                       t.data_inizio AS tv_data_inizio,
+                       t.data_fine AS tv_data_fine,
+                       t.ora_inizio AS tv_ora_inizio,
+                       t.durata_minuti AS tv_durata_minuti,
+                       t.entrata_libera AS tv_entrata_libera,
+                       t.num_min_partecipanti AS tv_num_min_partecipanti,
+                       t.num_max_partecipanti AS tv_num_max_partecipanti,
+                       v.data_svolgimento AS visita_data_svolgimento,
+                       v.stato AS visita_stato,
+                       l.nome AS luogo_nome,
+                       u.id AS utente_id,
+                       u.username AS utente_username,
+                       u.id AS utente_id
+                FROM visite v
+                JOIN tipi_visita t ON v.tipo_visita_id = t.id
+                JOIN utenti u ON v.volontario_id = u.id
+                JOIN luoghi l ON t.luogo_id = l.id
+                WHERE v.stato = ? AND u.username = ?
+                ORDER BY v.data_svolgimento;
                 """;
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -302,33 +308,8 @@ public class VisitaDao {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    int tipoVisitaId = rs.getInt("tipo_visita_id");
-                    java.lang.String indirizzo = rs.getString("indirizzo_incontro");
-                    java.lang.String comune = rs.getString("comune_incontro");
-                    java.lang.String provincia = rs.getString("provincia_incontro");
-                    java.lang.String titolo = rs.getString("titolo");
-                    java.lang.String descrizione = rs.getString("descrizione");
-                    LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
-                    LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
-                    LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
-                    int durataMinuti = rs.getInt("durata_minuti");
-                    boolean entrataLibera = rs.getBoolean("entrata_libera");
-                    int numMinPartecipanti = rs.getInt("num_min_partecipanti");
-                    int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
-                    LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
-                    Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
-                    java.lang.String luogoNome = rs.getString("luogo_nome");
-                    Integer id = rs.getInt("id");
 
-                    TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
-                    if (tipoVisita == null) {
-                        PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
-                        Luogo luogo = new Luogo(null, luogoNome, null, null);
-                        tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
-                        tipoVisitaCache.put(tipoVisitaId, tipoVisita);
-                    }
-
-                    Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeString, null, null, null), statoVisita);
+                    Visita visita = visitaMapper.map(rs, cache);
                     visite.add(visita);
                 }
             }
@@ -445,43 +426,35 @@ public class VisitaDao {
     }
 
     public List<Visita> getVisiteFromArchivio() throws SQLException {
-        java.lang.String sql = "SELECT * FROM archivio";
+        java.lang.String sql = """
+                SELECT a.titolo              AS tv_titolo,
+                       a.descrizione         AS tv_descrizione,
+                       a.indirizzo_incontro  AS tv_indirizzo_incontro,
+                       a.comune_incontro     AS tv_comune_incontro,
+                       a.provincia_incontro  AS tv_provincia_incontro,
+                       a.ora_inizio          AS tv_ora_inizio,
+                       a.durata_minuti       AS tv_durata_minuti,
+                       a.entrata_libera      AS tv_entrata_libera,
+                       a.luogo_nome          AS tv_luogo_nome,
+                       a.data_svolgimento    AS visita_data_svolgimento,
+                       a.stato               AS visita_stato,
+                       a.username_volontario AS utente_username,
+                       0                     AS utente_id,
+                       a.tipo_visita_id      AS tv_tipo_visita_id,
+                       0                     AS tv_num_min_partecipanti,
+                       0                     AS tv_num_max_partecipanti
+                FROM archivio a;
+                """;
+
         List<Visita> visite = new ArrayList<>();
-        Map<Integer, TipoVisita> tipoVisitaCache = new HashMap<>();
+        Map<Integer, TipoVisitaCore> cache = new HashMap<>();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int tipoVisitaId = rs.getInt("tipo_visita_id");
-                java.lang.String indirizzo = rs.getString("indirizzo_incontro");
-                java.lang.String comune = rs.getString("comune_incontro");
-                java.lang.String provincia = rs.getString("provincia_incontro");
-                java.lang.String titolo = rs.getString("titolo");
-                java.lang.String descrizione = rs.getString("descrizione");
-                LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
-                LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
-                LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
-                int durataMinuti = rs.getInt("durata_minuti");
-                boolean entrataLibera = rs.getBoolean("entrata_libera");
-                int numMinPartecipanti = rs.getInt("num_min_partecipanti");
-                int numMaxPartecipanti = rs.getInt("num_max_partecipanti");
-                LocalDate dataSvolgimento = rs.getDate("data_svolgimento").toLocalDate();
-                Visita.StatoVisita statoVisita = Visita.StatoVisita.valueOf(rs.getString("stato"));
-                java.lang.String luogoNome = rs.getString("luogo_nome");
-                java.lang.String nomeString = rs.getString("username_volontario");
-                Integer id = rs.getInt("id");
-
-                TipoVisita tipoVisita = tipoVisitaCache.get(tipoVisitaId);
-                if (tipoVisita == null) {
-                    PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
-                    Luogo luogo = new Luogo(null, luogoNome, null, null);
-                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
-                    tipoVisitaCache.put(tipoVisitaId, tipoVisita);
-                }
-
-                Visita visita = new Visita(id, tipoVisita, dataSvolgimento, new Volontario(null, nomeString, null, null, null), statoVisita);
+                Visita visita = visitaMapper.map(rs, cache);
                 visite.add(visita);
             }
         }

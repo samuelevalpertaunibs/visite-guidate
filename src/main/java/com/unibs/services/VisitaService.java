@@ -14,17 +14,18 @@ import java.util.logging.Logger;
 
 public class VisitaService {
     private static final Logger LOGGER = Logger.getLogger(VisitaService.class.getName());
-    private final VisitaDao visitaDao = new VisitaDao();
+    private final VisitaDao visitaDao;
     private final TipoVisitaService tipoVisitaService;
     private final ConfigService configService;
     private final VolontarioService volontarioService;
     private final GiornoService giornoService;
 
-    public VisitaService(TipoVisitaService tipoVisitaService, ConfigService configService, VolontarioService volontarioService, GiornoService giornoService) {
+    public VisitaService(TipoVisitaService tipoVisitaService, ConfigService configService, VolontarioService volontarioService, GiornoService giornoService, VisitaDao visitaDao) {
         this.tipoVisitaService = tipoVisitaService;
         this.configService = configService;
         this.volontarioService = volontarioService;
         this.giornoService = giornoService;
+        this.visitaDao = visitaDao;
     }
 
     public List<Visita> getVisitePreviewByStato(Visita.StatoVisita stato) throws DatabaseException {
@@ -62,9 +63,11 @@ public class VisitaService {
         Map<TipoVisita, Set<LocalDate>> dateOccupateTipoVisita = new HashMap<>();
 
         for (TipoVisita tipoVisita : tipiVisite) {
-            for (Volontario volontario : tipoVisita.getVolontari()) {
-                int volontarioId = volontario.getId();
-                List<LocalDate> disponibilita = volontarioService.getDateDisponibiliByMese(volontario, meseTarget);
+            for (Map.Entry<Integer, String> entry : tipoVisita.getVolontari().entrySet()) {
+                Integer volontarioId = entry.getKey();
+                String volontarioNome = entry.getValue();
+
+                List<LocalDate> disponibilita = volontarioService.getDateDisponibiliByMese(volontarioId, meseTarget);
 
                 dateOccupateVolontario.putIfAbsent(volontarioId, new HashSet<>());
                 dateOccupateTipoVisita.putIfAbsent(tipoVisita, new HashSet<>());
@@ -82,7 +85,7 @@ public class VisitaService {
                     if (occupateTipo.contains(data) || occupateVolontario.contains(data)) continue;
 
                     // Assegna la visita
-                    Visita visita = new Visita(null, tipoVisita, data, volontario);
+                    Visita visita = new Visita(null, tipoVisita, data, entry);
                     visitePerVolontario.computeIfAbsent(volontarioId, k -> new HashSet<>()).add(visita);
 
                     occupateTipo.add(data);

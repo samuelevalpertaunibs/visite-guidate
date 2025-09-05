@@ -15,8 +15,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LoginService {
-    final UtenteDao utenteDao = new UtenteDao();
+    final UtenteDao utenteDao;
     private static final Logger LOGGER = Logger.getLogger(LoginService.class.getName());
+
+    public LoginService(UtenteDao utenteDao) {
+        this.utenteDao = utenteDao;
+    }
 
     public Utente autentica(String username, String password)
             throws DatabaseException, IllegalArgumentException {

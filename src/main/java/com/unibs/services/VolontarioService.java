@@ -8,6 +8,7 @@ import com.unibs.utils.DatabaseException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -19,10 +20,11 @@ public class VolontarioService {
 
     private final PasswordService passwordService;
     private final DisponibilitaCalculatorService disponibilitaCalculatorService;
-    final UtenteDao utenteDao = new UtenteDao();
+    private final UtenteDao utenteDao;
 
-    public VolontarioService(TipoVisitaService tipoVisitaService, GiornoService giornoService, DatePrecluseService datePrecluseService) {
+    public VolontarioService(UtenteDao utenteDao, TipoVisitaService tipoVisitaService, GiornoService giornoService, DatePrecluseService datePrecluseService) {
         this.passwordService = new PasswordService();
+        this.utenteDao = utenteDao;
         this.disponibilitaCalculatorService = new DisponibilitaCalculatorService(tipoVisitaService, giornoService, datePrecluseService);
     }
 
@@ -47,7 +49,7 @@ public class VolontarioService {
         }
     }
 
-    public Set<Volontario> getByTipoVisitaId(int tipoVisitaId) throws DatabaseException {
+    public HashMap<Integer, String> getByTipoVisitaId(int tipoVisitaId) throws DatabaseException {
         try {
             return utenteDao.findVolontariByTipoVisitaId(tipoVisitaId);
         } catch (Exception e) {
@@ -57,9 +59,9 @@ public class VolontarioService {
         }
     }
 
-    public List<LocalDate> getDateDisponibiliByMese(Volontario volontario, YearMonth mese) throws DatabaseException {
+    public List<LocalDate> getDateDisponibiliByMese(Integer volontarioId, YearMonth mese) throws DatabaseException {
         try {
-            return utenteDao.getDateDisponibiliByMese(volontario.getId(), mese);
+            return utenteDao.getDateDisponibiliByMese(volontarioId, mese);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupero delle date disponibili", e);
             throw new DatabaseException("Impossibile recuperare le date disponibili selezionate.");
@@ -78,7 +80,7 @@ public class VolontarioService {
         }
     }
 
-    public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
+    public HashMap<Integer, String> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
         try {
             return utenteDao.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
         } catch (Exception e) {

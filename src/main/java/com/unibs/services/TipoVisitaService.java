@@ -16,38 +16,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class TipoVisitaService {
     private static final Logger LOGGER = Logger.getLogger(TipoVisitaService.class.getName());
 
     private final TipoVisitaDao tipoVisitaDao;
-    private final GiornoService giornoService;
-    private VolontarioService volontarioService;
 
-    public TipoVisitaService(GiornoService giornoService) {
-        this.tipoVisitaDao = new TipoVisitaDao();
-        this.giornoService = giornoService;
+    public TipoVisitaService(TipoVisitaDao tipoVisitaDao) {
+        this.tipoVisitaDao = tipoVisitaDao;
     }
 
-    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString,
-                                   String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti,
-                                   String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
+    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString, String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti, String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
 
-        TipoVisita tv = new TipoVisitaBuilder()
-                .conTitolo(titolo)
-                .conDescrizione(descrizione)
-                .conPeriodo(dataInizioString, dataFineString)
-                .conOrario(oraInizioString, durataMinutiString)
-                .conNumeroPartecipanti(numeroMinPartecipanti, numeroMaxPartecipanti)
-                .conEntrataLibera(entrataLibera)
-                .conLuogo(luogoSelezionato)
-                .conPuntoIncontro(indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro)
-                .neiGiorni(giorni)
-                .conVolontari(volontari)
-                .build();
+        TipoVisita tv = new TipoVisitaBuilder().conTitolo(titolo).conDescrizione(descrizione).conPeriodo(dataInizioString, dataFineString).conOrario(oraInizioString, durataMinutiString).conNumeroPartecipanti(numeroMinPartecipanti, numeroMaxPartecipanti).conEntrataLibera(entrataLibera).conLuogo(luogoSelezionato).conPuntoIncontro(indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro).neiGiorni(giorni).conVolontari(volontari).build();
 
-        int[] volontariIds = tv.getVolontari().stream().mapToInt(Volontario::getId).toArray();
-        int[] giorniIds = tv.getGiorniSettimana().stream().mapToInt(Giorno::getId).toArray();
+        Set<Integer> volontariIds = tv.getVolontari().keySet();
+        Set<Integer> giorniIds = tv.getGiorniSettimana().stream().map(Giorno::getId).collect(Collectors.toSet());
 
         // Controllo overlap
         if (tipoVisitaDao.siSovrappone(tv.getLuogo().getId(), giorniIds, tv.getOraInizio(), tv.getDurataMinuti(), tv.getDataInizio(), tv.getDataFine())) {
@@ -149,40 +134,12 @@ public class TipoVisitaService {
 
     public Optional<TipoVisita> getByTitolo(java.lang.String titolo) throws DatabaseException {
         try {
-            TipoVisita tv = tipoVisitaDao.getByTitolo(titolo);
-            if (tv == null) {
-                return Optional.empty();
-            }
+            return tipoVisitaDao.getByTitolo(titolo);
 
-            int tipoVisitaId = tv.getId();
-
-            Set<Giorno> giorni = giornoService.getByTipoVisitaId(tipoVisitaId);
-            Set<Volontario> volontari = volontarioService.getByTipoVisitaId(tipoVisitaId);
-
-            return Optional.of(new TipoVisita(
-                    tv.getId(),
-                    tv.getTitolo(),
-                    tv.getDescrizione(),
-                    tv.getDataInizio(),
-                    tv.getDataFine(),
-                    tv.getOraInizio(),
-                    tv.getDurataMinuti(),
-                    tv.isEntrataLibera(),
-                    tv.getNumMinPartecipanti(),
-                    tv.getNumMaxPartecipanti(),
-                    tv.getLuogo(),
-                    tv.getPuntoIncontro(),
-                    giorni,
-                    volontari
-            ));
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupera del tipo di visita", e);
             throw new DatabaseException("Impossibile recuperare il tipo di visita");
         }
-    }
-
-    public void setVolontarioService(VolontarioService volontarioService) {
-        this.volontarioService = volontarioService;
     }
 
     public List<String> getAllTitoli() throws DatabaseException {

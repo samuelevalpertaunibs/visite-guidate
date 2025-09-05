@@ -4,17 +4,13 @@ import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import com.unibs.facades.TipoVisitaFacade;
 import com.unibs.models.*;
-import com.unibs.models.Volontario;
 import com.unibs.services.ServiceFactory;
 import com.unibs.utils.DatabaseException;
 import com.unibs.views.*;
 import com.unibs.views.components.PopupChiudi;
 import com.unibs.views.components.PopupConferma;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TipoVisitaController {
@@ -384,7 +380,7 @@ public class TipoVisitaController {
                 throw new DatabaseException("Tipo visita non trovato");
             }
             int tipoVisitaId = tipoVisitaIdOptional.get();
-            Set<Volontario> volontariAssociabili = tvFacade.cercaVolontariAssociabiliAlTipoVisita(tipoVisitaId);
+            HashMap<Integer, String> volontariAssociabili = tvFacade.cercaVolontariAssociabiliAlTipoVisita(tipoVisitaId);
             if (volontariAssociabili.isEmpty()) {
                 throw new IllegalArgumentException("Tutti i volontari esistenti sono già associati a questo tipo di visita");
             }

@@ -1,25 +1,32 @@
 package com.unibs.daos;
 
-import com.unibs.models.Comune;
-import com.unibs.models.Luogo;
-import com.unibs.models.PuntoIncontro;
+import com.unibs.mappers.TipoVisitaMapper;
+import com.unibs.models.Giorno;
 import com.unibs.models.TipoVisita;
 import com.unibs.utils.DatabaseException;
 import com.unibs.utils.DatabaseManager;
 
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class TipoVisitaDao {
+    private final TipoVisitaMapper tipoVisitaMapper;
+    private final UtenteDao utenteDao;
+    private final GiorniDao giorniDao;
+
+    public TipoVisitaDao(TipoVisitaMapper tipoVisitaMapper, UtenteDao utenteDao, GiorniDao giorniDao) {
+        this.tipoVisitaMapper = tipoVisitaMapper;
+        this.utenteDao = utenteDao;
+        this.giorniDao = giorniDao;
+    }
 
     public void aggiungiVisita(String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
                                LocalTime oraInizio, int durataMinuti, boolean entrataLiberaBool, int numeroMin, int numeroMax,
-                               int luogoDaAssociare, int[] volontariIds, int[] giorniIds, String indirizzoPuntoIncontro,
+                               int luogoDaAssociare, Set<Integer> volontariIds, Set<Integer> giorniIds, String indirizzoPuntoIncontro,
                                String comunePuntoIncontro, String provinciaPuntoIncontro) throws SQLException {
 
         Connection conn = null;
@@ -75,7 +82,7 @@ public class TipoVisitaDao {
         }
     }
 
-    private void inserisciVolontari(Connection conn, int tipoVisitaId, int[] volontariIds) throws SQLException {
+    private void inserisciVolontari(Connection conn, int tipoVisitaId, Set<Integer> volontariIds) throws SQLException {
         String insertVolontarioNN = "INSERT INTO tipi_visita_volontari (tipo_visita_id, volontario_id) VALUES (?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertVolontarioNN)) {
             for (int volontarioId : volontariIds) {
@@ -92,7 +99,7 @@ public class TipoVisitaDao {
         }
     }
 
-    private void inserisciGiorni(Connection conn, int tipoVisitaId, int[] giorniIds) throws SQLException {
+    private void inserisciGiorni(Connection conn, int tipoVisitaId, Set<Integer> giorniIds) throws SQLException {
         String insertGiorniNN = "INSERT INTO giorni_settimana_tipi_visita (tipo_visita_id, giorno_settimana_id) VALUES (?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(insertGiorniNN)) {
             for (int giornoId : giorniIds) {
@@ -176,9 +183,9 @@ public class TipoVisitaDao {
         return titoliTipiVisita;
     }
 
-    public boolean siSovrappone(int luogoId, int[] giorniIds, LocalTime oraInizio, int durataMinuti, LocalDate dataInizio, LocalDate dataFine) {
+    public boolean siSovrappone(int luogoId, Set<Integer> giorniIds, LocalTime oraInizio, int durataMinuti, LocalDate dataInizio, LocalDate dataFine) {
         String giorniIdsPlaceholders = String.join(",",
-                java.util.Collections.nCopies(giorniIds.length, "?")
+                java.util.Collections.nCopies(giorniIds.size(), "?")
         );
 
         String sql = String.format("""
@@ -215,8 +222,9 @@ public class TipoVisitaDao {
             stmt.setTime(8, oraFine);
             stmt.setTime(9, oraFine);
 
-            for (int i = 0; i < giorniIds.length; i++) {
-                stmt.setInt(i + 10, giorniIds[i]);
+            int giorno_index = 10;
+            for (Integer giornoId : giorniIds) {
+                stmt.setInt(giorno_index++, giornoId);
             }
 
             ResultSet rs = stmt.executeQuery();
@@ -228,26 +236,6 @@ public class TipoVisitaDao {
         } catch (SQLException e) {
             throw new DatabaseException("Errore nel controllo sulla sovrapposizione: " + e.getMessage());
         }
-    }
-
-    public boolean esisteConTitolo(String titolo) {
-        String sql = "SELECT COUNT(*) FROM tipi_visita WHERE titolo = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, titolo);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (SQLException e) {
-            throw new DatabaseException("Errore durante il controllo della tabella tipo_visita: " + e.getMessage());
-        }
-
-        return false;
     }
 
     public ArrayList<String> getNomiTipiVisita(String luogoDaCercare) throws SQLException {
@@ -275,67 +263,50 @@ public class TipoVisitaDao {
         return tipiVisita;
     }
 
-    public TipoVisita getByTitolo(String titolo) throws SQLException {
+    public Optional<TipoVisita> getByTitolo(String titolo) throws SQLException {
         String sql = """
-                    SELECT tv.id, tv.titolo, tv.descrizione, tv.data_inizio, tv.data_fine, tv.ora_inizio,
-                           tv.durata_minuti, tv.entrata_libera, tv.num_min_partecipanti, tv.num_max_partecipanti,
-                           l.id AS luogo_id, l.nome AS luogo_nome, l.descrizione AS luogo_descrizione,
-                           c.id AS comune_id, c.nome AS comune_nome, c.provincia AS comune_provincia, c.regione AS comune_regione,
-                           tv.indirizzo_incontro, tv.comune_incontro, tv.provincia_incontro
-                    FROM tipi_visita tv
-                    JOIN luoghi l ON tv.luogo_id = l.id
-                    JOIN comuni c ON l.comune_id = c.id
-                    WHERE tv.titolo = ?
+                SELECT tv.id AS tv_id,
+                       tv.titolo AS tv_titolo,
+                       tv.descrizione AS tv_descrizione,
+                       tv.data_inizio AS tv_data_inizio,
+                       tv.data_fine AS tv_data_fine,
+                       tv.ora_inizio AS tv_ora_inizio,
+                       tv.durata_minuti AS tv_durata_minuti,
+                       tv.entrata_libera AS tv_entrata_libera,
+                       tv.num_min_partecipanti AS tv_num_min,
+                       tv.num_max_partecipanti AS tv_num_max,
+                       tv.indirizzo_incontro AS tv_indirizzo_incontro,
+                       tv.comune_incontro AS tv_comune_incontro,
+                       tv.provincia_incontro AS tv_provincia_incontro,
+                       l.id AS luogo_id,
+                       l.nome AS luogo_nome,
+                       l.descrizione AS luogo_descrizione,
+                       c.id AS comune_id,
+                       c.nome AS comune_nome,
+                       c.provincia AS comune_provincia,
+                       c.regione AS comune_regione
+                FROM tipi_visita tv
+                JOIN luoghi l ON tv.luogo_id = l.id
+                JOIN comuni c ON l.comune_id = c.id
+                WHERE tv.titolo = ?
                 """;
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, titolo);
-            ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    HashMap<Integer, String> volontari = utenteDao.findVolontariByTipoVisitaId(rs.getInt("tv_id"));
+                    Set<Giorno> giorni = giorniDao.findByTipoVisitaId(rs.getInt("tv_id"));
 
-                Comune comune = new Comune(
-                        rs.getInt("comune_id"),
-                        rs.getString("comune_nome"),
-                        rs.getString("comune_provincia"),
-                        rs.getString("comune_regione")
-                );
-
-                Luogo luogo = new Luogo(
-                        rs.getInt("luogo_id"),
-                        rs.getString("luogo_nome"),
-                        rs.getString("luogo_descrizione"),
-                        comune
-                );
-
-                PuntoIncontro puntoIncontro = new PuntoIncontro(
-                        rs.getString("indirizzo_incontro"),
-                        rs.getString("comune_incontro"),
-                        rs.getString("provincia_incontro")
-                );
-
-                return new TipoVisita(
-                        rs.getInt("id"),
-                        rs.getString("titolo"),
-                        rs.getString("descrizione"),
-                        rs.getDate("data_inizio").toLocalDate(),
-                        rs.getDate("data_fine").toLocalDate(),
-                        rs.getTime("ora_inizio").toLocalTime(),
-                        rs.getInt("durata_minuti"),
-                        rs.getBoolean("entrata_libera"),
-                        rs.getInt("num_min_partecipanti"),
-                        rs.getInt("num_max_partecipanti"),
-                        luogo,
-                        puntoIncontro,
-                        null,
-                        null
-                );
-            } else {
-                return null;
+                    return Optional.of(tipoVisitaMapper.map(rs, volontari, giorni));
+                }
             }
         }
+
+        return Optional.empty();
     }
 
     public List<String> getTitoliByMese(YearMonth mese) throws SQLException {

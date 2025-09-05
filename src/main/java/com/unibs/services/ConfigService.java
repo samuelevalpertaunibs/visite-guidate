@@ -1,6 +1,9 @@
 package com.unibs.services;
 
+import com.unibs.daos.ComuneDao;
 import com.unibs.daos.ConfigDao;
+import com.unibs.mappers.ComuneMapper;
+import com.unibs.mappers.ConfigMapper;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
 import com.unibs.utils.DatabaseException;
@@ -18,10 +21,12 @@ import java.util.logging.Logger;
  */
 public class ConfigService {
     private final ConfigDao configDao;
+    private final ComuneDao comuneDao;
     private final Logger LOGGER = Logger.getLogger(ConfigService.class.getName());
 
     public ConfigService() {
-        this.configDao = new ConfigDao();
+        this.configDao = new ConfigDao(new ConfigMapper());
+        this.comuneDao = new ComuneDao(new ComuneMapper());
     }
 
     public Config getConfig() throws DatabaseException {
@@ -29,7 +34,7 @@ public class ConfigService {
             Config config = configDao.getConfig()
                     .orElseThrow(() -> new DatabaseException("Configurazione non trovata."));
 
-            List<Comune> ambitoTerritoriale = configDao.getAmbitoTerritoriale();
+            List<Comune> ambitoTerritoriale = comuneDao.findAll();
             config.setAmbitoTerritoriale(ambitoTerritoriale);
 
             return config;
@@ -51,7 +56,7 @@ public class ConfigService {
             throw new IllegalArgumentException("Il comune è gia presente.");
 
         try {
-            configDao.aggiungiComune(comuneDaAggiungere);
+            comuneDao.aggiungiComune(comuneDaAggiungere);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante l'aggiunta del comune", e);
             throw new DatabaseException("Impossibile inserire il comune.");

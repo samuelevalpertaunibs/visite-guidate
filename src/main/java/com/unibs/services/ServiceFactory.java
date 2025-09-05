@@ -1,5 +1,7 @@
 package com.unibs.services;
 
+import com.unibs.daos.DaoFactory;
+
 public class ServiceFactory {
     private LuogoService luogoService;
     private ConfigService configService;
@@ -10,6 +12,7 @@ public class ServiceFactory {
     private DatePrecluseService datePrecluseService;
     private LoginService loginService;
     private FruitoreService fruitoreService;
+    private final DaoFactory daoFactory = new DaoFactory();
 
     public LuogoService getLuogoService() {
         if (luogoService == null) {
@@ -20,7 +23,7 @@ public class ServiceFactory {
 
     public LoginService getLoginService() {
         if (loginService == null) {
-            loginService = new LoginService();
+            loginService = new LoginService(daoFactory.getUtenteDao());
         }
         return loginService;
     }
@@ -41,17 +44,14 @@ public class ServiceFactory {
 
     public TipoVisitaService getTipoVisitaService() {
         if (tipoVisitaService == null) {
-            tipoVisitaService = new TipoVisitaService(getGiornoService());
-            if (volontarioService != null) {
-                tipoVisitaService.setVolontarioService(volontarioService);
-            }
+            tipoVisitaService = new TipoVisitaService(daoFactory.getTipoVisitaDao());
         }
         return tipoVisitaService;
     }
 
     public VisitaService getVisitaService() {
         if (visitaService == null) {
-            visitaService = new VisitaService(getTipoVisitaService(), getConfigService(), getVolontarioService(), getGiornoService());
+            visitaService = new VisitaService(getTipoVisitaService(), getConfigService(), getVolontarioService(), getGiornoService(), daoFactory.getVisitaDao());
         }
         return visitaService;
     }
@@ -66,17 +66,16 @@ public class ServiceFactory {
     public VolontarioService getVolontarioService() {
         if (volontarioService == null) {
             if (tipoVisitaService == null) {
-                this.tipoVisitaService = new TipoVisitaService(getGiornoService());
+                this.tipoVisitaService = new TipoVisitaService(daoFactory.getTipoVisitaDao());
             }
-            volontarioService = new VolontarioService(tipoVisitaService, getGiornoService(), getDatePrecluseService());
-            tipoVisitaService.setVolontarioService(volontarioService);
+            volontarioService = new VolontarioService(daoFactory.getUtenteDao(), tipoVisitaService, getGiornoService(), getDatePrecluseService());
         }
         return volontarioService;
     }
 
     public FruitoreService getFruitoreService() {
         if (fruitoreService == null) {
-            fruitoreService = new FruitoreService(getConfigService(), getVisitaService());
+            fruitoreService = new FruitoreService(getConfigService(), getVisitaService(), daoFactory.getVisitaDao());
         }
         return fruitoreService;
     }

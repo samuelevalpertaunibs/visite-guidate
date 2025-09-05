@@ -1,5 +1,6 @@
 package com.unibs.daos;
 
+import com.unibs.mappers.UtenteMapper;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
@@ -14,6 +15,12 @@ import java.util.*;
 
 public class UtenteDao {
 
+    private final UtenteMapper utenteMapper;
+
+    public UtenteDao(UtenteMapper utenteMapper) {
+        this.utenteMapper = utenteMapper;
+    }
+
     public Utente findByUsername(java.lang.String username) throws DatabaseException {
         java.lang.String sql = "SELECT * FROM utenti WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -22,7 +29,7 @@ public class UtenteDao {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new Utente(rs.getInt("id"), rs.getString("username"), rs.getString("password_hash"), rs.getBytes("salt"), rs.getInt("ruolo_id"), rs.getObject("last_login", LocalDate.class));
+                return utenteMapper.map(rs);
             }
         } catch (Exception e) {
             throw new DatabaseException(e.getMessage());
@@ -74,29 +81,22 @@ public class UtenteDao {
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
-                java.lang.String username = rs.getString("username");
-                java.lang.String passwordHash = rs.getString("password_hash");
-                byte[] salt = rs.getBytes("salt");
-                LocalDate lastLogin = rs.getObject("last_login", LocalDate.class);
-                volontari.add(new Volontario(id, username, passwordHash, salt, lastLogin));
+                volontari.add(new Volontario(utenteMapper.map(rs)));
             }
         }
         return volontari;
     }
 
-    public Set<Volontario> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
-        Set<Volontario> volontari = new HashSet<>();
+    public HashMap<Integer, String> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
+        HashMap<Integer, String> volontari = new HashMap<>();
         java.lang.String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, tipoVisitaId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
-                java.lang.String username = rs.getString("username");
+                volontari.put(rs.getInt("id"), rs.getString("username"));
 
-                volontari.add(new Volontario(id, username, null, null, null));
             }
         }
 
@@ -198,9 +198,9 @@ public class UtenteDao {
         }
     }
 
-    public Set<Volontario> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
+    public HashMap<Integer, String> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
         java.lang.String sql = "SELECT id, username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
-        Set<Volontario> volontari = new HashSet<>();
+        HashMap<Integer, String> volontari = new HashMap();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -208,10 +208,7 @@ public class UtenteDao {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int id = rs.getInt("id");
-                java.lang.String username = rs.getString("username");
-
-                volontari.add(new Volontario(id, username, null, null, null));
+                volontari.put(rs.getInt("id"), rs.getString("username"));
             }
         }
 

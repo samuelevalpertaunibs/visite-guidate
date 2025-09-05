@@ -3,7 +3,7 @@ package com.unibs.models;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public abstract class TipoVisitaAbstract {
+public class TipoVisitaCore {
     private final Integer id;
     private final String titolo;
     private final String descrizione;
@@ -14,11 +14,11 @@ public abstract class TipoVisitaAbstract {
     private final boolean entrataLibera;
     private final int numMinPartecipanti;
     private final int numMaxPartecipanti;
-    private PuntoIncontro puntoIncontro;
+    private final PuntoIncontro puntoIncontro;
 
-    protected TipoVisitaAbstract(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
-                                 LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti,
-                                 int numMaxPartecipanti, PuntoIncontro puntoIncontro) {
+    public TipoVisitaCore(int id, String titolo, String descrizione, LocalDate dataInizio, LocalDate dataFine,
+                             LocalTime oraInizio, int durataMinuti, boolean entrataLibera, int numMinPartecipanti,
+                             int numMaxPartecipanti, PuntoIncontro puntoIncontro) {
         this.id = id;
         this.titolo = titolo;
         this.descrizione = descrizione;

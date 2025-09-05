@@ -2,7 +2,10 @@ package com.unibs.facades;
 
 import com.unibs.models.Visita;
 import com.unibs.models.Volontario;
-import com.unibs.services.*;
+import com.unibs.services.ConfigService;
+import com.unibs.services.ServiceFactory;
+import com.unibs.services.VisitaService;
+import com.unibs.services.VolontarioService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -42,8 +45,8 @@ public class VolontarioFacade {
     }
 
     /** Recupera le date attualmente disponibili di un volontario */
-    public List<LocalDate> getDateDisponibiliByMese(Volontario volontario, YearMonth mese) {
-        return volontarioService.getDateDisponibiliByMese(volontario, mese);
+    public List<LocalDate> getDateDisponibiliByMese(Integer volontarioId, YearMonth mese) {
+        return volontarioService.getDateDisponibiliByMese(volontarioId, mese);
     }
 
     /** Sovrascrive le disponibilità del volontario */

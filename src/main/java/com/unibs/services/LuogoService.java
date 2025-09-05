@@ -1,5 +1,7 @@
 package com.unibs.services;
 
+import com.unibs.mappers.ComuneMapper;
+import com.unibs.mappers.LuogoMapper;
 import com.unibs.utils.DatabaseException;
 import com.unibs.daos.LuogoDao;
 import com.unibs.models.Comune;
@@ -21,7 +23,7 @@ public class LuogoService {
     private static final Logger LOGGER = Logger.getLogger(LuogoService.class.getName());
 
     public LuogoService() {
-        this.luogoDao = new LuogoDao();
+        this.luogoDao = new LuogoDao(new LuogoMapper(new ComuneMapper()));
         this.comuneService = new ComuneService();
     }
 

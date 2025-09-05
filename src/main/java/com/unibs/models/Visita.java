@@ -4,16 +4,17 @@ import com.unibs.utils.ElementoSelezionabile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 
 public class Visita implements ElementoSelezionabile {
     private final Integer id;
-    private final TipoVisitaAbstract tipoVisita;
+    private final TipoVisitaCore tipoVisita;
     private final LocalDate dataSvolgimento;
-    private final Volontario volontario;
+    private final Map.Entry<Integer, String> volontario;
     private final StatoVisita stato;
 
-    public Visita(Integer id, TipoVisitaAbstract tipoVisita, LocalDate dataSvolgimento, Volontario volontario, StatoVisita stato) {
+    public Visita(Integer id, TipoVisitaCore tipoVisita, LocalDate dataSvolgimento, Map.Entry<Integer, String> volontario, StatoVisita stato) {
         this.id = id;
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
@@ -21,7 +22,7 @@ public class Visita implements ElementoSelezionabile {
         this.stato = stato;
     }
 
-    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento, Volontario volontario) {
+    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento,  Map.Entry<Integer, String> volontario) {
         this.id = id;
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
@@ -34,7 +35,7 @@ public class Visita implements ElementoSelezionabile {
         return tipoVisita.getTitolo() + " in data " + dataSvolgimento.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
-    public TipoVisitaAbstract getTipoVisita() {
+    public TipoVisitaCore getTipoVisita() {
         return tipoVisita;
     }
 
@@ -46,7 +47,7 @@ public class Visita implements ElementoSelezionabile {
         return stato;
     }
 
-    public Volontario getVolontario() {
+    public Map.Entry getVolontario() {
         return volontario;
     }
 

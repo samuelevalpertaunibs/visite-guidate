@@ -111,7 +111,7 @@ public class VolontarioController implements IUserController {
                     .toList();
             view.setDateDisponibili(dateDisponibili);
 
-            List<LocalDate> dateAttualmenteDisponibili = volFacade.getDateDisponibiliByMese(volontario, mese);
+            List<LocalDate> dateAttualmenteDisponibili = volFacade.getDateDisponibiliByMese(volontario.getId(), mese);
             view.setDateSelezionate(dateAttualmenteDisponibili);
 
             // Imposto azione del bottone Salva

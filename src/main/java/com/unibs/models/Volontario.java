@@ -15,10 +15,6 @@ public class Volontario extends Utente implements ElementoSelezionabile {
         super(utente.getId(), utente.getUsername(), utente.getUsername(), utente.getSalt(), 2, utente.getLastLogin());
     }
 
-    public Volontario (String username) {
-        super(null, username, null, null, 2, null);
-    }
-
     @Override
     public String getPlaceHolder() {
         return getUsername();

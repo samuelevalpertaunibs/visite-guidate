@@ -1,10 +1,10 @@
 package com.unibs.facades;
 
 import com.unibs.models.*;
-import com.unibs.models.Volontario;
 import com.unibs.services.*;
 import com.unibs.utils.DatabaseException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -89,7 +89,7 @@ public class TipoVisitaFacade {
         volontarioService.associaATipoVisita(volontari, tipoVisitaId);
     }
 
-    public Set<Volontario> cercaVolontariAssociabiliAlTipoVisita(int tipoVisitaId) {
+    public HashMap<Integer, String> cercaVolontariAssociabiliAlTipoVisita(int tipoVisitaId) {
         return volontarioService.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
     }
 

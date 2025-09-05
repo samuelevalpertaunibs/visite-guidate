@@ -1,5 +1,6 @@
 package com.unibs.services;
 
+import com.unibs.mappers.ComuneMapper;
 import com.unibs.utils.DatabaseException;
 import com.unibs.daos.ComuneDao;
 import com.unibs.models.Comune;
@@ -13,7 +14,7 @@ public class ComuneService {
     private final ComuneDao comuneDao;
 
     public ComuneService() {
-        this.comuneDao = new ComuneDao();
+        this.comuneDao = new ComuneDao(new ComuneMapper());
     }
 
     // Non ritorna un Optional perchè viene sempre chiamato con un id valido

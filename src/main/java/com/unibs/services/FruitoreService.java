@@ -15,10 +15,10 @@ public class FruitoreService {
     private final VisitaService visitaService;
     private final VisitaDao visitaDao;
 
-    public FruitoreService(ConfigService configService, VisitaService visitaService) {
+    public FruitoreService(ConfigService configService, VisitaService visitaService, VisitaDao visitaDao) {
         this.configService = configService;
         this.visitaService = visitaService;
-        this.visitaDao = new VisitaDao();
+        this.visitaDao = visitaDao;
     }
 
     public int iscrivi(Fruitore fruitore, Visita visitaSelezionata, int numeroPersoneDaIscrivere) {
