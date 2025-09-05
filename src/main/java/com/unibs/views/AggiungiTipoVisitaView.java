@@ -224,19 +224,18 @@ public class AggiungiTipoVisitaView {
         giorniSelezionatiLabel.setText(testo);
     }
 
-    // TODO qua ce da gestire l'adapter
     public void aggiornaVolontariSelezionati(Set<CoppiaIdUsername> volontariSelezionati) {
         if (volontariSelezionati == null || volontariSelezionati.isEmpty()) {
             volontariSelezionatiLabel.setText("Nessun volontario selezionato");
             return;
         }
 
-        // TODO
-//        java.lang.String testo = volontariSelezionati.stream()
-//                .sorted(Comparator.comparing(CoppiaIdUsername::getId))
-//                .map(CoppiaIdUsername::getPlaceHolder)
-//                .collect(Collectors.joining(", "));
-//        volontariSelezionatiLabel.setText(testo);
+
+        java.lang.String testo = volontariSelezionati.stream()
+                .sorted(Comparator.comparing(CoppiaIdUsername::getId))
+                .map(CoppiaIdUsername::getUsername)
+                .collect(Collectors.joining(", "));
+        volontariSelezionatiLabel.setText(testo);
     }
 
     public java.lang.String getTitolo() {

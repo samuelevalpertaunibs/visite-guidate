@@ -132,11 +132,11 @@ public class TipoVisitaService {
         }
     }
 
-    public Optional<TipoVisita> getByTitolo(java.lang.String titolo) throws DatabaseException {
+    public Optional<TipoVisita> getByTitolo(String titolo) throws DatabaseException {
         try {
             return tipoVisitaDao.getByTitolo(titolo);
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Errore SQL durante il recupera del tipo di visita", e);
             throw new DatabaseException("Impossibile recuperare il tipo di visita");
         }

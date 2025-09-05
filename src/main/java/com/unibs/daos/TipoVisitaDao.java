@@ -299,10 +299,21 @@ public class TipoVisitaDao {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    Set<CoppiaIdUsername> volontari = utenteDao.findVolontariByTipoVisitaId(rs.getInt("tv_id"));
-                    Set<Giorno> giorni = giorniDao.findByTipoVisitaId(rs.getInt("tv_id"));
+                    // Creo la mappa dei dati
+                    Map<String, Object> dataMap = new HashMap<>();
+                    ResultSetMetaData meta = rs.getMetaData();
+                    for (int i = 1; i <= meta.getColumnCount(); i++) {
+                        dataMap.put(meta.getColumnLabel(i), rs.getObject(i));
+                    }
 
-                    return Optional.of(tipoVisitaMapper.map(rs, volontari, giorni));
+                    // Recupero i dati dai DAO esterni
+                    int tipoVisitaId = ((Number) dataMap.get("tv_id")).intValue();
+
+                    Set<CoppiaIdUsername> volontari = utenteDao.findVolontariByTipoVisitaId(tipoVisitaId);
+                    Set<Giorno> giorni = giorniDao.findByTipoVisitaId(tipoVisitaId);
+
+                    // Passo tutto al mapper
+                    return Optional.of(tipoVisitaMapper.map(dataMap, volontari, giorni));
                 }
             }
         }
