@@ -1,10 +1,7 @@
 package com.unibs.services;
 
 import com.unibs.daos.TipoVisitaDao;
-import com.unibs.models.Giorno;
-import com.unibs.models.Luogo;
-import com.unibs.models.TipoVisita;
-import com.unibs.models.Volontario;
+import com.unibs.models.*;
 import com.unibs.models.builders.TipoVisitaBuilder;
 import com.unibs.utils.DatabaseException;
 
@@ -27,11 +24,14 @@ public class TipoVisitaService {
         this.tipoVisitaDao = tipoVisitaDao;
     }
 
-    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString, String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti, String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<Volontario> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
+    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizioString, String dataFineString, String oraInizioString, String durataMinutiString, boolean entrataLibera, String numeroMinPartecipanti, String numeroMaxPartecipanti, Luogo luogoSelezionato, Set<CoppiaIdUsername> volontari, Set<Giorno> giorni, String indirizzoPuntoIncontro, String comunePuntoIncontro, String provinciaPuntoIncontro) throws DatabaseException, IllegalArgumentException {
 
         TipoVisita tv = new TipoVisitaBuilder().conTitolo(titolo).conDescrizione(descrizione).conPeriodo(dataInizioString, dataFineString).conOrario(oraInizioString, durataMinutiString).conNumeroPartecipanti(numeroMinPartecipanti, numeroMaxPartecipanti).conEntrataLibera(entrataLibera).conLuogo(luogoSelezionato).conPuntoIncontro(indirizzoPuntoIncontro, comunePuntoIncontro, provinciaPuntoIncontro).neiGiorni(giorni).conVolontari(volontari).build();
 
-        Set<Integer> volontariIds = tv.getVolontari().keySet();
+        Set<Integer> volontariIds = tv.getVolontari()
+                .stream()
+                .map(CoppiaIdUsername::getId)   // oppure getId() se è un getter
+                .collect(Collectors.toSet());
         Set<Integer> giorniIds = tv.getGiorniSettimana().stream().map(Giorno::getId).collect(Collectors.toSet());
 
         // Controllo overlap

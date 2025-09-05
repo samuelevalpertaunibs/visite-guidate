@@ -2,11 +2,10 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facades.ConfiguratoreFacade;
+import com.unibs.facades.*;
 import com.unibs.models.MenuOption;
 import com.unibs.models.Utente;
 import com.unibs.models.Visita;
-import com.unibs.services.ServiceFactory;
 import com.unibs.utils.DateService;
 import com.unibs.views.MenuView;
 import com.unibs.views.RegimeNonAttivoView;
@@ -30,21 +29,21 @@ public class ConfiguratoreController implements IUserController {
     final List<MenuOption> menuOptions = new ArrayList<>();
     MenuOption creaPianoOption;
     MenuView operazioniSupplementariMenu;
-    private final ConfiguratoreFacade configuratoreFacade;
+    private final IConfiguratoreFacade configuratoreFacade;
 
     // Views
     private final MenuView menuView;
 
-    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, ServiceFactory serviceFactory) {
+    public ConfiguratoreController(MultiWindowTextGUI gui, Utente currentUtente, IVisitaFacade visitaFacade, IConfiguratoreFacade configuratoreFacade, ITipoVisitaFacade tipoVisitaFacade, IConfigFacade configFacade, IDatePrecluseFacade datePrecluseFacade, ILuogoFacade luogoFacade) {
         this.gui = gui;
         this.utente = currentUtente;
-        this.luogoController = new LuogoController(gui, serviceFactory.getLuogoService());
-        this.tipoVisitaController = new TipoVisitaController(gui, serviceFactory);
-        this.visitaController = new VisitaController(gui, serviceFactory);
-        this.datePrecluseController = new DatePrecluseController(gui, serviceFactory.getDatePrecluseService());
-        this.configController = new ConfigController(gui, serviceFactory.getConfigService());
+        this.luogoController = new LuogoController(gui, luogoFacade);
+        this.tipoVisitaController = new TipoVisitaController(gui, tipoVisitaFacade);
+        this.visitaController = new VisitaController(gui,visitaFacade);
+        this.datePrecluseController = new DatePrecluseController(gui, datePrecluseFacade);
+        this.configController = new ConfigController(gui, configFacade);
         this.menuView = new MenuView(gui);
-        this.configuratoreFacade = new ConfiguratoreFacade(serviceFactory);
+        this.configuratoreFacade = configuratoreFacade;
     }
 
 

@@ -4,12 +4,11 @@ import com.unibs.models.*;
 import com.unibs.services.*;
 import com.unibs.utils.DatabaseException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class TipoVisitaFacade {
+public class TipoVisitaFacade implements ITipoVisitaFacade {
 
     private final TipoVisitaService tipoVisitaService;
     private final VolontarioService volontarioService;
@@ -25,93 +24,109 @@ public class TipoVisitaFacade {
         this.giornoService = serviceFactory.getGiornoService();
     }
 
-    // -------------------- TIPO VISITA --------------------
-    public void aggiungiTipoVisita(java.lang.String titolo, java.lang.String descrizione, java.lang.String dataInizio, java.lang.String dataFine,
-                                   java.lang.String oraInizio, java.lang.String durata, boolean entrataLibera,
-                                   java.lang.String numeroMin, java.lang.String numeroMax, Luogo luogo,
-                                   Set<Volontario> volontari, Set<Giorno> giorni,
-                                   java.lang.String indirizzo, java.lang.String comune, java.lang.String provincia) throws Exception {
+    // Implementazione di tutti i metodi definiti in ITipoVisiteFacade
+    @Override
+    public void aggiungiTipoVisita(String titolo, String descrizione, String dataInizio, String dataFine,
+                                   String oraInizio, String durata, boolean entrataLibera,
+                                   String numeroMin, String numeroMax, Luogo luogo,
+                                   Set<CoppiaIdUsername> volontari, Set<Giorno> giorni,
+                                   String indirizzo, String comune, String provincia) throws Exception {
         tipoVisitaService.aggiungiTipoVisita(titolo, descrizione, dataInizio, dataFine,
                 oraInizio, durata, entrataLibera, numeroMin, numeroMax, luogo,
                 volontari, giorni, indirizzo, comune, provincia);
     }
 
-    public List<java.lang.String> getNomiTipiVisita() throws DatabaseException {
+    @Override
+    public List<String> getNomiTipiVisita() throws DatabaseException {
         return tipoVisitaService.getNomiTipiVisita();
     }
 
-    public List<java.lang.String> getNomiTipiVisita(java.lang.String luogoNome) throws DatabaseException {
+    @Override
+    public List<String> getNomiTipiVisita(String luogoNome) throws DatabaseException {
         return tipoVisitaService.getNomiTipiVisita(luogoNome);
     }
 
+    @Override
     public boolean esisteAlmenoUnaVisita() throws DatabaseException {
         return tipoVisitaService.esisteAlmenoUnaVisita();
     }
 
-    public Optional<Integer> cercaIDTipoVisitaPerNome(java.lang.String nome) throws DatabaseException {
+    @Override
+    public Optional<Integer> cercaIDTipoVisitaPerNome(String nome) throws DatabaseException {
         return tipoVisitaService.getIdByNome(nome);
     }
 
+    @Override
     public List<TipoVisita> cercaVisiteDelVolontario(int volontarioId) {
         return tipoVisitaService.findByVolontario(volontarioId);
     }
 
-    public List<java.lang.String> cercaNomiDeiTipiVisitaDelVolontario(int volontarioId) {
+    @Override
+    public List<String> cercaNomiDeiTipiVisitaDelVolontario(int volontarioId) {
         return tipoVisitaService.getTitoliByVolontarioId(volontarioId);
     }
 
-    public List<java.lang.String> cercaTipiVisitaNelLuogo(int luogoId) {
+    @Override
+    public List<String> cercaTipiVisitaNelLuogo(int luogoId) {
         return tipoVisitaService.getTitoliByLuogoId(luogoId);
     }
 
-    public List<java.lang.String> cercaTuttiTipiVisita() {
+    @Override
+    public List<String> cercaTuttiTipiVisita() {
         return tipoVisitaService.getAllTitoli();
     }
 
-    public void inserisciTipoVisitaDaRimuovere(java.lang.String titolo) throws Exception {
+    @Override
+    public void inserisciTipoVisitaDaRimuovere(String titolo) throws Exception {
         tipoVisitaService.inserisciTVDaRimuovere(titolo);
     }
 
-    // -------------------- VOLONTARI --------------------
+    @Override
     public void rimuoviVolontariNonAssociati() {
         volontarioService.rimuoviNonAssociati();
     }
 
+    @Override
     public List<Volontario> cercaTuttiVolontari() throws DatabaseException {
         return volontarioService.findAllVolontari();
     }
 
-    public void aggiungiVolontario(java.lang.String username) throws Exception {
+    @Override
+    public void aggiungiVolontario(String username) throws Exception {
         volontarioService.aggiungiVolontario(username);
     }
 
-    public void associaVolontariAlTipoVisita(Set<Volontario> volontari, int tipoVisitaId) {
+    @Override
+    public void associaVolontariAlTipoVisita(Set<CoppiaIdUsername> volontari, int tipoVisitaId) {
         volontarioService.associaATipoVisita(volontari, tipoVisitaId);
     }
 
-    public HashMap<Integer, String> cercaVolontariAssociabiliAlTipoVisita(int tipoVisitaId) {
+    @Override
+    public Set<CoppiaIdUsername> cercaVolontariAssociabiliAlTipoVisita(int tipoVisitaId) {
         return volontarioService.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
     }
 
-    public void inserisciVolontarioDaRimuovere(java.lang.String username) throws Exception {
+    @Override
+    public void inserisciVolontarioDaRimuovere(String username) throws Exception {
         volontarioService.inserisciVolontarioDaRimuovere(username);
     }
 
-    // -------------------- LUOGHI --------------------
+    @Override
     public List<Luogo> cercaTuttiLuoghi() throws DatabaseException {
         return luogoService.findAll();
     }
 
-    public Luogo aggiungiLuogo(java.lang.String nome, java.lang.String descrizione, Comune comune) throws Exception {
+    @Override
+    public Luogo aggiungiLuogo(String nome, String descrizione, Comune comune) throws Exception {
         return luogoService.aggiungiLuogo(nome, descrizione, comune);
     }
 
-    // -------------------- COMUNI --------------------
+    @Override
     public List<Comune> getAmbitoTerritoriale() throws DatabaseException {
         return configService.getAmbitoTerritoriale();
     }
 
-    // -------------------- GIORNI --------------------
+    @Override
     public List<Giorno> getGiorni() throws DatabaseException {
         return giornoService.getGiorni();
     }

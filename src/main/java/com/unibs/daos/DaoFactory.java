@@ -79,7 +79,7 @@ public class DaoFactory {
 
     public UtenteDao getUtenteDao() {
         if (utenteDao == null) {
-            utenteDao = new UtenteDao(mapperFactory.getUtenteMapper());
+            utenteDao = new UtenteDao(mapperFactory.getUtenteMapper(), mapperFactory.getCoppiaIdUsernameMapper());
         }
         return utenteDao;
     }

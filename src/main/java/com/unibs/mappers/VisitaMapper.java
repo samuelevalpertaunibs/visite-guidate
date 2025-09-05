@@ -13,10 +13,13 @@ public class VisitaMapper implements CacheMapper<Visita, Integer, TipoVisitaCore
 
     private final TipoVisitaMapper tipoVisitaMapper;
     private final TipoVisitaPreviewMapper tipoVisitaPreviewMapper;
+    private final CoppiaIdUsernameMapper coppiaIdUsernameMapper;
 
-    public VisitaMapper(TipoVisitaMapper tipoVisitaMapper, TipoVisitaPreviewMapper tipoVisitaPreviewMapper) {
+
+    public VisitaMapper(TipoVisitaMapper tipoVisitaMapper, TipoVisitaPreviewMapper tipoVisitaPreviewMapper, CoppiaIdUsernameMapper coppiaIdUsernameMapper) {
         this.tipoVisitaMapper = tipoVisitaMapper;
         this.tipoVisitaPreviewMapper = tipoVisitaPreviewMapper;
+        this.coppiaIdUsernameMapper = coppiaIdUsernameMapper;
     }
 
     public Visita map(ResultSet rs, Map<Integer, TipoVisitaCore> cache) throws SQLException {
@@ -32,7 +35,7 @@ public class VisitaMapper implements CacheMapper<Visita, Integer, TipoVisitaCore
                 rs.getInt("visita_id"),
                 tipoVisita,
                 rs.getDate("visita_data_svolgimento").toLocalDate(),
-                new AbstractMap.SimpleEntry<>(rs.getInt("utente_id"), rs.getString("utente_username")),
+                coppiaIdUsernameMapper.map(rs),
                 Visita.StatoVisita.valueOf(rs.getString("visita_stato"))
         );
     }

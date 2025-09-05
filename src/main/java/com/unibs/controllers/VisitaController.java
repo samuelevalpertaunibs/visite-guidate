@@ -1,9 +1,8 @@
 package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facades.VisitaFacade;
+import com.unibs.facades.IVisitaFacade;
 import com.unibs.models.Visita;
-import com.unibs.services.ServiceFactory;
 import com.unibs.views.ElencoVisiteView;
 import com.unibs.views.components.PopupChiudi;
 import com.unibs.views.components.PopupConferma;
@@ -14,11 +13,11 @@ import java.util.List;
 public class VisitaController {
     private final WindowBasedTextGUI gui;
     private ElencoVisiteView elencoVisiteView;
-    private final VisitaFacade visitaFacade;
+    private final IVisitaFacade visitaFacade;
 
-    public VisitaController(WindowBasedTextGUI gui, ServiceFactory serviceFactory) {
+    public VisitaController(WindowBasedTextGUI gui, IVisitaFacade visitaFacade) {
         this.gui = gui;
-        this.visitaFacade = new VisitaFacade(serviceFactory);
+        this.visitaFacade = visitaFacade;
     }
 
     public void apriVisualizzaVisitePerTipologia(List<Visita.StatoVisita> statiDaMostrare) {

@@ -1,6 +1,8 @@
 package com.unibs.daos;
 
+import com.unibs.mappers.CoppiaIdUsernameMapper;
 import com.unibs.mappers.UtenteMapper;
+import com.unibs.models.CoppiaIdUsername;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
@@ -16,9 +18,11 @@ import java.util.*;
 public class UtenteDao {
 
     private final UtenteMapper utenteMapper;
+    private final CoppiaIdUsernameMapper coppiaIdUsernameMapper;
 
-    public UtenteDao(UtenteMapper utenteMapper) {
+    public UtenteDao(UtenteMapper utenteMapper, CoppiaIdUsernameMapper coppiaIdUsernameMapper) {
         this.utenteMapper = utenteMapper;
+        this.coppiaIdUsernameMapper = coppiaIdUsernameMapper;
     }
 
     public Utente findByUsername(java.lang.String username) throws DatabaseException {
@@ -87,16 +91,15 @@ public class UtenteDao {
         return volontari;
     }
 
-    public HashMap<Integer, String> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
-        HashMap<Integer, String> volontari = new HashMap<>();
-        java.lang.String query = "SELECT u.id, u.username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
+    public Set<CoppiaIdUsername> findVolontariByTipoVisitaId(int tipoVisitaId) throws SQLException {
+        Set<CoppiaIdUsername> volontari = new HashSet<>();
+        java.lang.String query = "SELECT u.id AS utente_id, u.username AS utente_username FROM utenti u JOIN tipi_visita_volontari tvv ON u.id = tvv.volontario_id WHERE tvv.tipo_visita_id = ?";
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, tipoVisitaId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                volontari.put(rs.getInt("id"), rs.getString("username"));
-
+                volontari.add(coppiaIdUsernameMapper.map(rs));
             }
         }
 
@@ -198,9 +201,9 @@ public class UtenteDao {
         }
     }
 
-    public HashMap<Integer, String> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
-        java.lang.String sql = "SELECT id, username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
-        HashMap<Integer, String> volontari = new HashMap();
+    public Set<CoppiaIdUsername> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) throws SQLException {
+        java.lang.String sql = "SELECT id AS utente_id, username AS utente_username FROM utenti WHERE ruolo_id = 2 AND id NOT IN (SELECT tipi_visita_volontari.volontario_id FROM tipi_visita_volontari WHERE tipo_visita_id = ?)";
+        Set<CoppiaIdUsername> volontari = new HashSet<>();
 
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -208,7 +211,7 @@ public class UtenteDao {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                volontari.put(rs.getInt("id"), rs.getString("username"));
+                volontari.add(coppiaIdUsernameMapper.map(rs));
             }
         }
 

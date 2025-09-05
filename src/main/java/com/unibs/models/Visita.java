@@ -4,17 +4,16 @@ import com.unibs.utils.ElementoSelezionabile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 
 public class Visita implements ElementoSelezionabile {
     private final Integer id;
     private final TipoVisitaCore tipoVisita;
     private final LocalDate dataSvolgimento;
-    private final Map.Entry<Integer, String> volontario;
+    private final CoppiaIdUsername volontario;
     private final StatoVisita stato;
 
-    public Visita(Integer id, TipoVisitaCore tipoVisita, LocalDate dataSvolgimento, Map.Entry<Integer, String> volontario, StatoVisita stato) {
+    public Visita(Integer id, TipoVisitaCore tipoVisita, LocalDate dataSvolgimento, CoppiaIdUsername volontario, StatoVisita stato) {
         this.id = id;
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
@@ -22,7 +21,7 @@ public class Visita implements ElementoSelezionabile {
         this.stato = stato;
     }
 
-    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento,  Map.Entry<Integer, String> volontario) {
+    public Visita(Integer id, TipoVisita tipoVisita, LocalDate dataSvolgimento,CoppiaIdUsername volontario) {
         this.id = id;
         this.tipoVisita = tipoVisita;
         this.dataSvolgimento = dataSvolgimento;
@@ -47,7 +46,7 @@ public class Visita implements ElementoSelezionabile {
         return stato;
     }
 
-    public Map.Entry getVolontario() {
+    public CoppiaIdUsername getVolontario() {
         return volontario;
     }
 

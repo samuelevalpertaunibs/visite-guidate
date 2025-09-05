@@ -1,6 +1,7 @@
 package com.unibs.daos;
 
 import com.unibs.mappers.TipoVisitaMapper;
+import com.unibs.models.CoppiaIdUsername;
 import com.unibs.models.Giorno;
 import com.unibs.models.TipoVisita;
 import com.unibs.utils.DatabaseException;
@@ -298,7 +299,7 @@ public class TipoVisitaDao {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    HashMap<Integer, String> volontari = utenteDao.findVolontariByTipoVisitaId(rs.getInt("tv_id"));
+                    Set<CoppiaIdUsername> volontari = utenteDao.findVolontariByTipoVisitaId(rs.getInt("tv_id"));
                     Set<Giorno> giorni = giorniDao.findByTipoVisitaId(rs.getInt("tv_id"));
 
                     return Optional.of(tipoVisitaMapper.map(rs, volontari, giorni));

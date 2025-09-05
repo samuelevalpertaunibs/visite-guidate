@@ -11,6 +11,7 @@ public class MapperFactory {
     private TipoVisitaMapper tvMapper;
     private VisitaMapper visitaMapper;
     private UtenteMapper utenteMapper;
+    private CoppiaIdUsernameMapper coppiaIdUsernameMapper;
 
     public ComuneMapper getComuneMapper() {
         if (comuneMapper == null) {
@@ -56,15 +57,20 @@ public class MapperFactory {
 
     public VisitaMapper getVisitaMapper() {
         if (visitaMapper == null) {
-            visitaMapper = new VisitaMapper(getTipoVisitaMapper(), getTipoVisitaPreviewMapper());
-        }
+            visitaMapper = new VisitaMapper(getTipoVisitaMapper(), getTipoVisitaPreviewMapper(), getCoppiaIdUsernameMapper());        }
         return visitaMapper;
+    }
+
+    public CoppiaIdUsernameMapper getCoppiaIdUsernameMapper() {
+        if (coppiaIdUsernameMapper == null) {
+            coppiaIdUsernameMapper = new CoppiaIdUsernameMapper();
+        }
+        return coppiaIdUsernameMapper;
     }
 
     public UtenteMapper getUtenteMapper() {
         if (utenteMapper == null) {
-            utenteMapper = new UtenteMapper();
-        }
+            utenteMapper = new UtenteMapper(getCoppiaIdUsernameMapper());        }
         return utenteMapper;
     }
 }

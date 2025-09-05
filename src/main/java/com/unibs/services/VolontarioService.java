@@ -1,6 +1,7 @@
 package com.unibs.services;
 
 import com.unibs.daos.UtenteDao;
+import com.unibs.models.CoppiaIdUsername;
 import com.unibs.models.Utente;
 import com.unibs.models.Volontario;
 import com.unibs.utils.DatabaseException;
@@ -8,7 +9,6 @@ import com.unibs.utils.DatabaseException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -49,7 +49,7 @@ public class VolontarioService {
         }
     }
 
-    public HashMap<Integer, String> getByTipoVisitaId(int tipoVisitaId) throws DatabaseException {
+    public Set<CoppiaIdUsername> getByTipoVisitaId(int tipoVisitaId) throws DatabaseException {
         try {
             return utenteDao.findVolontariByTipoVisitaId(tipoVisitaId);
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class VolontarioService {
         }
     }
 
-    public HashMap<Integer, String> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
+    public Set<CoppiaIdUsername> getVolontariNonAssociatiByTipoVisitaId(int tipoVisitaId) {
         try {
             return utenteDao.getVolontariNonAssociatiByTipoVisitaId(tipoVisitaId);
         } catch (Exception e) {
@@ -89,9 +89,9 @@ public class VolontarioService {
         }
     }
 
-    public void associaATipoVisita(Set<Volontario> volontariSelezionati, int tipoVisitaId) {
+    public void associaATipoVisita(Set<CoppiaIdUsername> volontariSelezionati, int tipoVisitaId) {
         try {
-            for (Volontario volontario : volontariSelezionati) {
+            for (CoppiaIdUsername volontario : volontariSelezionati) {
                 utenteDao.associaATipoVisitaById(volontario.getId(), tipoVisitaId);
             }
         } catch (Exception e) {

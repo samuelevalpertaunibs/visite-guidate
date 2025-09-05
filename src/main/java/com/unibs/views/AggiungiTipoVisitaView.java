@@ -1,15 +1,15 @@
 package com.unibs.views;
 
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.gui2.*;
+import com.unibs.models.CoppiaIdUsername;
+import com.unibs.models.Giorno;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.googlecode.lanterna.TerminalSize;
-import com.googlecode.lanterna.TextColor;
-import com.googlecode.lanterna.gui2.*;
-import com.unibs.models.Giorno;
-import com.unibs.models.Volontario;
 
 public class AggiungiTipoVisitaView {
     private static final int YES_INDEX = 0;
@@ -223,16 +223,19 @@ public class AggiungiTipoVisitaView {
         giorniSelezionatiLabel.setText(testo);
     }
 
-    public void aggiornaVolontariSelezionati(Set<Volontario> volontariSelezionati) {
+    // TODO qua ce da gestire l'adapter
+    public void aggiornaVolontariSelezionati(Set<CoppiaIdUsername> volontariSelezionati) {
         if (volontariSelezionati == null || volontariSelezionati.isEmpty()) {
             volontariSelezionatiLabel.setText("Nessun volontario selezionato");
             return;
         }
-        java.lang.String testo = volontariSelezionati.stream()
-                .sorted(Comparator.comparing(Volontario::getId))
-                .map(Volontario::getPlaceHolder)
-                .collect(Collectors.joining(", "));
-        volontariSelezionatiLabel.setText(testo);
+
+        // TODO
+//        java.lang.String testo = volontariSelezionati.stream()
+//                .sorted(Comparator.comparing(CoppiaIdUsername::getId))
+//                .map(CoppiaIdUsername::getPlaceHolder)
+//                .collect(Collectors.joining(", "));
+//        volontariSelezionatiLabel.setText(testo);
     }
 
     public java.lang.String getTitolo() {

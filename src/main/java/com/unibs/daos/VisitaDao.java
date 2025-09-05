@@ -71,7 +71,7 @@ public class VisitaDao {
 
             for (Visita visita : tutteLeVisite) {
                 stmt.setInt(1, visita.getTipoVisita().getId());
-                stmt.setInt(2, (Integer) visita.getVolontario().getKey());
+                stmt.setInt(2, (Integer) visita.getVolontario().getId());
                 stmt.setDate(3, Date.valueOf(visita.getDataSvolgimento()));
                 stmt.setString(4, visita.getStato().name());
                 stmt.addBatch();

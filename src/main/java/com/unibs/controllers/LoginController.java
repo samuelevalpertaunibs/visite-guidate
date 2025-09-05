@@ -1,8 +1,11 @@
 package com.unibs.controllers;
 
-import com.unibs.services.*;
+import com.googlecode.lanterna.gui2.Button;
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.unibs.facades.*;
 import com.unibs.models.Utente;
-import com.googlecode.lanterna.gui2.*;
+import com.unibs.services.LoginService;
+import com.unibs.services.ServiceFactory;
 import com.unibs.views.CambioPasswordView;
 import com.unibs.views.LoginView;
 import com.unibs.views.RegistrazioneView;
@@ -11,8 +14,8 @@ public class LoginController {
 
     private final ServiceFactory serviceFactory;
     private final LoginService loginService;
-    private LoginView loginView;
     private final MultiWindowTextGUI gui;
+    private LoginView loginView;
     private CambioPasswordView cambioPasswordView;
     private RegistrazioneView registrazioneView;
     private Utente utente;
@@ -37,17 +40,17 @@ public class LoginController {
     }
 
     private void inizializzaFruitore() {
-        FruitoreController fruitoreController = new FruitoreController(gui, utente, serviceFactory);
+        FruitoreController fruitoreController = new FruitoreController(gui, utente, new VisitaFacade(serviceFactory), new FruitoreFacade(serviceFactory));
         fruitoreController.start();
     }
 
     private void inizializzaConfiguratore() {
-        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, serviceFactory);
+        ConfiguratoreController configuratoreController = new ConfiguratoreController(gui, utente, new VisitaFacade(serviceFactory), new ConfiguratoreFacade(serviceFactory), new TipoVisitaFacade(serviceFactory), new ConfigFacade(serviceFactory), new DatePrecluseFacade(serviceFactory), new LuogoFacade(serviceFactory));
         configuratoreController.start();
     }
 
     private void inizializzaVolontario() {
-        VolontarioController volontarioController = new VolontarioController(gui, utente, serviceFactory);
+        VolontarioController volontarioController = new VolontarioController(gui, utente, new VolontarioFacade(serviceFactory), new TipoVisitaFacade(serviceFactory));
         volontarioController.start();
     }
 

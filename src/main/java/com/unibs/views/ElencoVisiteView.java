@@ -125,7 +125,8 @@ public class ElencoVisiteView {
             sb.append("Titolo: ").append(tipoVisita.getTitolo());
             sb.append("\nLuogo: ").append(tipoVisita.getNomeLuogo());
             sb.append("\nData di mancato svolgimento: ").append(v.getDataSvolgimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
+            //TODO
+            // sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
         } else {
             sb.append("Titolo: ").append(tipoVisita.getTitolo());
@@ -135,7 +136,8 @@ public class ElencoVisiteView {
             sb.append("\nData di svolgimento: ").append(v.getDataSvolgimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             sb.append("\nOra d'inzio: ").append(tipoVisita.getOraInizio());
             sb.append("\nEntrata libera: ").append(tipoVisita.isEntrataLibera() ? "Sì" : "No");
-            sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
+            //TODO
+            // sb.append("\nVolontario: ").append(v.getVolontario().getUsername());
             sb.append("\nStato: ").append(statoAttuale);
             if (mostraCodiciPrenotazione) {
                 sb.append("\nCodici prenotazione: ").append(codiciPrenotazinone.get(index).isEmpty() ? "Nessun iscritto" : codiciPrenotazinone.get(index));

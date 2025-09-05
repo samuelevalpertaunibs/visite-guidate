@@ -9,7 +9,7 @@ import com.unibs.services.VisitaService;
 
 import java.util.List;
 
-public class FruitoreFacade {
+public class FruitoreFacade implements IFruitoreFacade {
 
     private final ConfigService configService;
     private final VisitaService visitaService;

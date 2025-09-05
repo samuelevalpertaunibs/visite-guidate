@@ -2,22 +2,23 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.unibs.facades.IConfigFacade;
 import com.unibs.formatters.ComuneFormatter;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
-import com.unibs.services.ConfigService;
 import com.unibs.views.InitConfigView;
 import com.unibs.views.ModificaNumeroMaxView;
 import com.unibs.views.components.PopupChiudi;
 
 public class ConfigController {
-    private final ConfigService configService;
     private final WindowBasedTextGUI gui;
+    private final IConfigFacade configFacade;
     private InitConfigView initConfigView;
     private ModificaNumeroMaxView modificaNumeroMaxView;
 
-    public ConfigController(WindowBasedTextGUI gui, ConfigService configService) {
-        this.configService = configService;
+
+    public ConfigController(WindowBasedTextGUI gui, IConfigFacade configFacade) {
+        this.configFacade = configFacade;
         this.gui = gui;
     }
 
@@ -38,7 +39,7 @@ public class ConfigController {
         String provincia = initConfigView.getProvincia();
         String regione = initConfigView.getRegione();
         try {
-            configService.aggiungiComune(nome, provincia, regione);
+            configFacade.aggiungiComune(nome, provincia, regione);
             String ambitoTerritorialeRecap = generaAmbitoTerritorialeRecap();
             initConfigView.mostraAmbito(ambitoTerritorialeRecap);
             initConfigView.resetComune();
@@ -51,7 +52,7 @@ public class ConfigController {
     private void confermaConfig(Button button) {
         try {
             String numeroMaxPersone = initConfigView.getNumeroMax();
-            configService.setNumeroMaxPersone(numeroMaxPersone);
+            configFacade.setNumeroMaxPersone(numeroMaxPersone);
             initConfigView.chiudi();
         } catch (Exception e) {
             initConfigView.mostraErroreNumeroMax(e.getMessage());
@@ -62,7 +63,7 @@ public class ConfigController {
 
     private String generaAmbitoTerritorialeRecap() {
         try {
-            Config config = configService.getConfig();
+            Config config = configFacade.getConfig();
             StringBuilder sb = new StringBuilder();
             ComuneFormatter comuneFormatter = new ComuneFormatter();
             sb.append("Ambito territoriale:\n");
@@ -79,7 +80,7 @@ public class ConfigController {
     public void apriModificaNumeroMax() {
         try {
             modificaNumeroMaxView = new ModificaNumeroMaxView();
-            int numeroMaxAttuale = configService.getNumeroMax();
+            int numeroMaxAttuale = configFacade.getNumeroMax();
             modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAttuale);
             modificaNumeroMaxView.getConfermaButton().addListener(this::setNumeroMaxPersone);
             modificaNumeroMaxView.mostra(gui);
@@ -91,7 +92,7 @@ public class ConfigController {
     private void setNumeroMaxPersone(Button button) {
         try {
             String numeroMaxPersone = modificaNumeroMaxView.getNumeroMaxInserito();
-            int numeroMaxAggiornato = configService.setNumeroMaxPersone(numeroMaxPersone);
+            int numeroMaxAggiornato = configFacade.setNumeroMaxPersone(numeroMaxPersone);
             modificaNumeroMaxView.aggiornaNumeroAttuale(numeroMaxAggiornato);
             new PopupChiudi(gui).mostra("", "Numero massimo aggiornato con successo.");
             modificaNumeroMaxView.mostraErrore("");
@@ -104,7 +105,7 @@ public class ConfigController {
 
     private void confermaAmbito(Button button) {
         try {
-            if (!configService.esisteAlmenoUnComune()) {
+            if (!configFacade.esisteAlmenoUnComune()) {
                 initConfigView.mostraErroreComune("Inserisci almeno un comune.");
                 initConfigView.moveCursorToComune();
                 return;

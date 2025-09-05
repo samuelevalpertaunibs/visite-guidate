@@ -63,9 +63,8 @@ public class VisitaService {
         Map<TipoVisita, Set<LocalDate>> dateOccupateTipoVisita = new HashMap<>();
 
         for (TipoVisita tipoVisita : tipiVisite) {
-            for (Map.Entry<Integer, String> entry : tipoVisita.getVolontari().entrySet()) {
-                Integer volontarioId = entry.getKey();
-                String volontarioNome = entry.getValue();
+            for (CoppiaIdUsername volontario : tipoVisita.getVolontari()) {
+                Integer volontarioId = volontario.getId();
 
                 List<LocalDate> disponibilita = volontarioService.getDateDisponibiliByMese(volontarioId, meseTarget);
 
@@ -85,8 +84,7 @@ public class VisitaService {
                     if (occupateTipo.contains(data) || occupateVolontario.contains(data)) continue;
 
                     // Assegna la visita
-                    Visita visita = new Visita(null, tipoVisita, data, entry);
-                    visitePerVolontario.computeIfAbsent(volontarioId, k -> new HashSet<>()).add(visita);
+                    Visita visita = new Visita(null, tipoVisita, data, volontario);                    visitePerVolontario.computeIfAbsent(volontarioId, k -> new HashSet<>()).add(visita);
 
                     occupateTipo.add(data);
                     occupateVolontario.add(data);
@@ -148,7 +146,7 @@ public class VisitaService {
             visitaDao.disdiciIscrizione(codiceIscrizione);
 
             // Se la visita era al completo, dopo la disdetta torna proposta
-            if (visitaDao.getStatoById(visitaId).get() == Visita.StatoVisita.COMPLETA) {
+            if (visitaDao.getStatoById(visitaId).orElseThrow() == Visita.StatoVisita.COMPLETA) {
                 visitaDao.setStatoById(visitaId, Visita.StatoVisita.PROPOSTA);
             }
         } catch (SQLException e) {
@@ -157,7 +155,7 @@ public class VisitaService {
         }
     }
 
-    public List<java.lang.String> getCodiciPrenotazionePerVista(Volontario volontario, Integer id) throws DatabaseException {
+    public List<java.lang.String> getCodiciPrenotazionePerVisita(Volontario volontario, Integer id) throws DatabaseException {
         try {
             return visitaDao.getCodiciPrenotazionePerVista(volontario.getUsername(), id);
         } catch (Exception e) {

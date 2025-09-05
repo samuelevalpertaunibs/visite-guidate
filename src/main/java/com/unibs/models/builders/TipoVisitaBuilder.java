@@ -21,7 +21,7 @@ public class TipoVisitaBuilder {
     private Luogo luogo;
     private PuntoIncontro puntoIncontro;
     private Set<Giorno> giorni;
-    private Set<Volontario> volontari;
+    private Set<CoppiaIdUsername> volontari;
 
     private static final int MINUTES_PER_DAY = 24 * 60;
 
@@ -145,7 +145,7 @@ public class TipoVisitaBuilder {
         return this;
     }
 
-    public TipoVisitaBuilder conVolontari(Set<Volontario> volontari) {
+    public TipoVisitaBuilder conVolontari(Set<CoppiaIdUsername> volontari) {
         if (volontari == null || volontari.isEmpty()) {
             throw new IllegalArgumentException("Seleziona almeno un volontario.");
         }
@@ -165,8 +165,8 @@ public class TipoVisitaBuilder {
                 entrataLibera,
                 numeroMinPartecipanti,
                 numeroMaxPartecipanti,
-                luogo,
                 puntoIncontro,
+                luogo,
                 giorni,
                 volontari
         );

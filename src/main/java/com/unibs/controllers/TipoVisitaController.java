@@ -2,19 +2,21 @@ package com.unibs.controllers;
 
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.unibs.facades.TipoVisitaFacade;
+import com.unibs.facades.*;
 import com.unibs.models.*;
-import com.unibs.services.ServiceFactory;
 import com.unibs.utils.DatabaseException;
 import com.unibs.views.*;
 import com.unibs.views.components.PopupChiudi;
 import com.unibs.views.components.PopupConferma;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TipoVisitaController {
-    private final TipoVisitaFacade tvFacade;
+    private final ITipoVisitaFacade tvFacade;
     private final WindowBasedTextGUI gui;
 
     private AggiungiTipoVisitaView aggiungiTipoVisitaView;
@@ -24,12 +26,12 @@ public class TipoVisitaController {
     private Luogo luogoSelezionato;
     private Comune comuneSelezionato;
     private Set<Giorno> giorniSelezionati;
-    private Set<Volontario> volontariSelezionati;
+    private Set<CoppiaIdUsername> volontariSelezionati;
     private SelezioneMultiplaView<Volontario> selezioneMultiplaVolontariView;
 
-    public TipoVisitaController(WindowBasedTextGUI gui, ServiceFactory serviceFactory) {
+    public TipoVisitaController(WindowBasedTextGUI gui, ITipoVisitaFacade tvFacade) {
         this.gui = gui;
-        this.tvFacade = new TipoVisitaFacade(serviceFactory);
+        this.tvFacade = tvFacade;
         this.aggiungiTipoVisitaView = new AggiungiTipoVisitaView();
         this.giorniSelezionati = new HashSet<>();
         this.volontariSelezionati = new HashSet<>();
@@ -91,8 +93,9 @@ public class TipoVisitaController {
             if (aggiungiButton != null) {
                 aggiungiButton.addListener(this::apriAggiungiVolontario);
             }
-            Set<Volontario> setSelezionati = new HashSet<>(volontariSelezionati);
-            volontariSelezionati = selezioneMultiplaVolontariView.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
+            Set<CoppiaIdUsername> setSelezionati = new HashSet<>(volontariSelezionati);
+            // TODO implementare interfaccia Selectable per CoppiaIdUsername
+            // volontariSelezionati = selezioneMultiplaVolontariView.mostra(gui, setSelezionati, "Seleziona i volontari da associare al tipo di visita");
             aggiungiTipoVisitaView.aggiornaVolontariSelezionati(volontariSelezionati);
         } catch (DatabaseException e) {
             aggiungiTipoVisitaView.mostraErrore(e.getMessage());
@@ -380,12 +383,14 @@ public class TipoVisitaController {
                 throw new DatabaseException("Tipo visita non trovato");
             }
             int tipoVisitaId = tipoVisitaIdOptional.get();
-            HashMap<Integer, String> volontariAssociabili = tvFacade.cercaVolontariAssociabiliAlTipoVisita(tipoVisitaId);
+            Set<CoppiaIdUsername> volontariAssociabili = tvFacade.cercaVolontariAssociabiliAlTipoVisita(tipoVisitaId);
             if (volontariAssociabili.isEmpty()) {
                 throw new IllegalArgumentException("Tutti i volontari esistenti sono già associati a questo tipo di visita");
             }
-            SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList(), false);
-            volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, new HashSet<>(), "Seleziona i volontari da associare al tipo di visita");
+
+            // TODO: implementare adapter
+            // SelezioneMultiplaView<Volontario> selezioneMultiplaVolontari = new SelezioneMultiplaView<>(volontariAssociabili.stream().toList(), false);
+            // volontariSelezionati = selezioneMultiplaVolontari.mostra(gui, new HashSet<>(), "Seleziona i volontari da associare al tipo di visita");
             if (volontariSelezionati.isEmpty()) {
                 new PopupChiudi(gui).mostra("", "Nessun volontario aggiunto.");
                 return;
