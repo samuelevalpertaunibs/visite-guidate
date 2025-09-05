@@ -17,7 +17,7 @@ public class ServiceFactory {
 
     public LuogoService getLuogoService() {
         if (luogoService == null) {
-            luogoService = new LuogoService();
+            luogoService = new LuogoService(daoFactory.getLuogoDao());
         }
         return luogoService;
     }
@@ -38,14 +38,14 @@ public class ServiceFactory {
 
     public ConfigService getConfigService() {
         if (configService == null) {
-            configService = new ConfigService();
+            configService = new ConfigService(daoFactory.getConfigDao(), daoFactory.getComuneDao());
         }
         return configService;
     }
 
     public GiornoService getGiornoService() {
         if (giornoService == null) {
-            giornoService = new GiornoService();
+            giornoService = new GiornoService(daoFactory.getGiorniDao());
         }
         return giornoService;
     }

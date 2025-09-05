@@ -1,11 +1,9 @@
 package com.unibs.services;
 
-import com.unibs.mappers.ComuneMapper;
-import com.unibs.mappers.LuogoMapper;
-import com.unibs.utils.DatabaseException;
 import com.unibs.daos.LuogoDao;
 import com.unibs.models.Comune;
 import com.unibs.models.Luogo;
+import com.unibs.utils.DatabaseException;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -22,8 +20,8 @@ public class LuogoService {
     private final ComuneService comuneService;
     private static final Logger LOGGER = Logger.getLogger(LuogoService.class.getName());
 
-    public LuogoService() {
-        this.luogoDao = new LuogoDao(new LuogoMapper(new ComuneMapper()));
+    public LuogoService(LuogoDao luogoDao) {
+        this.luogoDao = luogoDao;
         this.comuneService = new ComuneService();
     }
 

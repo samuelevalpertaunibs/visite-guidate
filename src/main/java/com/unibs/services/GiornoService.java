@@ -17,8 +17,8 @@ public class GiornoService {
     private List<Giorno> giorni;
     private final GiorniDao giorniDao;
 
-    public GiornoService() {
-        giorniDao = new GiorniDao();
+    public GiornoService(GiorniDao giorniDao) {
+        this.giorniDao = giorniDao;
     }
 
     public List<Giorno> getGiorni() throws DatabaseException {

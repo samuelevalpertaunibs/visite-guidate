@@ -2,8 +2,6 @@ package com.unibs.services;
 
 import com.unibs.daos.ComuneDao;
 import com.unibs.daos.ConfigDao;
-import com.unibs.mappers.ComuneMapper;
-import com.unibs.mappers.ConfigMapper;
 import com.unibs.models.Comune;
 import com.unibs.models.Config;
 import com.unibs.utils.DatabaseException;
@@ -24,9 +22,9 @@ public class ConfigService {
     private final ComuneDao comuneDao;
     private final Logger LOGGER = Logger.getLogger(ConfigService.class.getName());
 
-    public ConfigService() {
-        this.configDao = new ConfigDao(new ConfigMapper());
-        this.comuneDao = new ComuneDao(new ComuneMapper());
+    public ConfigService(ConfigDao configDao, ComuneDao comuneDao) {
+        this.configDao = configDao;
+        this.comuneDao = comuneDao;
     }
 
     public Config getConfig() throws DatabaseException {
