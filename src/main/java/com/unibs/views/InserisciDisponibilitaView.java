@@ -46,6 +46,7 @@ public class InserisciDisponibilitaView {
 
     public void setDateDisponibili(List<LocalDate> dateDisponibili) {
         listaDate.clearItems();
+        this.titleLabel = new Label("Seleziona le tue disponibilità:");
         if (dateDisponibili.isEmpty()) {
             titleLabel.setText("Nessuna data selezionabile.");
             salvaButton.setEnabled(false);

@@ -552,8 +552,6 @@ public class VisitaDao {
                 String provincia = rs.getString("provincia_incontro");
                 String titolo = rs.getString("titolo");
                 String descrizione = rs.getString("descrizione");
-                LocalDate dataInizio = rs.getDate("data_inizio").toLocalDate();
-                LocalDate dataFine = rs.getDate("data_fine").toLocalDate();
                 LocalTime oraInizio = rs.getTime("ora_inizio").toLocalTime();
                 int durataMinuti = rs.getInt("durata_minuti");
                 boolean entrataLibera = rs.getBoolean("entrata_libera");
@@ -569,7 +567,7 @@ public class VisitaDao {
                 if (tipoVisita == null) {
                     PuntoIncontro puntoIncontro = new PuntoIncontro(indirizzo, comune, provincia);
                     Luogo luogo = new Luogo(null, luogoNome, null, null);
-                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, dataInizio, dataFine, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
+                    tipoVisita = new TipoVisita(tipoVisitaId, titolo, descrizione, null, null, oraInizio, durataMinuti, entrataLibera, numMinPartecipanti, numMaxPartecipanti, luogo, puntoIncontro, null, null);
                     tipoVisitaCache.put(tipoVisitaId, tipoVisita);
                 }
 

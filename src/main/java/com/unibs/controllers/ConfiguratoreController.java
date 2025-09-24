@@ -170,6 +170,7 @@ public class ConfiguratoreController implements IUserController {
     }
 
     private void handleMenuAction(Runnable action) {
+        menuView.mostraErrore("");
         try {
             action.run();
         } catch (Exception e) {
