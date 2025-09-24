@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestore Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    .date-display {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
+    .button-container button {
+      font-size: 1.2em;
+      margin: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="date-display" id="date-display"></div>
+
+  <div class="button-container">
+    <button onclick="modifyDate('addDay')">Aggiungi 1 giorno</button>
+    <button onclick="modifyDate('subtractDay')">Sottrai 1 giorno</button>
+    <button onclick="modifyDate('addWeek')">Aggiungi 1 settimana</button>
+    <button onclick="modifyDate('subtractWeek')">Sottrai 1 settimana</button>
+    <button onclick="resetDate()">Reset</button>
+  </div>
+
+  <script>
+    // Funzione per aggiornare la data dal server
+    function updateDate() {
+      fetch('/api/datetime')
+        .then(response => response.text())  // Cambiato da .json() a .text()
+        .then(date => {
+          document.getElementById('date-display').textContent = date;
+        })
+        .catch(error => {
+          console.error('Error fetching date:', error);
+        });
+    }
+
+    // Funzione per modificare la data tramite API
+    function modifyDate(action) {
+      fetch(`/api/modifyDate?action=${action}`, {method: 'POST'})
+        .then(response => response.json())
+        .then(() => updateDate());
+    }
+
+    // Funzione per resettare la data
+    function resetDate() {
+      fetch('/api/reset', {method: 'POST'})
+        .then(response => response.json())
+        .then(() => updateDate());
+    }
+
+    // Caricare la data all'avvio
+    window.onload = updateDate;
+
+    // Aggiornare la data ogni minuto
+    setInterval(updateDate, 60000);  // Esegui updateDate ogni minuto
+  </script>
+
+</body>
+
+</html>
